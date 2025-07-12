@@ -1,0 +1,10 @@
+{
+  "build": {
+    "env": {
+      "NODE_VERSION": "16"
+    }
+  },
+  "start": {
+    "command": "node index.js"
+  }
+}

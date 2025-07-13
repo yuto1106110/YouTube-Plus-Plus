@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>球跳ね返しブロック崩しゲーム - YouTube Plus⁺</title>
+  <style>
+    /* 全体の基本設定 */
+    body {
+      margin: 0;
+      background: #f0f0f8;
+      color: #333;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      text-align: center;
+    }
+    /* 難易度選択メニュー */
+    #menu {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    }
+    #menu h1 {
+      margin-bottom: 20px;
+    }
+    #menu button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background: #88a;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #menu button:hover {
+      background: #667;
+    }
+    /* ゲームキャンバス */
+    #gameCanvas {
+      background: #000;
+      display: none;
+      margin: 40px auto;
+      border: 2px solid #fff;
+      border-radius: 5px;
+    }
+    /* 終了 & カウントダウンメッセージ */
+    #message {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      color: #333;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+      display: none;
+      text-align: center;
+    }
+    #message button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background: #88a;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #message button:hover {
+      background: #667;
+    }
+  </style>
+</head>
+<body>
+  <!-- 難易度選択メニュー -->
+  <div id="menu">
+    <h1>難易度を選んでください</h1>
+    <button id="easyBtn">簡単</button>
+    <button id="normalBtn">普通</button>
+    <button id="hardBtn">難しい</button>
+    <button id="ultraBtn">超難しい</button>
+  </div>
+  
+  <!-- ゲームキャンバス -->
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  
+  <!-- 終了時 or カウントダウン時のメッセージ表示領域 -->
+  <div id="message">
+    <p id="messageText"></p>
+    <button id="restartBtn">Restart</button>
+  </div>
+  
+  <script>
+    /* グローバル変数 */
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const menu = document.getElementById("menu");
+    const messageDiv = document.getElementById("message");
+    const messageText = document.getElementById("messageText");
+    const restartBtn = document.getElementById("restartBtn");
+
+    // 難易度ボタンの取得
+    const easyBtn  = document.getElementById("easyBtn");
+    const normalBtn = document.getElementById("normalBtn");
+    const hardBtn   = document.getElementById("hardBtn");
+    const ultraBtn  = document.getElementById("ultraBtn");
+
+    // キー入力状態管理（PC操作用）
+    const keys = {};
+    window.addEventListener("keydown", e => { keys[e.code] = true; });
+    window.addEventListener("keyup", e => { keys[e.code] = false; });
+
+    // タッチ操作対応：キャンバス上でタッチ移動した場合、タッチ位置に合わせてパドルを移動
+    canvas.addEventListener("touchmove", function(e) {
+      e.preventDefault();
+      if (!gameRunning) return;
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      // タッチ位置の相対的な x 座標
+      const touchX = touch.clientX - rect.left;
+      // パドルの中心をタッチ位置に合わせる
+      paddle.x = touchX - paddle.width / 2;
+      // 画面外に出ないように制限
+      if(paddle.x < 0) paddle.x = 0;
+      if(paddle.x + paddle.width > canvas.width) 
+        paddle.x = canvas.width - paddle.width;
+    }, {passive: false});
+
+    // 難易度に応じたパラメータ
+    let ballInitSpeed = 5;
+    let bombInterval = null; // 自動落下なしの場合は null
+    const specialBlockRate = 0.1; // 約10%が特殊ブロック
+
+    /* クラス定義 */
+    class Paddle {
+      constructor() {
+        this.width = 100;
+        this.height = 15;
+        this.x = (canvas.width - this.width) / 2;
+        this.y = canvas.height - this.height - 20;
+        this.speed = 10;
+      }
+      update() {
+        if (keys["ArrowLeft"]) this.x -= this.speed;
+        if (keys["ArrowRight"]) this.x += this.speed;
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+      }
+      draw(ctx) {
+        ctx.fillStyle = "#0f0";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+      }
+      getRect() { return { x: this.x, y: this.y, width: this.width, height: this.height }; }
+    }
+
+    class Ball {
+      constructor(x, y, dx, dy) {
+        this.x = x;
+        this.y = y;
+        this.radius = 8;
+        this.dx = dx;
+        this.dy = dy;
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        // 左右・上の壁で反転
+        if (this.x - this.radius < 0) { this.x = this.radius; this.dx = -this.dx; }
+        if (this.x + this.radius > canvas.width) { this.x = canvas.width - this.radius; this.dx = -this.dx; }
+        if (this.y - this.radius < 0) { this.y = this.radius; this.dy = -this.dy; }
+      }
+      draw(ctx) {
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      getRect() { return { x: this.x - this.radius, y: this.y - this.radius, width: this.radius * 2, height: this.radius * 2 }; }
+    }
+
+    class Block {
+      constructor(x, y, width, height, isSpecial = false) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.isSpecial = isSpecial;
+        this.color = this.isSpecial ? "#f00" : "#00f";
+      }
+      draw(ctx) {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(this.x, this.y, this.width, this.height);
+      }
+      getRect() { return { x: this.x, y: this.y, width: this.width, height: this.height }; }
+    }
+
+    class Bomb {
+      constructor(x, y, fallingSpeed = 5) {
+        this.x = x;
+        this.y = y;
+        this.radius = 10;
+        this.fallingSpeed = fallingSpeed;
+      }
+      update() { this.y += this.fallingSpeed; }
+      draw(ctx) {
+        ctx.fillStyle = "#ff0";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      getRect() { return { x: this.x - this.radius, y: this.y - this.radius, width: this.radius * 2, height: this.radius * 2 }; }
+    }
+
+    // 矩形同士の衝突判定
+    function rectIntersect(r1, r2) {
+      return !(r2.x > r1.x + r1.width ||
+               r2.x + r2.width < r1.x ||
+               r2.y > r1.y + r1.height ||
+               r2.y + r2.height < r1.y);
+    }
+
+    // ブロック生成（行×列）
+    function createBlocks() {
+      const blocks = [];
+      const rows = 6, cols = 10;
+      const blockWidth = canvas.width / cols;
+      const blockHeight = 30;
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          let x = col * blockWidth;
+          let y = row * (blockHeight + 5) + 50;
+          let isSpecial = Math.random() < specialBlockRate;
+          blocks.push(new Block(x, y, blockWidth - 5, blockHeight, isSpecial));
+        }
+      }
+      return blocks;
+    }
+
+    /* グローバルゲーム変数 */
+    let paddle, balls, blocks, bombs;
+    let lastTime = 0;
+    let lastBombSpawnTime = 0;
+    let gameRunning = false;
+
+    // カウントダウン開始（難易度選択後、3秒間カウントダウン→ゲーム開始）
+    function startCountdown(difficulty) {
+      let countdown = 3;
+      // Restart ボタン非表示
+      restartBtn.style.display = "none";
+      messageText.textContent = countdown;
+      messageDiv.style.display = "block";
+      
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          messageText.textContent = countdown;
+        } else {
+          clearInterval(countdownInterval);
+          messageDiv.style.display = "none";
+          startGame(difficulty);
+        }
+      }, 1000);
+    }
+
+    // ゲーム初期化と開始
+    function startGame(difficulty) {
+      // パラメータ設定（難易度による調整）
+      if (difficulty === "easy") {
+        ballInitSpeed = 5;
+        bombInterval = null;
+      } else if (difficulty === "normal") {
+        ballInitSpeed = 7;
+        bombInterval = null;
+      } else if (difficulty === "hard") {
+        ballInitSpeed = 10;
+        bombInterval = 5000; // 5秒
+      } else if (difficulty === "ultra") {
+        ballInitSpeed = 12;
+        bombInterval = 3000; // 3秒
+      }
+      // ゲームオブジェクト生成
+      paddle = new Paddle();
+      const initialDX = (Math.random() < 0.5 ? -1 : 1) * ballInitSpeed;
+      const initialDY = -ballInitSpeed;
+      balls = [ new Ball(canvas.width / 2, canvas.height / 2, initialDX, initialDY) ];
+      blocks = createBlocks();
+      bombs = [];
+      lastBombSpawnTime = performance.now();
+      gameRunning = true;
+      // ゲーム画面を表示、メニュー非表示
+      menu.style.display = "none";
+      canvas.style.display = "block";
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    // ゲームループ（更新＆描画）
+    function gameLoop(timestamp) {
+      if (!gameRunning) return;
+      const deltaTime = timestamp - lastTime;
+      lastTime = timestamp;
+      
+      updateObjects(timestamp);
+      drawObjects();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function updateObjects(currentTime) {
+      paddle.update();
+
+      balls.forEach(ball => {
+        ball.update();
+        // パドルとの衝突
+        if (rectIntersect(ball.getRect(), paddle.getRect())) {
+          ball.dy = -Math.abs(ball.dy);
+          const offset = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+          ball.dx = ballInitSpeed * offset;
+        }
+        // ブロックとの衝突
+        for (let i = 0; i < blocks.length; i++) {
+          const block = blocks[i];
+          if (rectIntersect(ball.getRect(), block.getRect())) {
+            blocks.splice(i, 1);
+            ball.dy = -ball.dy;
+            // 特殊ブロックの場合、追加の2球を生成
+            if (block.isSpecial) {
+              balls.push(new Ball(ball.x, ball.y, ball.dx, -ball.dy));
+              balls.push(new Ball(ball.x, ball.y, -ball.dx, ball.dy));
+            }
+            // ブロック破壊時、30%の確率で爆弾生成
+            if (Math.random() < 0.3) {
+              bombs.push(new Bomb(block.x + block.width / 2, block.y + block.height / 2));
+            }
+            break;
+          }
+        }
+        // 球の速度を徐々に上げる
+        ball.dx *= 1.0001;
+        ball.dy *= 1.0001;
+      });
+      // 画面下に落ちた球を除去
+      balls = balls.filter(ball => ball.y - ball.radius <= canvas.height);
+      if (balls.length === 0) {
+        endGame("Game Over! 球を全て失いました。");
+      }
+      
+      // 爆弾自動落下（hard, ultraの場合）
+      if (bombInterval && currentTime - lastBombSpawnTime >= bombInterval) {
+        const bombX = Math.random() * (canvas.width - 40) + 20;
+        bombs.push(new Bomb(bombX, 0));
+        lastBombSpawnTime = currentTime;
+      }
+      bombs.forEach(bomb => {
+        bomb.update();
+        if (rectIntersect(bomb.getRect(), paddle.getRect())) {
+          endGame("Game Over! 爆弾がパドルに当たりました。");
+        }
+      });
+      bombs = bombs.filter(bomb => bomb.y - bomb.radius <= canvas.height);
+      
+      // 全ブロック破壊で勝利
+      if (blocks.length === 0) {
+        endGame("WIN!");
+      }
+    }
+
+    function drawObjects() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      paddle.draw(ctx);
+      balls.forEach(ball => ball.draw(ctx));
+      blocks.forEach(block => block.draw(ctx));
+      bombs.forEach(bomb => bomb.draw(ctx));
+    }
+
+    // ゲーム終了時の処理（終了メッセージと Restart ボタンを表示）
+    function endGame(text) {
+      gameRunning = false;
+      messageText.textContent = text;
+      // Restart ボタンを表示
+      restartBtn.style.display = "block";
+      messageDiv.style.display = "block";
+    }
+
+    // Restart ボタン押下時、ゲーム画面・メッセージを隠し、難易度選択画面へ戻る
+    restartBtn.addEventListener("click", () => {
+      gameRunning = false;
+      canvas.style.display = "none";
+      messageDiv.style.display = "none";
+      menu.style.display = "block";
+    });
+
+    // 難易度ボタンのイベント登録（カウントダウンからゲーム開始へ）
+    easyBtn.addEventListener("click", () => startCountdown("easy"));
+    normalBtn.addEventListener("click", () => startCountdown("normal"));
+    hardBtn.addEventListener("click", () => startCountdown("hard"));
+    ultraBtn.addEventListener("click", () => startCountdown("ultra"));
+  </script>
+</body>
+</html>

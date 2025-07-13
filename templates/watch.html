@@ -458,6 +458,49 @@
   overlay.addEventListener("click", closeSidebarFunc);
 </script>
 
+<script>
+	const video = document.getElementById('video');
+        const audio = document.getElementById('audio');
+
+       video.addEventListener('play', () => {
+            audio.play().catch(error => {
+                console.error("オーディオの再生エラー:", error);
+            });
+        });
+
+        video.addEventListener('pause', () => {
+            audio.pause();
+            audio.currentTime = video.currentTime;
+        });
+
+        video.addEventListener('ended', () => {
+            audio.pause();
+            audio.currentTime = 0; 
+        });
+      
+        video.addEventListener('seeked', () => {
+            video.pause();
+            audio.pause();
+            audio.currentTime = video.currentTime;
+            video.play();
+            audio.play();
+        });
+      
+        video.addEventListener('timeupdate', () => {
+            if (Math.abs(video.currentTime - audio.currentTime) > 0.3) {
+                audio.currentTime = video.currentTime;
+            }
+        });
+
+document.getElementById('reloadButton').addEventListener('click', function() {
+    const video = document.getElementById('video');
+    const audio = document.getElementById('audio');
+    
+    video.load();
+    audio.load();
+});		
+</script>
+	  
     <!-- 以降はその他の既存JS -->
     <script>
       const xhr = new XMLHttpRequest();
@@ -676,7 +719,8 @@ function toggleFullScreen() {
 		<h3> ツール一覧 </h3>
 		<p><a href="/">ホーム</a></p>
 		<p><a onclick="location.replace(location.href)">再読み込み</a></p>
-    <p><a href="javascript:openSubTool('tool')">基本ツール →</a></p>
+		<p><a href="javascript:openSubTool('server')">画質の変更 →</a></p>
+		<p><a href="javascript:openSubTool('tool')">基本ツール →</a></p>
 		<p><a href="javascript:openSubTool('embed')">再生方法の変更 →</a></p>
 		<p><a href="javascript:openSubTool('sonota')">その他 →</a></p>
     <label for="autonextpage">自動で次の動画へ<input id="autonextpage" type="checkbox" onchange="changeAutoNextPage(this)"></label><br>
@@ -723,7 +767,12 @@ function toggleFullScreen() {
 						<p><a href="javascript:closeSubTool('server')">← 戻る</a></p>
 						<h3>サーバー切り替え</h3>
 						<form id="api-selector-form">
-
+                                  <label for="quality-change">画質を変更:</label>
+						<select id="quality-change">
+					{% for s in streamUrls %}
+					<option value="{{ s.url }}" data-resolution="{{ s.resolution }}">{{ s.resolution }}</option>
+					{% endfor %}
+					</select>
 					
 					</div>
 	</div><!-- スタイル（CSS） -->
@@ -833,6 +882,32 @@ function toggleFullScreen() {
     document.getElementById(`tool-sub-${id}`).style.left = "100%";
   }
 	</script>
+<script>
+		document.getElementById('quality-change').addEventListener('change', function () {
+		    const selectedUrl = this.value;
+		    const video = document.getElementById('video');
+		
+		    // 現在の再生位置を記録
+		    const currentTime = video.currentTime;
+		    const isPlaying = !video.paused;
+		
+		    // <source> を置き換え
+		    video.innerHTML = '';
+		    const newSource = document.createElement('source');
+		    newSource.src = selectedUrl;
+		    newSource.type = 'video/mp4';
+		    video.appendChild(newSource);
+		
+		    // 再読み込みして再生位置を復元
+		    video.load();
+		    video.currentTime = currentTime;
+		
+		    if (isPlaying) {
+		        video.play().catch(err => console.error("再生失敗:", err));
+		    }
+		});
+　　</script>
+	  
 <script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript> 
   </body>
 </html>

@@ -765,9 +765,10 @@ function toggleFullScreen() {
 
 					<div id="tool-sub-server" class="tool-sub">
 						<p><a href="javascript:closeSubTool('server')">← 戻る</a></p>
-						<h3>サーバー切り替え</h3>
-						<form id="api-selector-form">
-                                  <label for="quality-change">画質を変更:</label>
+						<h3>画質を変更</h3>
+						<p>現在の画質:{{ s.resolution }}</p>
+						<form class="select" id="api-selector-form">
+                                  <label for="quality-change">画質を変更:{</label>
 						<select id="quality-change">
 					{% for s in streamUrls %}
 					<option value="{{ s.url }}" data-resolution="{{ s.resolution }}">{{ s.resolution }}</option>
@@ -856,6 +857,43 @@ function toggleFullScreen() {
 			box-shadow: inset #2589d0 0 0 0 2em;
 			color: #fff;
 		}
+
+		/* 基本のセレクトボックスのカスタマイズ */
+.select {
+  background: #cfcedb;
+  height: 40px;
+  width: 300px;
+  border-radius: 5px;
+  position: relative;
+  z-index: 1;
+}
+
+.select::after {
+  position: absolute;
+  content: '';
+  width: 8px;
+  height: 8px;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  border-bottom: 2px solid #fff;
+  border-right: 2px solid #fff;
+  z-index: -1;
+}
+
+select {
+  /* 初期化 */
+  appearance: none;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 16px;
+  width: 100%;
+  height: 100%;
+  padding: 0 10px;
+}
 	</style><!-- JavaScript -->
 	<script>
 		function openToolPanel() {

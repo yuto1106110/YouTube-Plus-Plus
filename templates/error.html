@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ context }} - YouTube Plus⁺</title>
+  <style>
+    /* 全体のスタイル */
+    body {
+      background-color: #f4f7f6; /* 明るいパステル調の背景 */
+      color: #333;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; /* 柔らかい印象のサンセリフ体 */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    /* エラーメッセージ用のコンテナ */
+    .error-container {
+      background-color: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 30px 40px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    /* タイトルのスタイル */
+    h1 {
+      font-size: 2em;
+      color: #d9534f; /* 優しいトーンの赤 */
+      margin-bottom: 15px;
+    }
+    /* エラー詳細文のスタイル */
+    p {
+      font-size: 1.1em;
+      color: #555;
+    }
+            #topButton {
+            position: fixed;
+            bottom: 500px;
+            left: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
+  </style>
+</head>
+<body>
+  <button id="topButton" onclick="history.back(-1)" >戻る</button>
+  <div class="error-container">
+    <h1>{{ context }}</h1>
+    <p>お探しのpageは削除されてるか、errorにより開けません٩( ᐛ )و数分待っても治らない場合、このerror文を早急に僕に送ってください‼︎</p>
+  </div>
+</body>
+</html>

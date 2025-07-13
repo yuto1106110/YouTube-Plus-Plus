@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>設定</title>
+</head>
+<body>
+    <h1>設定</h1>
+    <p>現在の埋め込み再生設定：{{ "オン" if ume_toggle == "true" else "オフ" }}</p>
+    <form method="post" action="/setting">
+        {% if ume_toggle == "true" %}
+            <input type="hidden" name="embed" value="off">
+            <button type="submit">埋め込み再生をオフにする</button>
+        {% else %}
+            <input type="hidden" name="embed" value="on">
+            <button type="submit">埋め込み再生をオンにする</button>
+        {% endif %}
+    </form>
+</body>
+</html>

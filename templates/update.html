@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <link rel="icon" href="/img/logo/favicon.ico">
+	      <link rel="stylesheet" href="/css/empty.css">
+        <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+        
+    <title>勉強に集中したい!!勉強への集中力をアップする方法とは？</title>
+    <style>/* 全体のレイアウト */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff; /* 白背景 */
+    color: #333; /* 濃いテキスト色 */
+}
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f8f9fa; /* 薄いグレー */
+      border: 1px solid #e2e2e2;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    /* エントリーのカードスタイル */
+    .entry {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #dcdcdc; /* 明るいグレー */
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      background-color: #ffffff; /* 白背景 */
+      border-left: 5px solid #3b82f6; /* 左にアクセントライン */
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUp 0.5s forwards;
+    }
+
+    .entry h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      color: #5f5f5f; /* ダークグレー */
+    }
+
+    .entry p {
+      margin: 0;
+      font-size: 16px;
+      color: #4d4d4d; /* 濃いめのグレー */
+    }
+
+    /* フォームのスタイル */
+    form {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #dcdcdc;
+      border-radius: 5px;
+      background-color: #f8f9fa;
+    }
+
+    form textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #dcdcdc;
+      border-radius: 5px;
+      resize: none;
+      background-color: #ffffff; /* テキストエリアの白背景 */
+    }
+
+    form button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #5f5f5f; /* ダークグレー */
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s;
+    }
+
+    form button:hover {
+      background-color: #4a4a4a; /* ホバー時にさらに濃いグレー */
+    }
+
+    body.dark-mode {
+      background-color: #2d2d2d; /* ダーク背景 */
+      color: #f1f1f1;
+    }
+
+    button {
+      background-color: #ff5722; /* 明るいアクセント色 */
+    }
+
+    /* アニメーション */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* エントリーにホバーエフェクトを追加 */
+    .entry:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+</style>
+</head>
+<body>
+     <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <!-- モバイル用ハンバーガーアイコン -->
+    <div id="hamburger">&#9776;</div>
+    <!-- ナビゲーション -->
+    <nav id="top-nav">
+      <a href="/bbs">掲示板</a>
+      <a href="/proxypage">Proxy</a>
+      <a href="/others">その他</a>
+      <a href="/sitsumon">回答よろ</a>
+	&emsp;
+    </nav>
+  </header>
+	<br>
+    <main class="container">
+	     <section class="entry">
+            <h2>日付: 2025-04-2</h2>
+            <p>リアタイでchatができるサイトを作りました、再読み込みとかをしないとごくまれに読み込めないのが弱点</p>
+        </section>
+	    <section class="entry">
+            <h2>日付: 2025-04-1</h2>
+            <p>埋め込みの新しいverをつくりました(education)</p>
+        </section>
+	     <section class="entry">
+            <h2>日付: 2025-03-27</h2>
+            <p>トップバーを作成、「その他」の項目を作りました</p>
+        </section>
+        <section class="entry">
+            <h2>日付: 2025-03-26</h2>
+            <p>invを追加、動画が見れないバグが治りました</p>
+        </section>
+        <section class="entry">
+            <h2>日付: 2025-03-25</h2>
+            <p>invの不具合を修正、youtube-nocookieを利用した埋め込み機能を追加しました</p>
+            <p>この機能はデフォルトモードで読み込んだ後左にある「埋め込みで視聴」を押すことで視聴できます</p>
+            <p>またこの機能を使うと、画質切替、字幕、テレビにキャストなど細かい設定が行えます。</p>
+            
+        </section>
+	      <section class="entry">
+            <h2>日付: 2025-03-24</h2>
+            <p>proxyでinterstellar、spaceを追加,shadowなどの2個目も余裕があったら作る予定</p>      
+        </section>
+    </main>
+</body>
+</html>

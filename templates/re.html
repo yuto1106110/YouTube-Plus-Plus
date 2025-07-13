@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>デジタル時計「--:--:--」</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f3f3f3;
+    }
+    #currentId {
+      font-size: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    #updateCount {
+      font-size: 1.5em;
+      margin-bottom: 1em;
+    }
+    #toggle {
+      padding: 1em 2em;
+      font-size: 1.5em;
+      border: none;
+      border-radius: 8px;
+      background: #007acc;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin: 1em 0;
+    }
+    #toggle:hover {
+      background: #005fa3;
+    }
+    #clockContainer {
+      text-align: center;
+      margin-top: 1em;
+    }
+    #clock {
+      font-size: 2.5em;
+      font-family: "Courier New", Courier, monospace;
+      margin-top: 0.5em;
+    }
+    /* スライダーとラベルのスタイル */
+    #speedControl {
+      margin: 1em 0;
+      text-align: center;
+    }
+    #speedControl label {
+      font-size: 1.2em;
+      margin-right: 0.5em;
+    }
+    #speedValue {
+      font-weight: bold;
+      margin-left: 0.5em;
+    }
+  </style>
+</head>
+<body>
+  <!-- 現在のID表示エリア -->
+  <div id="currentId">Current ID: -</div>
+  <!-- 更新回数の表示エリア -->
+  <div id="updateCount">更新回数: 0</div>
+  
+  <!-- URL更新間隔調整用のスライダー -->
+  <div id="speedControl">
+    <label for="speedRange">更新速度 (ms):</label>
+    <input type="range" id="speedRange" min="50" max="1000" step="50" value="100">
+    <span id="speedValue">100</span>
+  </div>
+  <h3>数字は小さい方が早く履歴を埋めます,その分遅くなりますが…</h3>
+
+  <!-- トグルボタン -->
+  <button id="toggle">Start</button>
+
+  <!-- デジタル時計エリア -->
+  <div id="clockContainer">
+    <h2>デジタル時計(現在の時間)</h2>
+    <div id="clock">--:--:--</div>
+  </div>
+
+  <script>
+    // タイマー管理用の変数
+    let urlTimer = null;
+    let clockTimer = null;
+    // 更新回数をカウントする変数
+    let updateCount = 0;
+
+    // HTML要素の取得
+    const toggleButton = document.getElementById("toggle");
+    const currentIdDisplay = document.getElementById("currentId");
+    const updateCountDisplay = document.getElementById("updateCount");
+    const clockDisplay = document.getElementById("clock");
+    const speedRange = document.getElementById("speedRange");
+    const speedValue = document.getElementById("speedValue");
+
+    // 任意の長さのランダム文字列を生成する関数（英数字のみ）
+    function randomId(length) {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    // URL をランダムなIDに変更して履歴に追加し、
+    // 現在のIDと更新回数を表示する処理
+    function changeURL() {
+      const id = randomId(8);
+      currentIdDisplay.textContent = "Current ID: " + id;
+      history.pushState(null, "", "/" + id);
+      
+      // 更新回数をインクリメントし、表示を更新
+      updateCount++;
+      updateCountDisplay.textContent = "更新回数: " + updateCount;
+      
+      // もし更新回数が100の倍数になっても、何もせず更新を継続（デバッグ用メッセージを出力）
+      if (updateCount % 100 === 0) {
+        console.log("更新回数が " + updateCount + " に達しましたが、一時停止はしません。");
+      }
+    }
+
+    // URL更新のタイマー開始（スライダーの値に基づいて間隔を設定）
+    function startChangingURL() {
+      const interval = parseInt(speedRange.value);
+      urlTimer = setInterval(changeURL, interval);
+    }
+
+    // URL更新タイマーの停止
+    function stopChangingURL() {
+      clearInterval(urlTimer);
+      urlTimer = null;
+    }
+
+    // デジタル時計を更新する関数（ページタイトルも更新）
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
+      const timeString = hours + ":" + minutes + ":" + seconds;
+      
+      // 時計表示の更新
+      clockDisplay.textContent = timeString;
+      // ページタイトルの更新
+      document.title = "デジタル時計「" + timeString + "」";
+    }
+
+    // 時計の開始（初回即時更新＋1秒ごとの更新）
+    function startClock() {
+      updateClock();
+      clockTimer = setInterval(updateClock, 1000);
+    }
+    
+    // デジタル時計の開始
+    startClock();
+
+    // スライダー値の変更で表示を更新し、タイマー動作中なら新しい間隔で再設定
+    speedRange.addEventListener("input", () => {
+      speedValue.textContent = speedRange.value;
+      if (urlTimer !== null) {
+        stopChangingURL();
+        startChangingURL();
+      }
+    });
+
+    // トグルボタンのクリックでURL切り替えの開始/停止をトグル
+    toggleButton.addEventListener("click", () => {
+      if (urlTimer === null) {
+        startChangingURL();
+        toggleButton.textContent = "Stop";
+      } else {
+        stopChangingURL();
+        toggleButton.textContent = "Start";
+      }
+    });
+  </script>
+</body>
+</html>

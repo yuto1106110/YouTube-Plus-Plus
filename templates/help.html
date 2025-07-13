@@ -1,0 +1,50 @@
+  <!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>お問い合わせ - YouTube Plus⁺</title>
+	  <link rel="icon" href="/img/logo/favicon.ico">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #topButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
+    </style>
+</head>
+<body>
+  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLScXAv5MtRfSlBMugk9414cq-OC8q7rN7SBC4DAMkCaIcoP3Mw/viewform?usp=header" title=""></iframe>
+    <button id="topButton" onclick="javascript:location.replace('/')">  <i class="fas fa-arrow-up"></i> 戻る</button>
+    <script>
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

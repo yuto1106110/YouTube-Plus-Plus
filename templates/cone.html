@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connect Four（コネクトフォー）- YouTube Plus⁺</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f7f7f7;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    /* 柔らかいパステルカラーのボタンデザイン */
+    button {
+      background-color: #e0f7fa; /* ソフトなシアン */
+      color: #333;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #b2ebf2;
+    }
+    /* モード選択エリア */
+    #modeSelect {
+      margin: 20px;
+    }
+    /* ゲームルールを表示するエリア */
+    #gameRules {
+      background-color: #fff;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: left;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #gameRules h2 {
+      margin-top: 0;
+    }
+    canvas {
+      background: #00bfff; /* 青い背景 */
+      display: block;
+      margin: 0 auto;
+      border: 4px solid #333;
+    }
+    .message {
+      font-size: 24px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Connect Four</h1>
+
+  <!-- ゲームルール表示エリア -->
+  <div id="gameRules">
+    <h2>ゲームルール</h2>
+    <ul>
+      <li><strong>ゲーム概要：</strong>コネクトフォーは2人のプレイヤーまたはプレイヤーとCPUが対戦するターン制ボードゲームです。盤面は7列×6行のグリッドになっており、交互に自分の駒（Player 1は赤、Player 2またはCPUは黄色）を配置します。</li>
+      <li><strong>駒の配置：</strong>各ターン、選択された列の中で一番下の空セルに駒が落ちます。すでにその列が埋まっている場合は、別の列を選ぶ必要があります。</li>
+      <li><strong>勝利条件：</strong>自分の駒が横・縦・斜めのいずれかで連続4つ並んだら勝利です。配置後、各方向に4つ揃っているかチェックします。</li>
+      <li><strong>引き分け：</strong>盤面のすべてのセルが埋まり、どちらも連続4つを作れなかった場合は引き分けとなります。</li>
+      <li><strong>対戦モード：</strong>
+        <ul>
+          <li>【対人プレイ】：2人のプレイヤーが同じデバイスで交互に駒を落とします。</li>
+          <li>【CPU対戦】：Player 1（赤）が人間プレイヤーとなり、Player 2の役割はCPU（黄色）が担当します。CPUは自動で駒を落とし、勝てる手があればそれを実行、または相手の勝利を阻止します。</li>
+        </ul>
+      </li>
+      <li><strong>操作方法：</strong>PCではキャンバス上をクリック、スマホ・タブレットではタッチ操作で任意の列に駒を落とすことができます。</li>
+    </ul>
+  </div>
+
+  <!-- モード選択エリア -->
+  <div id="modeSelect">
+    <button id="pvpBtn">対人プレイ</button>
+    <button id="pvcBtn">CPU対戦</button>
+  </div>
+  
+  <canvas id="gameCanvas" width="700" height="600"></canvas>
+  <div class="message" id="message"></div>
+  <button id="restartBtn">ゲームリスタート</button>
+
+  <script>
+    // キャンバス関連
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const rows = 6;
+    const cols = 7;
+    const cellSize = 100;  // キャンバスは 700 x 600 になる
+
+    // ゲーム管理用グローバル変数
+    let board, currentPlayer, gameOver = false;
+    // gameMode: "pvp"（対人プレイ）または "pvc"（CPU対戦）
+    let gameMode = null;
+
+    // 盤面を初期状態に設定
+    function initBoard() {
+      board = [];
+      for (let r = 0; r < rows; r++) {
+        board.push(new Array(cols).fill(0));
+      }
+      currentPlayer = 1;
+      gameOver = false;
+      updateMessage();
+      drawBoard();
+    }
+
+    // 現在のターンのメッセージを更新
+    function updateMessage() {
+      const msgElem = document.getElementById("message");
+      msgElem.textContent = currentTurnMessage();
+    }
+
+    // ターンごとのメッセージ
+    function currentTurnMessage() {
+      if (gameMode === "pvc") {
+        return currentPlayer === 1 ? "Player 1 (Red) の番です" : "CPU (Yellow) の番です";
+      } else {
+        return currentPlayer === 1 ? "Player 1 (Red) の番です" : "Player 2 (Yellow) の番です";
+      }
+    }
+
+    // 勝者のメッセージを作成
+    function getWinnerMessage(player) {
+      if (gameMode === "pvc") {
+        return player === 1 ? "Player 1 (Red) の勝ちです！" : "CPU (Yellow) の勝ちです！";
+      } else {
+        return player === 1 ? "Player 1 (Red) の勝ちです！" : "Player 2 (Yellow) の勝ちです！";
+      }
+    }
+
+    // 盤面を描画
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const centerX = c * cellSize + cellSize / 2;
+          const centerY = r * cellSize + cellSize / 2;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, cellSize / 2 - 10, 0, Math.PI * 2);
+          if (board[r][c] === 1) {
+            ctx.fillStyle = "red";
+          } else if (board[r][c] === 2) {
+            ctx.fillStyle = "yellow";
+          } else {
+            ctx.fillStyle = "white";
+          }
+          ctx.fill();
+          ctx.closePath();
+        }
+      }
+    }
+
+    // 指定した列で一番下の空セルの行番号を返す
+    function getAvailableRow(col) {
+      for (let r = rows - 1; r >= 0; r--) {
+        if (board[r][col] === 0) {
+          return r;
+        }
+      }
+      return -1;
+    }
+
+    // 連続する駒が 4 つ揃ったかどうかチェック
+    function checkWin(row, col, player) {
+      function countDirection(deltaRow, deltaCol) {
+        let count = 0;
+        let r = row + deltaRow;
+        let c = col + deltaCol;
+        while (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === player) {
+          count++;
+          r += deltaRow;
+          c += deltaCol;
+        }
+        return count;
+      }
+      // 横方向
+      let total = 1 + countDirection(0, 1) + countDirection(0, -1);
+      if (total >= 4) return true;
+      // 縦方向
+      total = 1 + countDirection(1, 0) + countDirection(-1, 0);
+      if (total >= 4) return true;
+      // 斜め（右上 ↘ 左下）
+      total = 1 + countDirection(1, -1) + countDirection(-1, 1);
+      if (total >= 4) return true;
+      // 斜め（左上 ↘ 右下）
+      total = 1 + countDirection(1, 1) + countDirection(-1, -1);
+      if (total >= 4) return true;
+
+      return false;
+    }
+
+    // キャンバス上クリック／タッチイベントの処理
+    canvas.addEventListener("click", (e) => {
+      if (gameOver) return;
+      // CPU対戦時、CPU の番中はクリックを無視
+      if (gameMode === "pvc" && currentPlayer === 2) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const col = Math.floor(x / cellSize);
+      const row = getAvailableRow(col);
+      if (row === -1) {
+        alert("この列は満杯です。別の列を選んでください。");
+        return;
+      }
+      board[row][col] = currentPlayer;
+      drawBoard();
+
+      if (checkWin(row, col, currentPlayer)) {
+        document.getElementById("message").textContent = getWinnerMessage(currentPlayer);
+        gameOver = true;
+        return;
+      }
+      // 盤面が全て埋まった場合
+      let tie = board.every(r => r.every(cell => cell !== 0));
+      if (tie) {
+        document.getElementById("message").textContent = "引き分けです！";
+        gameOver = true;
+        return;
+      }
+
+      // ターン交代
+      if (gameMode === "pvc") {
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        updateMessage();
+        // CPU 対戦の場合、CPU のターンなら自動で動かす
+        if (currentPlayer === 2 && !gameOver) {
+          cpuMove();
+        }
+      } else {
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        updateMessage();
+      }
+    });
+
+    // タッチ操作もクリックと同様の処理になるように
+    canvas.addEventListener("touchstart", (e) => {
+      const touch = e.touches[0];
+      let mouseEvent = new MouseEvent("click", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+      e.preventDefault();
+    });
+
+    // CPU の駒を自動で落とす関数（攻撃的戦略＋防御戦略）
+    function cpuMove() {
+      setTimeout(() => {
+        if (gameOver) return;
+        
+        let targetCol = null;
+        
+        // ① 攻撃的戦略：もしCPU (Yellow) がここに置いて勝利できるならその列に置く
+        for (let c = 0; c < cols; c++) {
+          let availableRow = getAvailableRow(c);
+          if (availableRow !== -1) {
+            board[availableRow][c] = 2;  // CPU の駒としてシミュレーション
+            if (checkWin(availableRow, c, 2)) {
+              targetCol = c;
+              board[availableRow][c] = 0;  // シミュレーション後にリセット
+              break;
+            }
+            board[availableRow][c] = 0;
+          }
+        }
+        
+        // ② 防御戦略：攻撃手がなければ、相手 (Red) が次の一手で勝利できるかどうかチェック
+        if (targetCol === null) {
+          let blockColumn = null;
+          for (let c = 0; c < cols; c++) {
+            let availableRow = getAvailableRow(c);
+            if (availableRow !== -1) {
+              board[availableRow][c] = 1;  // 相手の駒としてシミュレーション
+              if (checkWin(availableRow, c, 1)) {
+                blockColumn = c;
+                board[availableRow][c] = 0;
+                break;
+              }
+              board[availableRow][c] = 0;
+            }
+          }
+          targetCol = blockColumn;
+        }
+        
+        // ③ どちらにも該当しなければ、有効な列からランダムに選択
+        let availableCols = [];
+        for (let c = 0; c < cols; c++) {
+          if (getAvailableRow(c) !== -1) {
+            availableCols.push(c);
+          }
+        }
+        if (targetCol === null && availableCols.length > 0) {
+          targetCol = availableCols[Math.floor(Math.random() * availableCols.length)];
+        }
+        
+        if (targetCol === null) return;
+        let row = getAvailableRow(targetCol);
+        if (row === -1) return;
+        board[row][targetCol] = currentPlayer;
+        drawBoard();
+        
+        if (checkWin(row, targetCol, currentPlayer)) {
+          document.getElementById("message").textContent = getWinnerMessage(currentPlayer);
+          gameOver = true;
+          return;
+        }
+        let tie = board.every(r => r.every(cell => cell !== 0));
+        if (tie) {
+          document.getElementById("message").textContent = "引き分けです！";
+          gameOver = true;
+          return;
+        }
+        currentPlayer = 1;
+        updateMessage();
+      }, 500);
+    }
+
+    // モード選択ボタンの設定
+    document.getElementById("pvpBtn").addEventListener("click", () => {
+      gameMode = "pvp";
+      document.getElementById("modeSelect").style.display = "none";
+      initBoard();
+    });
+    document.getElementById("pvcBtn").addEventListener("click", () => {
+      gameMode = "pvc";
+      document.getElementById("modeSelect").style.display = "none";
+      initBoard();
+    });
+
+    // ゲームリスタートボタン
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      initBoard();
+    });
+  </script>
+</body>
+</html>

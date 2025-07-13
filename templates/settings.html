@@ -3,8 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>設定</title>
+<style>
+	        #topButton {
+            position: fixed;
+            left: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
+</style>
 </head>
 <body>
+    <button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
     <h1>設定</h1>
     <p>現在の埋め込み再生設定：{{ "オン" if ume_toggle == "true" else "オフ" }}</p>
     <form method="post" action="/setting">

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ゲーム一覧 - YouTube Plus⁺</title>
+	    <link rel="icon" href="/img/logo/favicon.ico">
+             <link rel="stylesheet" href="/css/empty.css">
+        <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+        
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <style>
+    /* ページ全体の設定 */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff; /* 背景を白に */
+      font-family: Arial, sans-serif;
+    }
+
+    /* ヘッダー部分のスタイル */
+    header #setume{
+      text-align: center;
+      padding: 40px 20px;
+    }
+    header h1 {
+      font-size: 2.5em; /* 題名を大きめに */
+      margin: 0;
+    }
+    header p {
+      font-size: 1.2em; /* 説明文を見やすく */
+      margin-top: 10px;
+    }
+
+    /* 各項目のコンテナ */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    /* 各項目のスタイル */
+    .item {
+      display: block;
+      width: 250px;  /* 項目の横幅 */
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+      transition: transform 0.3s;
+      text-decoration: none; /* リンク下線を消去 */
+      color: inherit;
+    }
+
+    /* 画像部分のスタイル */
+    .item img {
+      width: 100%;
+      height: 200px; /* 高さを固定 */
+      object-fit: cover; /* コンテナ内に収めつつ比率を維持 */
+      transition: transform 0.3s;
+    }
+
+    /* テキスト部分のスタイル */
+    .item-content {
+      padding: 15px;
+      text-align: center;
+    }
+    .item-content h3 {
+      margin: 10px 0 5px;
+      font-size: 1.5em;
+    }
+    .item-content p {
+      margin: 0;
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    /* ホバー時のエフェクト */
+    .item:hover {
+      transform: scale(1.05);
+    }
+    .item:hover img {
+      transform: scale(1.1);
+    }
+  </style>
+</head>
+<body>
+<header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <!-- モバイル用ハンバーガーアイコン -->
+    <div id="hamburger">&#9776;</div>
+    <!-- ナビゲーション -->
+    <nav id="top-nav">
+      <a href="/chat">Plus⁺ Chat</a>
+      <a href="/others">メニュー</a>
+      <a href="/qanda">ヘルプ</a>
+      <a href="/help">お問い合わせ</a>
+	&emsp;
+    </nav>
+  </header>
+
+  <header id=setume>
+	  
+    <h1>game!</h1>
+    <p>暇なら暇を潰そう‼︎</p>
+  </header>
+  
+  <div class="container">
+    <!-- 項目1 -->
+    <a href="/snow" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>snowball.io</h3>
+          <p>雪玉を作って、ぶっ飛ばせ‼︎</p>
+      </div>
+    </a>
+    
+    <!-- 項目2 -->
+    <a href="/drive" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>drive</h3>
+          <p>車を乗りこなせ‼︎</p>
+      </div>
+    </a>
+        <a href="/1v1lol" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>1v1lol</h3>
+          <p>銃を撃て!!(PCしかできないよ)</p>
+      </div>
+    </a>
+    <a href="/cone" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>connect four</h3>
+          <p>めちゃくちゃ面白いですw2人プレイ可能</p>
+      </div>
+    </a>
+    <a href="/usa" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>卓球</h3>
+          <p>結構難しいw2人プレイ可能</p>
+      </div>
+    </a>
+    <!-- 項目3 -->
+    <a href="/paper" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>paper.io</h3>
+          <p>この中で僕が一番大好きなゲームですw</p>
+      </div>
+    </a>
+	    <a href="/ose" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>オセロ</h3>
+          <p>1人でも2人でも</p>
+      </div>
+    </a>
+	  <a href="/ball" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>ブロック崩し</h3>
+          <p>おもちさんが提案してくれました‼︎ｶﾝｼｬ</p>
+      </div>
+    </a>
+	  <a href="/2048" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>2048</h3>
+          <p>ブロックを合わせよう！</p>
+      </div>
+    </a>
+	      <a href="/bj" class="item">
+      <img src="https://via.placeholder.com/250x200" alt="">
+      <div class="item-content">
+          <h3>black jack</h3>
+          <p>遊び対戦で好きになりましたw4人プレイ可能</p>
+      </div>
+    </a>
+  </div>
+</body>
+</html>

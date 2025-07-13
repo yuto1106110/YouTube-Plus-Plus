@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="robots" content="noindex,nofollow">
+        
+        <title>読み込み中... - YouTube Plus⁺</title>
+        <link rel="icon" href="/img/logo/favicon.ico">
+         <link rel="stylesheet" href="/css/empty.css">
+        <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+            <script src="./scripts.js"></script>
+    </head>
+    <body>
+        <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+		 <div class="search-container">
+      <form class="pure-form" action="/search" method="get">
+        <fieldset>
+          <input id="searchbox" name="q" type="search" placeholder="検索" title="検索" autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false">
+        </fieldset>
+      </form>
+    </div>
+    <!-- モバイル用ハンバーガーアイコン -->
+    <div id="hamburger">&#9776;</div>
+    <!-- ナビゲーション -->
+    <nav id="top-nav">
+      <a href="/chat">Plus⁺ Chat</a>
+      <a href="/others">メニュー</a>
+      <a href="/qanda">ヘルプ</a>
+      <a href="/help">お問い合わせ</a>
+	&emsp;
+    </nav>
+  </header>
+	    <br>
+         <h1>読み込み中...</h1>
+	    <script>
+    // ページが読み込まれたときに実行する処理
+    window.onload = function() {
+      // 表示するメッセージの配列
+      const messages = [
+        "APIに原因がある場合はどうしようもないです...最新情報を確認しよう！",
+        "liveが見たいけど、見れない？そんな時には埋め込みを使おう‼︎",
+        "ずっと読み込んでいる場合、一度入り直してみてください！",
+        "画質を変えたい？そんな時には高画質機能を使おう‼︎",
+        "もうしばらくお待ち下さい..."
+      ];
+      // 0からmessages.length-1までのランダムな整数を生成
+      const randomIndex = Math.floor(Math.random() * messages.length);
+      // ランダムに選んだメッセージをページ内の要素に表示
+      document.getElementById("dynamicContent").innerText = messages[randomIndex];
+    };
+  </script>
+</head>
+<body>
+  <h3 id="dynamicContent">読み込み中…</h3>
+  <script>setTimeout(function(){location.reload();},2000);</script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<html>
+  <head>
+	  
+    <title>URL検索 - YouTube Plus⁺</title>
+        <link rel="icon" href="/img/logo/favicon.ico">
+           <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=thumb_up" />
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  </head>
+	  <script>
+    $(document).ready(function() {
+      // モバイル時：ハンバーガーメニューのトグル
+      $("#hamburger").click(function() {
+        $("#top-nav").toggleClass("show");
+      });
+      
+      // スクロールによるトップバーの縮小効果
+      $(window).on("scroll", function() {
+        if($(window).scrollTop() > 50) {
+          $("#top-bar").addClass("scrolled");
+        } else {
+          $("#top-bar").removeClass("scrolled");
+        }
+      });
+    });
+  </script>
+    </head>
+    <body>
+       <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <!-- モバイル用ハンバーガーアイコン -->
+    <div id="hamburger">&#9776;</div>
+    <!-- ナビゲーション -->
+    <nav id="top-nav">
+      <a href="/bbs">掲示板</a>
+      <a href="/proxypage">Proxy</a>
+      <a href="/others">その他</a>
+      <a href="/sitsumon">回答よろ</a>
+	&emsp;
+    </nav>
+  </header>
+  <body style="background: white; margin: 0; font-family: Arial, sans-serif;">
+    <style>
+      /* ======================
+         モーダルウィンドウのスタイル
+         ====================== */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.5s ease;
+        z-index: 1000;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .modal-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 500px;
+        width: 80%;
+        animation: slideDown 0.5s ease;
+        position: relative;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      }
+      @keyframes slideDown {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #ff5c5c;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .modal-close:hover {
+        background: #ff1c1c;
+      }
+
+      /* ======================
+         YouTube URL入力フォームのアニメーション付きスタイル
+         ====================== */
+      .form-container {
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        margin: 100px auto;
+        max-width: 600px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 1s ease forwards;
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      h1 {
+        text-align: center;
+        font-size: 2.2em;
+        margin-bottom: 20px;
+        animation: slideIn 1s ease forwards;
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(-100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      input, button {
+        font-size: 16px;
+        padding: 10px;
+        margin: 5px;
+        transition: transform 0.3s ease;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      input:focus, button:hover {
+        transform: scale(1.05);
+        outline: none;
+      }
+    </style>
+
+    <!-- モーダルウィンドウ（使い方説明） -->
+    <div id="modalOverlay" class="modal-overlay">
+      <div class="modal-content">
+        <button id="modalClose" class="modal-close">&times;</button>
+        <h2>操作方法</h2>
+        <p>
+          このページでは、YouTubeのURLを入力して動画を再生します。<br>
+          「再生！(デフォルト)」をクリックすると通常の再生ページに移動し、<br>
+          「再生！(埋め込み)」をクリックすると埋め込み用の再生ページに移動します。<br>
+		楽しんでください！
+        </p>
+      </div>
+    </div>
+
+    <!-- アニメーション付きのURL入力フォーム -->
+    <div class="form-container">
+      <h1>YouTubeのURLを入力</h1>
+      <form id="urlForm2">
+        <input type="text" id="youtubeUrl" placeholder="YouTubeのURLを入力..." required>
+        <button type="submit" name="action" value="watch">再生！(デフォルト)</button>
+        <button type="submit" name="action" value="watch1">再生！(埋め込み)</button>
+        <br><br>
+      </form>
+    </div>
+
+    <script>
+      // モーダルを閉じる処理
+      document.getElementById("modalClose").addEventListener("click", function() {
+        document.getElementById("modalOverlay").style.display = "none";
+      });
+      window.addEventListener("click", function(event) {
+        if (event.target === document.getElementById("modalOverlay")) {
+          document.getElementById("modalOverlay").style.display = "none";
+        }
+      });
+
+      // YouTube URL入力フォームの処理
+      document.getElementById('urlForm2').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const url = document.getElementById('youtubeUrl').value;
+        const videoId = extractVideoId(url);
+        if (videoId) {
+          const action = event.submitter.value;
+          if (action === 'watch') {
+            window.location.href = `/watch?v=${videoId}`;
+          } else if (action === 'watch1') {
+            window.location.href = `/ume?v=${videoId}`;
+          } else {
+            alert('Invalid action type');
+          }
+        } else {
+          alert('error urlの形式をもう一度見直してください');
+        }
+      });
+
+      function extractVideoId(url) {
+        const regExp = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[1].length === 11) ? match[1] : null;
+      }
+    </script>
+  </body>
+</html>

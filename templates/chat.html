@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>勉強に集中したい!!勉強への集中力をアップする方法とは？</title>
+  <link rel="icon" href="/img/logo/favicon.ico">
+  <link rel="stylesheet" href="/css/empty.css">
+  <link rel="stylesheet" href="/css/pure-min.css">
+  <link rel="stylesheet" href="/css/grids-responsive-min.css">
+  <link rel="stylesheet" href="/css/ionicons.min.css">
+  <link rel="stylesheet" href="/css/default.css">
+  
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+  
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  
+  <!-- jQuery 動作: ハンバーガーメニュー＆スクロール時トップバー縮小 -->
+  <script>
+    $(document).ready(function() {
+      $("#hamburger").click(function() {
+        $("#top-nav").toggleClass("show");
+      });
+      $(window).on("scroll", function() {
+        if ($(window).scrollTop() > 50) {
+          $("#top-bar").addClass("scrolled");
+        } else {
+          $("#top-bar").removeClass("scrolled");
+        }
+      });
+    });
+  </script>
+  
+  <!-- CSS -->
+  <style>
+   body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #fff;
+    }
+     /* テーマごとのスタイル */
+    body.theme-default {
+      background-color: #fff;
+      color: #000;
+    }
+    body.theme-dark {
+      background-color: #222;
+      color: #ddd;
+    }
+    body.theme-light {
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    body.theme-blue {
+      background-color: #e0f7fa;
+      color: #006064;
+    }
+    /* チャット用エリア */
+    #chat-section {
+      margin-top: 0px;
+      padding: 20px;
+    }
+    #chat-box {
+      border: 1px solid #ccc;
+      height: 600px;
+      overflow-y: scroll;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #f9f9f9;
+      animation: backgroundPulse 10s ease infinite;
+      background-size: 200% 200%;
+    }
+    @keyframes backgroundPulse {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .message-container {
+      border: 1px solid #ccc;
+      background-color: #f5f5f5;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .message-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .message-text {
+      white-space: pre-wrap;
+      margin-bottom: 5px;
+    }
+    .quote {
+      color: #888;
+      font-style: italic;
+      margin: 2px 0;
+    }
+    .message-time {
+      font-size: 0.8em;
+      color: gray;
+      text-align: right;
+    }
+    textarea {
+      margin: 5px;
+      padding: 10px;
+      width: calc(100% - 22px);
+      height: 100px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      resize: vertical;
+    }
+    .reply-button, .edit-button {
+      position: absolute;
+      top: 5px;
+      font-size: 12px;
+      padding: 2px 4px;
+      background-color: #eee;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .reply-button {
+      right: 5px;
+    }
+    .edit-button {
+      right: 70px;
+    }
+    .reply-button:hover, .edit-button:hover {
+      background-color: #ddd;
+    }
+    button {
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background-color: #2980b9;
+      transform: scale(1.05);
+    }
+    #user-auth, #chat-section {
+      animation: slideIn 0.6s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .rainbow-name {
+      background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 400% 400%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: rainbow 5s linear infinite;
+    }
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    textarea:focus,
+    #signupName:focus,
+    #signupPassword:focus,
+    #loginName:focus,
+    #loginPassword:focus {
+      outline: none;
+      border: 1px solid #3498db;
+      box-shadow: 0 0 5px rgba(52,152,219,0.5);
+      transition: box-shadow 0.3s ease, border 0.3s ease;
+    }
+    #command-summary {
+      background-color: #fff;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease;
+    }
+    #command-summary h3 {
+      margin-top: 0;
+      color: #3498db;
+    }
+    #command-summary ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    #command-summary li {
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    #command-summary code {
+      background-color: #f1f1f1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 90%;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .delete-button {
+      font-size: 12px;
+      padding: 2px 4px;
+      background-color: #e74c3c;
+      border: 1px solid #e74c3c;
+      border-radius: 3px;
+      color: #fff;
+      cursor: pointer;
+      margin-right: 5px;
+      position: absolute;
+      top: 5px;
+      right: 130px;
+    }
+    .delete-button:hover {
+      background-color: #c0392b;
+    }
+    /* プロフィール更新フォーム */
+    #profile-settings {
+      margin: 20px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+    }
+    #profile-settings input, #profile-settings select {
+      margin: 5px 0;
+      padding: 5px;
+      width: 200px;
+    }
+    #profile-settings button {
+      background-color: #2ecc71;
+      border: none;
+      padding: 6px 12px;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #profile-settings button:hover {
+      background-color: #27ae60;
+    }
+    /* 話題表示エリア用のCSS */
+    #chat-topic {
+      background: linear-gradient(135deg, #63a4ff, #83eaf1);
+      color: #fff;
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 20px;
+      border-radius: 8px;
+      margin: 10px 0;
+      box-shadow: 0px 2px 10px rgba(0,0,0,0.2);
+      display: none;
+    }
+    #command-summary a {
+      margin-top: 0;
+      color: #3498db;
+      text-decoration: none;
+    }
+    /* アクションメニュー用のスタイル */
+.action-menu-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+/* ハンバーガーアイコン用のボタン */
+.action-menu-button {
+  background-color: #f0f0f0; /* 白背景に合う明るいグレー */
+  border: 1px solid #ccc;
+  color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px 8px;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+/* アクションメニュー全体 */
+.action-menu {
+  position: absolute;
+  right: 5px;
+  top: 30px; /* ボタン下に展開 */
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 100;
+}
+
+.action-menu div {
+  padding: 5px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.action-menu div:hover {
+  background-color: #eee;
+}
+
+  </style>
+</head>
+<body>
+  <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <div id="hamburger">&#9776;</div>
+    <nav id="top-nav">
+      <a href="/chat">Plus⁺ Chat</a>
+      <a href="/others">メニュー</a>
+      <a href="/qanda">ヘルプ</a>
+      <a href="/help">お問い合わせ</a>&emsp;
+    </nav>
+  </header>
+  
+  
+  <!-- サインアップ／ログイン用 -->
+  <div id="user-auth">
+    <div id="signup">
+      <h3>サインアップ</h3>
+      <h4>アカウントを作成してください。名前とパスワードはしっかり覚えておきましょう！</h4>
+      <input type="text" id="signupName" placeholder="名前">
+      <input type="password" id="signupPassword" placeholder="パスワード">
+      <button id="signupButton">サインアップ</button>
+    </div>
+    <div id="login">
+      <h3>ログイン</h3>
+      <h4>作成したアカウントでログインできます。なりすましは禁止です！</h4>
+      <input type="text" id="loginName" placeholder="名前">
+      <input type="password" id="loginPassword" placeholder="パスワード">
+      <button id="loginButton">ログイン</button>
+    </div>
+  </div>
+  
+  <!-- チャット用エリア -->
+  <div id="chat-section" style="display:none;">
+    <h2>yuki-youtube<sup>+</sup>chatsite</h2>
+    <h3>新しくきた人も勇気を出して挨拶しよう‼︎</h3>
+    <p id="online-count">現在のオンライン人数: 0人</p>
+    <div id="current-topic" style="text-align: center; font-size: 18px; color: white; background-color: #333; padding: 5px; border-radius: 4px; margin-top: 5px; display: none;"></div>
+　　　　<div id="featured-news"></div>
+    
+    <div id="chat-box"></div>
+    
+    <!-- ※ タイピングインジケーターは削除済 -->
+    
+<label style="display: block; margin: 5px 10px;">
+  <input type="checkbox" id="enterToggle" checked>
+  Enterで送信（Shift+Enterで改行）
+</label>
+    <textarea id="messageInput" placeholder="メッセージを入力"></textarea>
+    <button id="sendButton">送信</button>
+    <button id="logoutButton">ログアウト</button>
+    <a href="javascript:location.replace('https://google.com')">緊急ボタン</a>
+    
+    <!-- コマンド一覧 -->
+    <div id="command-summary">
+      <h3>コマンド一覧と使用方法</h3>
+      <ul>
+        <li><code>/color [カラーコード]</code>: 表示名のカラーを変更します。（例: <code>/color #fff</code>）</li>
+        <li><code>/omi</code>: おみくじを引きます。重み付き確率により結果が決定され、実行者の名前が表示されます。</li>
+        <li><code>/poker</code>: 52枚のカードからランダムに引いて、ポーカーができます</li>
+        <li><code>/you [youtubeのurl]</code>: youtubeのurlを送ると、ストリームurlを返します。</li>
+        <h3>新しいコマンド募集中‼︎</h3><a href=https://docs.google.com/forms/d/e/1FAIpQLScVEH0uKevJcBQCAnpnQCB2gH5un7SvZzCCtbC7MV4m0mQzpA/viewform?usp=header> ここから提案できます‼回答よろー</a>
+      </ul>
+    </div>
+    <div id="command-summary">
+      <h3>管理者専用のコマンド</h3>
+      <ul>
+        <li><code>/adminadd [名前]</code>: 「ねむい」専用。指定した名前を擬似管理者に追加します。</li>
+        <li><code>/admin</code>: 「ねむい」専用。現在の擬似管理者一覧を表示します。</li>
+        <li><code>/adminre [名前]</code>: 「ねむい」専用。指定した名前を擬似管理者から外します。</li>
+        <li><code>/delete [ユーザー名]</code>: 「ねむい」または擬似管理者専用。指定したユーザーのメッセージを削除します。</li>
+        <li><code>/mute [ユーザー名] [期間]</code>: 「ねむい」専用。指定したユーザーを指定期間ミュートします。（例: <code>/mute taro 10m</code>）</li>
+        <li><code>/unmute [ユーザー名]</code>: 「ねむい」専用。指定したユーザーのミュート状態を解除します。</li>
+      </ul>
+    </div>
+    
+    <!-- プロフィール更新フォーム -->
+    <!-- プロフィール更新フォーム -->
+<div id="profile-settings">
+  <h3>プロフィール更新</h3>
+  <!-- 既存の名前更新用・パスワード更新用フィールドがあればそのままで -->
+  <input type="password" id="newPassword" placeholder="新しいパスワード (空欄で変更なし)">
+  <!-- 追加：カスタム文入力フィールド（20文字以内） -->
+  <input type="text" id="newCustom" placeholder="好きな文 (20文字以内)" maxlength="20">
+  
+  <select id="newColor">
+    <option value="">-- 色を選択 --</option>
+    <option value="#000000">黒</option>
+    <option value="#FF0000">赤</option>
+    <option value="#0000FF">青</option>
+    <option value="#00FF00">緑</option>
+    <option value="#FFA500">オレンジ</option>
+    <option value="#800080">紫</option>
+    <option value="#808080">灰色</option>
+  </select>
+  <select id="themeSelect">
+    <option value="">-- テーマを選択 --</option>
+    <option value="light">ライト</option>
+    <option value="blue">ブルー</option>
+  </select>
+  <button id="updateProfileButton">更新</button>
+</div>
+
+    
+    <script>
+      // ページは一度だけ自動リロード（テスト用）
+      if (!sessionStorage.getItem("reloaded")) {
+        sessionStorage.setItem("reloaded", "true");
+        setTimeout(function() { location.reload(); }, 1000);
+      }
+    </script>
+  </div>
+  <script type="module">
+   // Firebaseモジュールのインポート
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      updateProfile,
+      signOut,
+      onAuthStateChanged,
+      updatePassword
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      deleteDoc,
+      getDocs,
+      updateDoc,
+      onSnapshot,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+    import {
+      getDatabase,
+      ref,
+      onDisconnect,
+      set,
+      serverTimestamp,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+    
+    
+    
+    // Firebase 設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyBy2-A1aPIJ5sgdIkdtVP8M3ejYWh1SUU4",
+      authDomain: "chat-chat-2518e.firebaseapp.com",
+      projectId: "chat-chat-2518e",
+      storageBucket: "chat-chat-2518e.firebasestorage.app",
+      messagingSenderId: "465019906626",
+      appId: "1:465019906626:web:1de95eec38a8bbf5c65bdb",
+      measurementId: "G-HVV4XD4D6J"
+    };
+    
+    // 初期化
+    const appFB = initializeApp(firebaseConfig);
+    const auth = getAuth(appFB);
+    const db = getFirestore(appFB);
+    const dbRT = getDatabase(appFB);
+    
+    const MAX_MESSAGES = 50;
+    let pseudoAdmins = new Set();
+    let mutedUsers = {};
+// たとえば "currentTopic" ノードにアクセスする場合
+const currentTopicRef = ref(dbRT, "currentTopic");
+
+// データ書き込み: ノードが存在しない場合、set() によって自動作成されます
+async function updateCurrentTopic(topicText) {
+  try {
+    await set(currentTopicRef, topicText);
+    console.log("currentTopic を更新しました:", topicText);
+  } catch (error) {
+    console.error("currentTopic 更新エラー:", error);
+  }
+}
+
+// リアルタイム監視: "currentTopic" の値が更新されるとこの onValue のコールバックが呼ばれる
+onValue(currentTopicRef, (snapshot) => {
+  const topic = snapshot.val();
+  const topicElem = document.getElementById("current-topic");
+  if (topic) {
+    topicElem.textContent = topic;
+    topicElem.style.display = "block";
+  } else {
+    topicElem.style.display = "none";
+  }
+});
+
+    
+  // 例：既存の extractVideoId 関数（なければ下記を利用）
+function extractVideoId(url) {
+  const regExp = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[1].length === 11) ? match[1] : null;
+}
+    
+    function generateEmailFromName(name) {
+      return name.trim().toLowerCase().replace(/\s+/g, "") + "@chatapp.local";
+    }
+    // 強制IDはサインアップ時に一度生成される
+    function generateForcedId() {
+      return Math.floor(1000 + Math.random() * 9000).toString();
+    }
+    
+    const CLEAR_CHAT_PASSWORD = "RESET1234";
+    
+    const signupButton = document.getElementById("signupButton");
+    const loginButton  = document.getElementById("loginButton");
+    const logoutButton = document.getElementById("logoutButton");
+    const sendButton   = document.getElementById("sendButton");
+    const chatBox      = document.getElementById("chat-box");
+    const messageInput = document.getElementById("messageInput");
+    // プロフィール更新用ボタン
+    const updateProfileButton = document.getElementById("updateProfileButton");
+    function openEditModal(currentText, callback) {
+      // overlay の生成
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      overlay.style.display = 'flex';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+      overlay.style.zIndex = '2000';
+      
+      // モーダルコンテナ
+      const modal = document.createElement('div');
+      modal.style.backgroundColor = '#fff';
+      modal.style.padding = '20px';
+      modal.style.borderRadius = '5px';
+      modal.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+      modal.style.maxWidth = '500px';
+      modal.style.width = '90%';
+      
+      // タイトル
+      const title = document.createElement('h3');
+      title.innerText = 'メッセージ編集';
+      modal.appendChild(title);
+      
+      // textarea：改行を保持
+      const textarea = document.createElement('textarea');
+      textarea.style.width = '100%';
+      textarea.style.height = '150px';
+      textarea.value = currentText;
+      modal.appendChild(textarea);
+      
+      // ボタンコンテナ
+      const btnContainer = document.createElement('div');
+      btnContainer.style.marginTop = '10px';
+      btnContainer.style.textAlign = 'right';
+      
+      // 保存ボタン
+      const saveBtn = document.createElement('button');
+      saveBtn.innerText = '保存';
+      saveBtn.style.marginRight = '10px';
+      saveBtn.onclick = () => {
+        callback(textarea.value);
+        document.body.removeChild(overlay);
+      };
+      btnContainer.appendChild(saveBtn);
+      
+      // キャンセルボタン
+      const cancelBtn = document.createElement('button');
+      cancelBtn.innerText = 'キャンセル';
+      cancelBtn.onclick = () => {
+        document.body.removeChild(overlay);
+      };
+      btnContainer.appendChild(cancelBtn);
+      
+      modal.appendChild(btnContainer);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+    }
+    signupButton.addEventListener("click", async () => {
+      const name = document.getElementById("signupName").value;
+      const password = document.getElementById("signupPassword").value;
+      if (!name || !password) {
+        alert("名前とパスワードの両方を入力してください。");
+        return;
+      }
+      const email = generateEmailFromName(name);
+      const forcedId = (name === "ねむい") ? "" : generateForcedId();
+      const fullName = (name === "ねむい") ? name : `${name}#${forcedId}`;
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(userCredential.user, { displayName: fullName });
+        console.log("サインアップ成功:", userCredential.user);
+      } catch (error) {
+        alert("サインアップエラー: " + error.message);
+      }
+    });
+    
+    loginButton.addEventListener("click", async () => {
+      const name = document.getElementById("loginName").value;
+      const password = document.getElementById("loginPassword").value;
+      if (!name || !password) {
+        alert("名前とパスワードの両方を入力してください。");
+        return;
+      }
+      const email = generateEmailFromName(name);
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        console.log("ログイン成功");
+      } catch (error) {
+        alert("ログインエラー: " + error.message);
+      }
+    });
+    
+    function setupPresence(user) {
+      const userStatusRef = ref(dbRT, "status/" + user.uid);
+      const connectedRef = ref(dbRT, ".info/connected");
+      onValue(connectedRef, (snapshot) => {
+        if (snapshot.val() === true) {
+          onDisconnect(userStatusRef)
+            .set({
+              displayName: user.displayName,
+              status: "offline",
+              last_changed: serverTimestamp()
+            })
+            .then(() => {
+              set(userStatusRef, {
+                displayName: user.displayName,
+                status: "online",
+                last_changed: serverTimestamp()
+              });
+            })
+            .catch((error) => {
+              console.error("onDisconnect 設定エラー:", error);
+            });
+        }
+      });
+    }
+    
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("user-auth").style.display = "none";
+        document.getElementById("chat-section").style.display = "block";
+        setupPresence(user);
+        setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 200);
+      } else {
+        document.getElementById("user-auth").style.display = "block";
+        document.getElementById("chat-section").style.display = "none";
+      }
+    });
+    
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("user-auth").style.display = "none";
+        document.getElementById("chat-section").style.display = "block";
+        setupPresence(user);
+      } else {
+        document.getElementById("user-auth").style.display = "block";
+        document.getElementById("chat-section").style.display = "none";
+      }
+    });
+    
+    function isMuted(userBaseName) {
+      if (mutedUsers[userBaseName]) {
+        if (Date.now() < mutedUsers[userBaseName]) {
+          return true;
+        } else {
+          delete mutedUsers[userBaseName];
+        }
+      }
+      return false;
+    }
+    
+    const fortuneOptions = [
+      { name: "…あれ？……何故か表示されません…", weight: 1 },
+      { name: "極大吉", weight: 2 },
+      { name: "超大吉", weight: 2 },
+      { name: "大吉", weight: 10 },
+      { name: "吉", weight: 20 },
+      { name: "中吉", weight: 20 },
+      { name: "小吉", weight: 20 },
+      { name: "末吉", weight: 10 },
+      { name: "凶", weight: 10 },
+      { name: "大凶", weight: 5 }
+    ];
+    
+    function weightedRandom(options) {
+      let totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
+      let rand = Math.random() * totalWeight;
+      for (let opt of options) {
+        if (rand < opt.weight) {
+          return opt.name;
+        }
+        rand -= opt.weight;
+      }
+      return options[options.length - 1].name;
+    }
+    
+    updateProfileButton.addEventListener("click", async () => {
+  const newName = document.getElementById("newName").value.trim();
+  const newPassword = document.getElementById("newPassword").value;
+  const newCustom = document.getElementById("newCustom").value.trim(); // 追加：カスタム文取得
+  if (newCustom.length > 20) {
+    alert("カスタムメッセージは20文字以内で入力してください。");
+    return;
+  }
+  const newColor = document.getElementById("newColor").value; // 選択された色
+  const newTheme = document.getElementById("themeSelect").value; // 選択されたテーマ
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("ログインしてください。");
+    return;
+  }
+
+  // 現在の displayName は "名前#ID" または "名前#ID|色" または "名前#ID|色|カスタム文" として保存されている
+  const currentDisplay = user.displayName || "";
+  const parts = currentDisplay.split("|");
+  const mainPart = parts[0];        // "名前#ID"
+  const currentColor = parts[1] || "";
+  const currentCustom = parts[2] || "";
+
+  let [currentName, forcedId = ""] = mainPart.split("#");
+
+  // 新しい名前が入力されている場合、「ねむい」への変更は不可
+  if (newName !== "" && newName === "ねむい") {
+    alert("名前を「ねむい」に変更することはできません。");
+    return;
+  }
+
+  let finalName;
+  if (currentName === "ねむい") {
+    finalName = "ねむい";
+  } else {
+    let namePart = newName !== "" ? newName : currentName;
+    forcedId = forcedId || generateForcedId();
+    finalName = `${namePart}#${forcedId}`;
+  }
+
+  const finalColor = newColor !== "" ? newColor : currentColor;
+  // 優先的に新しいカスタム文を使い、未入力なら現在のカスタム文をそのまま使う（無くてもOK）
+  const finalCustom = newCustom !== "" ? newCustom : currentCustom;
+
+  // displayName の組み立て：色情報、カスタム文は任意のため状況に応じてパイプ区切りで追加
+  let finalDisplay = finalName;
+  if (finalColor !== "") {
+    finalDisplay += `|${finalColor}`;
+  }
+  if (finalCustom !== "") {
+    finalDisplay += `|${finalCustom}`;
+  }
+  
+  try {
+    await updateProfile(user, { displayName: finalDisplay });
+    alert("名前・色・カスタム文が更新されました。");
+
+    if (newPassword) {
+      await updatePassword(user, newPassword);
+      alert("パスワードが更新されました。");
+    }
+
+    if(newTheme) {
+      document.body.classList.remove("theme-default", "theme-dark", "theme-light", "theme-blue");
+      document.body.classList.add("theme-" + newTheme);
+      localStorage.setItem("chatTheme", newTheme);
+    }
+
+    document.getElementById("newName").value = "";
+    document.getElementById("newPassword").value = "";
+    document.getElementById("newCustom").value = "";
+    document.getElementById("newColor").value = "";
+    document.getElementById("themeSelect").value = "";
+  } catch (error) {
+    alert("更新に失敗しました：" + error.message);
+  }
+});
+
+
+    
+    sendButton.addEventListener("click", async () => {
+      const messageText = messageInput.value;
+      if (messageText.trim() === "") return;
+      const user = auth.currentUser;
+      if (!user) {
+        alert("まずログインしてください。");
+        return;
+      }
+      // 掲示場で表示する際は、displayNameの「名前#ID」部分（色情報を除く）をそのまま表示
+      const userBaseName = user.displayName.split("|")[0];
+      
+      if (isMuted(userBaseName.split("#")[0])) {
+        alert("あなたはミュート中です。ミュート解除後に送信してください。");
+        return;
+      }
+      
+      // /adminadd コマンド：この操作は「ねむい」専用
+      if (messageText.startsWith("/adminadd ")) {
+        if (userBaseName.split("#")[0] !== "ねむい") {
+          alert("この操作は権限がありません。");
+          return;
+        }
+        const parts = messageText.split(" ");
+        if (parts.length < 2) { 
+          alert("使い方: /adminadd [名前]");
+          return;
+        }
+        const targetName = parts[1].trim();
+        if (pseudoAdmins.has(targetName)) {
+          alert(targetName + " は既に擬似管理者です。");
+        } else {
+          pseudoAdmins.add(targetName);
+          alert("擬似管理者に追加しました: " + targetName);
+        }
+        messageInput.value = "";
+        return;
+      }
+      
+      // /admin コマンド
+      if (messageText === "/admin") {
+        if (userBaseName.split("#")[0] !== "ねむい") {
+          alert("この操作は権限がありません。");
+          return;
+        }
+        if (pseudoAdmins.size === 0) { 
+          alert("現在、擬似管理者は設定されていません。");
+        } else { 
+          alert("現在の擬似管理者: " + Array.from(pseudoAdmins).join(", "));
+        }
+        messageInput.value = "";
+        return;
+      }
+      
+      // /adminre コマンド：擬似管理者として登録されている対象は削除できるようにする
+      if (messageText.startsWith("/adminre ")) {
+        if (userBaseName.split("#")[0] !== "ねむい") {
+          alert("この操作は権限がありません。");
+          return;
+        }
+        const parts = messageText.split(" ");
+        if (parts.length < 2) {
+          alert("使い方: /adminre [名前]");
+          return;
+        }
+        const targetName = parts[1].trim();
+        if (pseudoAdmins.has(targetName)) {
+          pseudoAdmins.delete(targetName);
+          alert("擬似管理者から削除しました: " + targetName);
+        } else {
+          alert(targetName + " は擬似管理者ではありません。");
+        }
+        messageInput.value = "";
+        return;
+      }
+
+
+      
+      // 以下、/delete, /color, /mute, /unmute, … の各コマンド
+if (messageText.startsWith("/you ")) {
+    const parts = messageText.split(" ");
+    if (parts.length < 2) {
+      alert("使い方: /you [YouTube URL]");
+      return;
+    }
+    const youtubeUrl = parts[1].trim();
+    const videoId = extractVideoId(youtubeUrl);
+    if (!videoId) {
+      alert("有効なYouTube URLを入力してください。");
+      return;
+    }
+    // 現在のドメインと組み合わせた /watch ページへの絶対URL を作成
+    const watchUrl = `${window.location.origin}/watch?v=${videoId}`;
+    try {
+      // 送信者名を "【YouTube】" としてシステムメッセージとして送信
+      await addDoc(collection(db, "chat"), {
+        text: watchUrl,  // 例: https://example.com/watch?v=動画ID
+        name: "【YouTube】",
+        uid: "system",
+        timestamp: new Date()
+      });
+    } catch (error) {
+      alert("URL送信エラー: " + error.message);
+    }
+    messageInput.value = "";
+    return;
+  }
+
+
+      
+      if (messageText.startsWith("/delete ")) {
+        if (userBaseName.split("#")[0] === "ねむい" || pseudoAdmins.has(userBaseName.split("#")[0])) {
+          const parts = messageText.split(" ");
+          if (parts.length < 2) {
+            alert("使い方: /delete [ユーザー名]");
+            return;
+          }
+          const targetName = parts[1].trim();
+          try {
+            const chatCollection = collection(db, "chat");
+            const snapshot = await getDocs(chatCollection);
+            snapshot.forEach(async (docSnap) => {
+              const msg = docSnap.data();
+              if (msg.name) {
+  // displayName は "名前#ID|…" の形式として保存されているので、パイプ(|)で区切り、
+  // 先頭の「名前#ID」から「#」の前の部分を取得して比較する
+  const baseName = msg.name.split("|")[0].split("#")[0];
+  if (baseName === targetName) {
+    await deleteDoc(docSnap.ref);
+  }
+}
+
+            });
+            console.log(`ユーザー「${targetName}」のメッセージを削除しました。`);
+          } catch (error) {
+            alert("メッセージ削除エラー: " + error.message);
+          }
+          messageInput.value = "";
+          return;
+        } else {
+          alert("この操作は権限がありません。");
+          return;
+        }
+      }
+      
+      if (messageText === CLEAR_CHAT_PASSWORD) {
+        if (userBaseName.split("#")[0] === "ねむい" || pseudoAdmins.has(userBaseName.split("#")[0])) {
+          try {
+            const chatCollection = collection(db, "chat");
+            const snapshot = await getDocs(chatCollection);
+            for (const docSnap of snapshot.docs) {
+              await deleteDoc(docSnap.ref);
+            }
+            chatBox.innerHTML = "";
+            console.log("全ての発言を削除しました。");
+            messageInput.value = "";
+          } catch (error) {
+            alert("チャット削除エラー: " + error.message);
+          }
+          return;
+        } else {
+          alert("この操作は権限がありません。");
+          return;
+        }
+      }
+      
+      if (messageText.startsWith("/color ")) {
+        const parts = messageText.split(" ");
+        if (parts.length < 2) {
+          alert("使い方: /color #fff (カラーコードを入力してください)");
+          return;
+        }
+        const newColor = parts[1].trim();
+        if (!/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(newColor)) {
+          alert("有効なカラーコードを入力してください (例: /color #fff)");
+          return;
+        }
+        const currentDisplayName = user.displayName || "名無し";
+        const nameOnly = currentDisplayName.split("|")[0].split("#")[0];
+        let currentForcedId = currentDisplayName.split("|")[0].split("#")[1] || generateForcedId();
+        let finalDisplay = `${nameOnly}#${currentForcedId}|${newColor}`;
+        try {
+          await updateProfile(user, { displayName: finalDisplay });
+          alert("名前の色が変更されました");
+        } catch (error) {
+          alert("名前の色更新エラー: " + error.message);
+        }
+        messageInput.value = "";
+        return;
+      }
+      
+      
+      // ★ /topic コマンド ★
+if (messageText.startsWith("/topic ")) {
+  if (userBaseName.split("#")[0] !== "ねむい") {
+    alert("この操作は権限がありません。");
+    return;
+  }
+  const topicText = messageText.substring("/topic ".length).trim();
+  if (topicText === "") {
+    alert("話題を入力してください。");
+    return;
+  }
+  await updateCurrentTopic(topicText);
+  alert("話題が更新されました！");
+  messageInput.value = "";
+  return;
+}
+
+
+
+  // -----------------------
+  // Groq OpenAI API を呼び出す関数
+  // -----------------------
+     
+    
+    // ★ 既存コマンド /omi の修正版 ★
+    if (messageText.startsWith("/omi")) {
+      // 入力された /omi コマンドもまず表示
+      await addDoc(collection(db, "chat"), {
+        text: messageText,
+        name: user.displayName || "名無し",
+        uid: user.uid,
+        timestamp: new Date()
+      });
+      const result = weightedRandom(fortuneOptions);
+      try {
+        await addDoc(collection(db, "chat"), {
+          text: `【おみくじ】${userBaseName}さんの今日の運勢は…：${result}`,
+          name: "【おみくじ】",
+          uid: "system",
+          timestamp: new Date()
+        });
+      } catch (error) {
+        alert("おみくじ送信エラー: " + error.message);
+      }
+      messageInput.value = "";
+      return;
+    }
+      
+if (messageText.startsWith("/news")) {
+  // ユーザーが入力した /news コマンドをまずチャットに投稿
+  await addDoc(collection(db, "chat"), {
+    text: messageText,
+    name: user.displayName || "名無し",
+    uid: user.uid,
+    timestamp: new Date()
+  });
+
+  try {
+    // Mediastack API 用のアクセストークンを設定（無料プランの場合のキー）
+    const mediastackApiKey = 'b037cd39eb522c5955524b45a248101a'; // ← ご自身の API キーに置き換えてください
+
+    // Yahoo News のみを対象とするため、sources パラメーターに "yahoo" を指定（limit=1 で最新記事1件を取得）
+    const mediastackUrl = `http://api.mediastack.com/v1/news?access_key=${mediastackApiKey}&sources=google&limit=1`;
+
+    // Mediastack API にリクエストを送信
+    const response = await fetch(mediastackUrl);
+    if (!response.ok) {
+      throw new Error(`Mediastack API エラー: ${response.status}`);
+    }
+
+    const newsData = await response.json();
+    // 取得データは newsData.data 配列に格納される
+    if (!newsData.data || newsData.data.length === 0) {
+      throw new Error("ニュースが見つかりませんでした。");
+    }
+    const topNews = newsData.data[0];
+
+    // 取得した記事からタイトル、URL、画像を取り出す
+    const newsTitle = topNews.title;
+    const newsUrl = topNews.url;
+    // 画像情報がない場合は代替画像（Yahoo News のロゴ）を使用
+    const imageUrl = topNews.image ? topNews.image : "https://s.yimg.com/cv/apiv2/default/NewsLogo.png";
+
+    // HTML 形式のメッセージを生成（リンクと画像付き）
+    const newsMessage = `
+      <div>
+        <a href="${newsUrl}" target="_blank" style="text-decoration:none; color:#000;">
+          <strong>${newsTitle}</strong>
+        </a>
+        <br>
+        <img src="${imageUrl}" alt="Yahoo News Top News" style="max-width:300px; margin-top:10px;">
+      </div>
+    `;
+
+    // システムユーザーとしてニュース情報をチャットに投稿
+    await addDoc(collection(db, "chat"), {
+      text: newsMessage,
+      name: "【News】",
+      uid: "system",
+      timestamp: new Date()
+    });
+  } catch (error) {
+    alert("News コマンド送信エラー: " + error.message);
+  }
+
+  messageInput.value = "";
+  return;
+}
+
+
+
+    // ★ 既存コマンド /poker の修正版 ★
+    if (messageText.startsWith("/poker")) {
+      // 入力された /poker コマンドもまず表示
+      await addDoc(collection(db, "chat"), {
+        text: messageText,
+        name: user.displayName || "名無し",
+        uid: user.uid,
+        timestamp: new Date()
+      });
+      // 1. デッキ作成
+      const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+      const suits = ['♠','♥','♦','♣'];
+      let deck = [];
+      for (let rank of ranks) {
+        for (let suit of suits) {
+          deck.push({ rank, suit });
+        }
+      }
+      // フィッシャー・イェーツ法によるシャッフル
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      // 上から5枚を手札として抽出
+      const hand = deck.slice(0, 5);
+      // 手役評価（シンプルなロジック）
+      function evaluateHand(hand) {
+        const rankCount = {};
+        const suitCount = {};
+        for (let card of hand) {
+          rankCount[card.rank] = (rankCount[card.rank] || 0) + 1;
+          suitCount[card.suit] = (suitCount[card.suit] || 0) + 1;
+        }
+        const flush = Object.values(suitCount).some(count => count === 5);
+        const rankIndexes = hand.map(card => ranks.indexOf(card.rank)).sort((a, b) => a - b);
+        let straight = false;
+        if (rankIndexes[4] - rankIndexes[0] === 4 && new Set(rankIndexes).size === 5) {
+          straight = true;
+        }
+        const counts = Object.values(rankCount).sort((a, b) => b - a);
+        if (flush && straight && hand.some(card => card.rank === 'A') && hand.some(card => card.rank === '10')) {
+          return "Royal Flush";
+        } else if (flush && straight) {
+          return "Straight Flush";
+        } else if (counts[0] === 4) {
+          return "Four of a Kind";
+        } else if (counts[0] === 3 && counts[1] === 2) {
+          return "Full House";
+        } else if (flush) {
+          return "Flush";
+        } else if (straight) {
+          return "Straight";
+        } else if (counts[0] === 3) {
+          return "Three of a Kind";
+        } else if (counts[0] === 2 && counts[1] === 2) {
+          return "Two Pair";
+        } else if (counts[0] === 2) {
+          return "One Pair";
+        } else {
+          return "High Card";
+        }
+      }
+      const handRank = evaluateHand(hand);
+      const handString = hand.map(card => card.rank + card.suit).join(" ");
+      const pokerMessage = `${userBaseName}さんの結果：手札: ${handString}\n結果: ${handRank}`;
+      try {
+        await addDoc(collection(db, "chat"), {
+          text: pokerMessage,
+          name: "【Poker Hand】",
+          uid: "system",
+          timestamp: new Date()
+        });
+      } catch (error) {
+        alert("Pokerコマンド送信エラー: " + error.message);
+      }
+      messageInput.value = "";
+      return;
+    }
+
+         
+      
+      // 通常メッセージ送信
+      try {
+        await addDoc(collection(db, "chat"), {
+          text: messageText,
+          name: user.displayName || "名無し",
+          uid: user.uid,
+          timestamp: new Date()
+        });
+        messageInput.value = "";
+      } catch (error) {
+        alert("メッセージ送信エラー: " + error.message);
+      }
+    });
+
+ 
+    
+    logoutButton.addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        console.log("ログアウト成功");
+      } catch (error) {
+        alert("ログアウトエラー: " + error.message);
+      }
+    });
+    
+    const chatQuery = query(collection(db, "chat"), orderBy("timestamp", "asc"));
+    onSnapshot(chatQuery, async (snapshot) => {
+      if (snapshot.docs.length > MAX_MESSAGES) {
+        const deleteCount = snapshot.docs.length - MAX_MESSAGES;
+        for (let i = 0; i < deleteCount; i++) {
+          try {
+            await deleteDoc(snapshot.docs[i].ref);
+          } catch (err) {
+            console.error("古いメッセージ削除エラー:", err);
+          }
+        }
+      }
+      chatBox.innerHTML = "";
+// 既存の snapshot.forEach 内で各メッセージの HTML を生成する部分
+snapshot.forEach((doc) => {
+  const msg = doc.data();
+  
+  // メッセージコンテナを生成（スタイル上、位置相対にしておく）
+  const messageContainer = document.createElement("div");
+  messageContainer.className = "message-container";
+  messageContainer.style.position = "relative"; // 後で絶対配置するアクションメニュー用
+  
+  /// ----- 送信者名の表示等（既存コードの変更部分） -----
+const nameDiv = document.createElement("div");
+nameDiv.className = "message-name";
+let displayName = msg.name || "名無し";
+// displayName をパイプ("｜")区切りで分割し、各情報を取得する
+const parts = displayName.split("|");
+const namePart = parts[0]; // "名前#ID"部分（/delete等の処理で利用）
+const colorCode = parts[1] || "";
+const customText = parts[2] || "";
+
+// ----- 送信者名の表示（変更箇所） -----
+const nameSpan = document.createElement("span");
+const actualName = namePart.split("#")[0];  // 「名前」部分を抽出
+
+if (actualName === "ねむい") {
+  // ねむいの場合は、虹色のクラスを使わず、落ち着いた色 (例: darkslategray) を適用
+  nameSpan.textContent = namePart;
+  nameSpan.style.color = "black";
+} else {
+  nameSpan.textContent = namePart;
+  if (pseudoAdmins.has(actualName)) {
+    nameSpan.textContent += " (擬似管理者)";
+  }
+  if (colorCode) {
+    nameSpan.style.color = colorCode;
+  }
+}
+
+// ※ 自己紹介文（カスタムテキスト）は常に灰色で表示
+if (customText) {
+  const customSpan = document.createElement("span");
+  customSpan.textContent = customText;
+  customSpan.style.color = "gray";
+  customSpan.style.fontSize = "0.8em";
+  customSpan.style.marginLeft = "4px";
+  nameSpan.appendChild(customSpan);
+}
+
+
+nameDiv.appendChild(nameSpan);
+messageContainer.appendChild(nameDiv);
+
+  
+  // ----- ここから「アクションメニュー」の実装 -----
+  const currentUser = auth.currentUser;
+  
+  // メニュー用のハンバーガーアイコンボタン（3本線のアイコン）
+  const actionMenuButton = document.createElement("button");
+  actionMenuButton.className = "action-menu-button";
+  actionMenuButton.innerHTML = "&#9776;"; // ハンバーガーアイコン
+  // メッセージコンテナ右上に表示されるよう、上記CSSで absolute 配置
+  
+  // アクションメニューの本体（初期状態は非表示）
+  const actionMenu = document.createElement("div");
+  actionMenu.className = "action-menu";
+  actionMenu.style.display = "none";
+  
+  // 自分のメッセージの場合は「削除」と「編集」を追加
+  if (currentUser && msg.uid === currentUser.uid) {
+    // 削除オプション
+    const deleteOption = document.createElement("div");
+    deleteOption.textContent = "削除";
+    deleteOption.addEventListener("click", async function(e) {
+      e.stopPropagation();  // クリックのバブリング防止
+      if (confirm("このメッセージを削除してよろしいですか？")) {
+        try {
+          await deleteDoc(doc.ref);
+        } catch (err) {
+          console.error("メッセージ削除エラー:", err);
+        }
+      }
+      actionMenu.style.display = "none"; // 操作後はメニューを閉じる
+    });
+    actionMenu.appendChild(deleteOption);
+    
+    // 編集オプション
+    const editOption = document.createElement("div");
+    editOption.textContent = "編集";
+    editOption.addEventListener("click", function(e) {
+      e.stopPropagation();
+      openEditModal(msg.text, async (newText) => {
+        if (newText && newText.trim() !== "" && newText !== msg.text) {
+          try {
+            await updateDoc(doc.ref, {
+              text: newText,
+              edited: true,
+              editedAt: new Date()
+            });
+          } catch (error) {
+            alert("メッセージ更新エラー: " + error.message);
+          }
+        }
+      });
+      actionMenu.style.display = "none";
+    });
+    actionMenu.appendChild(editOption);
+  }
+  
+  // どのメッセージでも利用できる「返信」オプション
+  const replyOption = document.createElement("div");
+  replyOption.textContent = "返信";
+  replyOption.addEventListener("click", function(e) {
+    e.stopPropagation();
+    let lines = msg.text.split("\n");
+    if (lines.length && lines[0].trim().startsWith(">")) {
+      lines.shift();
+    }
+    if (lines.length === 1) {
+      messageInput.value = `> ${msg.name}: ${lines[0]}\n` + messageInput.value;
+    } else {
+      let quotedText = lines.map(line => "> " + line).join("\n");
+      messageInput.value = `> ${msg.name}:\n` + quotedText + "\n" + messageInput.value;
+    }
+    messageInput.focus();
+    actionMenu.style.display = "none";
+  });
+  actionMenu.appendChild(replyOption);
+  
+  // メニューをトグル：ハンバーガーボタンをクリックすると表示／非表示を切り替える
+  actionMenuButton.addEventListener("click", function(e) {
+    e.stopPropagation();
+    actionMenu.style.display = (actionMenu.style.display === "none") ? "block" : "none";
+  });
+  
+  // メッセージコンテナにハンバーガーボタンとアクションメニューを追加
+  messageContainer.appendChild(actionMenuButton);
+  messageContainer.appendChild(actionMenu);
+  
+  // ドキュメント上のどこかをクリックしたらアクションメニューを閉じる
+  document.addEventListener("click", function() {
+    actionMenu.style.display = "none";
+  });
+  // ----- ここまでがアクションメニューの実装 -----
+  
+  // ----- 以下、メッセージ本文やタイムスタンプの既存処理 -----
+  const textDiv = document.createElement("div");
+  textDiv.className = "message-text";
+  // (ここは /you コマンドの処理や自動リンク化の既存処理をそのまま適用)
+  const linesArr = msg.text.split("\n");
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  linesArr.forEach((line) => {
+    const lineDiv = document.createElement("div");
+    if (line.trim().startsWith(">")) {
+      lineDiv.className = "quote";
+    }
+    if (urlRegex.test(line)) {
+      const parts = line.split(urlRegex);
+      parts.forEach((part) => {
+        if (urlRegex.test(part)) {
+          const anchor = document.createElement("a");
+          anchor.href = part;
+          anchor.textContent = part;
+          anchor.target = "_blank";
+          anchor.rel = "noopener noreferrer";
+          lineDiv.appendChild(anchor);
+        } else {
+          lineDiv.appendChild(document.createTextNode(part));
+        }
+      });
+    } else {
+      lineDiv.textContent = line;
+    }
+    textDiv.appendChild(lineDiv);
+  });
+  messageContainer.appendChild(textDiv);
+  
+  if (msg.timestamp) {
+    let dateObj;
+    if (typeof msg.timestamp.toDate === "function") {
+      dateObj = msg.timestamp.toDate();
+    } else {
+      dateObj = new Date(msg.timestamp);
+    }
+    const timeDiv = document.createElement("div");
+    timeDiv.className = "message-time";
+    timeDiv.textContent = dateObj.toLocaleString();
+    if (msg.edited) {
+      const editedSpan = document.createElement("span");
+      editedSpan.style.fontSize = "0.7em";
+      editedSpan.style.color = "gray";
+      editedSpan.style.marginLeft = "5px";
+      editedSpan.textContent = " (編集済み)";
+      timeDiv.appendChild(editedSpan);
+    }
+    messageContainer.appendChild(timeDiv);
+  }
+  
+  chatBox.appendChild(messageContainer);
+});
+chatBox.scrollTop = chatBox.scrollHeight;
+      
+// Enterキーで送信
+const enterToggle = document.getElementById("enterToggle");
+
+messageInput.addEventListener("keydown", (e) => {
+if (enterToggle.checked && e.key === "Enter" && !e.shiftKey) {
+e.preventDefault();
+sendButton.click();
+}
+});
+      
+    });
+  </script>
+</body>
+</html>

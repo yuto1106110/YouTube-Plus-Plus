@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Yahoo!ニュース トレンドまとめ</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 20px; }
+    .news-item { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #ccc; }
+    .news-item a { text-decoration: none; color: #333; }
+    .news-item a:hover { text-decoration: underline; }
+    .summary { font-size: 0.9em; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Yahoo!ニュース トレンドまとめ</h1>
+  {% for item in news %}
+    <div class="news-item">
+      <h2><a href="{{ item.url }}" target="_blank">{{ item.title }}</a></h2>
+      <p class="summary">{{ item.summary }}</p>
+    </div>
+  {% else %}
+    <p>現在、ニュースは取得されていません。</p>
+  {% endfor %}
+</body>
+</html>

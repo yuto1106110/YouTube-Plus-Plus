@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <!-- スマホ対応 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CPUまたは2人対戦型オセロ - YouTube Plus⁺</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    /* ゲームモード選択用UI */
+    #mode-select,
+    /* CPU対戦時の色選択用UI */
+    #color-select {
+      margin-bottom: 20px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 5px;
+      display: inline-block;
+    }
+    #mode-select p,
+    #color-select p {
+      font-size: 20px;
+      margin: 10px 0;
+    }
+    #mode-select button,
+    #color-select button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    #choose-cpu {
+      background-color: #0066cc;
+      color: white;
+    }
+    #choose-2p {
+      background-color: #009900;
+      color: white;
+    }
+    #choose-black {
+      background-color: black;
+      color: white;
+    }
+    #choose-white {
+      background-color: white;
+      color: black;
+      border: 1px solid #ccc;
+    }
+    /* ゲーム盤 */
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 50px);
+      grid-template-rows: repeat(8, 50px);
+      gap: 2px;
+      background-color: #006600;
+      padding: 2px;
+      border: 2px solid #333;
+      margin: 0 auto;
+    }
+    .cell {
+      background-color: #009900;
+      width: 50px;
+      height: 50px;
+      position: relative;
+      border: 1px solid #005500;
+      cursor: pointer;
+    }
+    .cell:hover {
+      background-color: #00aa00;
+    }
+    .piece {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      top: 5px;
+      left: 5px;
+    }
+    .black {
+      background-color: black;
+    }
+    .white {
+      background-color: white;
+      border: 1px solid #ccc;
+    }
+    #message {
+      margin: 10px;
+      font-size: 18px;
+    }
+    #restart {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #dd3333;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>オセロ / リバーシ</h1>
+  <!-- モード選択用 UI -->
+  <div id="mode-select">
+    <p>ゲームモードを選択してください</p>
+    <button id="choose-cpu">CPU対戦</button>
+    <button id="choose-2p">2人対戦</button>
+  </div>
+  <!-- CPU対戦のときの色選択用 UI -->
+  <div id="color-select" style="display:none;">
+    <p>あなたはどちらの色になりますか？</p>
+    <button id="choose-black">黒</button>
+    <button id="choose-white">白</button>
+  </div>
+  <div id="board"></div>
+  <div id="message"></div>
+  <button id="restart">リスタート</button>
+
+  <script>
+    // グローバル変数
+    // board: 8×8 の盤面　0=空　1=黒　2=白
+    let board = [];
+    // gameMode: "cpu" または "2p"
+    let gameMode = "";
+    // プレイヤーの色。CPU対戦の場合は playerColor と cpuColor で管理。
+    // 2人対戦の場合はプレイヤー1を黒(1)・プレイヤー2を白(2) とする。
+    let playerColor = null, cpuColor = null;
+    // 現在の手番。オセロでは黒が先手。
+    let currentPlayer = 1;
+    let gameOver = false;
+    
+    // モード選択用 UI の要素
+    const modeSelectDiv = document.getElementById("mode-select");
+    const colorSelectDiv = document.getElementById("color-select");
+    
+    // 盤面の初期配置（中央4マス）
+    function initBoard() {
+      board = Array(8).fill().map(() => Array(8).fill(0));
+      board[3][3] = 2;
+      board[3][4] = 1;
+      board[4][3] = 1;
+      board[4][4] = 2;
+      // オセロでは黒が先手
+      currentPlayer = 1;
+      gameOver = false;
+      updateMessage();
+      updateBoard();
+      // もし合法手がなければ自動でパス（通常は初期盤面で合法手あり）
+      if (getValidMoves(currentPlayer).length === 0) {
+        nextTurn();
+        return;
+      }
+      // ★ CPU対戦かつ、現在のターンが CPU (cpuColor) なら、初手（黒の場合）に自動で手を打たせる
+      if (gameMode === "cpu" && currentPlayer === cpuColor && !gameOver) {
+        setTimeout(cpuMove, 500);
+      }
+    }
+    
+    // 盤面描画。各セルにクリックイベントを設定し、盤面情報に応じた駒を表示
+    function updateBoard() {
+      const boardDiv = document.getElementById("board");
+      boardDiv.innerHTML = "";
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const cell = document.createElement("div");
+          cell.classList.add("cell");
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener("click", handleCellClick);
+          if (board[r][c] !== 0) {
+            const piece = document.createElement("div");
+            piece.classList.add("piece");
+            piece.classList.add(board[r][c] === 1 ? "black" : "white");
+            cell.appendChild(piece);
+          }
+          boardDiv.appendChild(cell);
+        }
+      }
+    }
+    
+    // メッセージ更新
+    function updateMessage() {
+      const msgDiv = document.getElementById("message");
+      if (gameOver) {
+        const counts = countPieces();
+        let result = "";
+        if (counts.black > counts.white) {
+          result = (gameMode === "2p") ? "プレイヤー1の勝ち！" : "あなたの勝ち！";
+        } else if (counts.black < counts.white) {
+          result = (gameMode === "2p") ? "プレイヤー2の勝ち！" : "CPUの勝ち！";
+        } else {
+          result = "引き分け！";
+        }
+        msgDiv.textContent = `ゲーム終了　黒: ${counts.black}　白: ${counts.white}　結果: ${result}`;
+      } else {
+        if (gameMode === "cpu") {
+          msgDiv.textContent = currentPlayer === playerColor ? 
+            `あなたのターン (${playerColor === 1 ? "黒" : "白"})` : 
+            `CPUのターン (${cpuColor === 1 ? "黒" : "白"})`;
+        } else { // 2人対戦の場合
+          msgDiv.textContent = currentPlayer === 1 ? "プレイヤー1のターン (黒)" : "プレイヤー2のターン (白)";
+        }
+      }
+    }
+    
+    // セルクリック時の処理。CPU対戦の場合は、ユーザーの色のターンの場合のみ有効
+    function handleCellClick(e) {
+      if (gameOver) return;
+      if (gameMode === "cpu" && currentPlayer !== playerColor) return;
+      const r = parseInt(e.currentTarget.dataset.row);
+      const c = parseInt(e.currentTarget.dataset.col);
+      let flips = getFlips(r, c, currentPlayer);
+      if (flips.length > 0) {
+        applyMove(r, c, currentPlayer, flips);
+        updateBoard();
+        nextTurn();
+      }
+    }
+    
+    // 相手の色を返す
+    function opponent(color) {
+      return color === 1 ? 2 : 1;
+    }
+    
+    // 指定セルに駒を置いた場合に反転できる駒の座標一覧を返す
+    function getFlips(r, c, color) {
+      if (board[r][c] !== 0) return [];
+      const opp = opponent(color);
+      const directions = [
+        { dr: -1, dc: 0 }, { dr: 1, dc: 0 },
+        { dr: 0, dc: -1 }, { dr: 0, dc: 1 },
+        { dr: -1, dc: -1 }, { dr: -1, dc: 1 },
+        { dr: 1, dc: -1 }, { dr: 1, dc: 1 }
+      ];
+      let flipsTotal = [];
+      for (const { dr, dc } of directions) {
+        let r2 = r + dr, c2 = c + dc;
+        let flipsDir = [];
+        while (r2 >= 0 && r2 < 8 && c2 >= 0 && c2 < 8 && board[r2][c2] === opp) {
+          flipsDir.push({ r: r2, c: c2 });
+          r2 += dr;
+          c2 += dc;
+        }
+        if (flipsDir.length > 0 && r2 >= 0 && r2 < 8 && c2 >= 0 && c2 < 8 && board[r2][c2] === color) {
+          flipsTotal = flipsTotal.concat(flipsDir);
+        }
+      }
+      return flipsTotal;
+    }
+    
+    // 指定セルに駒を置いて、flips で返された駒を反転する
+    function applyMove(r, c, color, flips) {
+      board[r][c] = color;
+      flips.forEach(pos => board[pos.r][pos.c] = color);
+    }
+    
+    // 指定色の合法手一覧を返す
+    function getValidMoves(color) {
+      let moves = [];
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const flips = getFlips(r, c, color);
+          if (flips.length > 0) moves.push({ r, c, flips });
+        }
+      }
+      return moves;
+    }
+    
+    // ターン切替。合法手がない場合はパスし、両者とも手がなければゲーム終了
+    function nextTurn() {
+      currentPlayer = opponent(currentPlayer);
+      if (getValidMoves(currentPlayer).length === 0) {
+        currentPlayer = opponent(currentPlayer);
+        if (getValidMoves(currentPlayer).length === 0) {
+          gameOver = true;
+          updateMessage();
+          return;
+        }
+      }
+      updateMessage();
+      updateBoard();
+      if (gameMode === "cpu" && currentPlayer === cpuColor && !gameOver) {
+        setTimeout(cpuMove, 500);
+      }
+    }
+    
+    // CPUの手。合法手一覧からランダムに選択
+    function cpuMove() {
+      const validMoves = getValidMoves(cpuColor);
+      if (validMoves.length === 0) {
+        nextTurn();
+        return;
+      }
+      const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+      applyMove(move.r, move.c, cpuColor, move.flips);
+      updateBoard();
+      nextTurn();
+    }
+    
+    // 駒の数を数える（ゲーム終了時の結果表示用）
+    function countPieces() {
+      let counts = { black: 0, white: 0 };
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if (board[r][c] === 1) counts.black++;
+          else if (board[r][c] === 2) counts.white++;
+        }
+      }
+      return counts;
+    }
+    
+    // リスタートボタンの処理：モード選択画面を再表示
+    document.getElementById("restart").addEventListener("click", function() {
+      modeSelectDiv.style.display = "block";
+      colorSelectDiv.style.display = "none";
+      document.getElementById("board").innerHTML = "";
+      document.getElementById("message").textContent = "";
+      gameMode = "";
+      playerColor = null;
+      cpuColor = null;
+    });
+    
+    // モード選択用の処理
+    document.getElementById("choose-cpu").addEventListener("click", function() {
+      gameMode = "cpu";
+      modeSelectDiv.style.display = "none";
+      // CPU対戦の場合、まず色選択画面を表示
+      colorSelectDiv.style.display = "block";
+    });
+    document.getElementById("choose-2p").addEventListener("click", function() {
+      gameMode = "2p";
+      modeSelectDiv.style.display = "none";
+      colorSelectDiv.style.display = "none";
+      // 2人対戦の場合、プレイヤー1を黒（1）、プレイヤー2を白（2）とする
+      playerColor = 1;
+      cpuColor = 2; // ※2pモードでは CPU は使わず、両方ユーザーが操作
+      initBoard();
+    });
+    
+    // 色選択（CPU対戦時）の処理
+    // もしユーザーが黒を選べば、ユーザーが先手（黒）となる
+    // もしユーザーが白を選べば、CPUが黒（先手）となり最初に手を打ちます
+    document.getElementById("choose-black").addEventListener("click", function() {
+      playerColor = 1;
+      cpuColor = 2;
+      colorSelectDiv.style.display = "none";
+      initBoard();
+    });
+    document.getElementById("choose-white").addEventListener("click", function() {
+      playerColor = 2;
+      cpuColor = 1;
+      colorSelectDiv.style.display = "none";
+      initBoard();
+    });
+    
+    // 初回はモード選択画面を表示。ユーザーが各ボタンをクリックすることで initBoard() が呼ばれます。
+  </script>
+</body>
+</html>

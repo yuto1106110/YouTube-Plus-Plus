@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>メニュー - YouTube Plus⁺</title>
+	<link rel="icon" href="/img/logo/favicon.ico">
+         <link rel="stylesheet" href="/css/empty.css">
+        <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+  <style>
+    /* 基本のスタイル */
+    h2 {
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+	     a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* コンテナ：初期状態は下にずれていて、不透明度0 */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    /* コンテナが表示状態になるアニメーション */
+    .container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 各ボックスの基本スタイル */
+    .box {
+      width: 250px;
+      height: 120px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* ボックスがIntersection Observerで表示判定されたらフェードイン */
+    .box.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ホバー時 */
+    .box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      background-color: #fdfdfd;
+    }
+
+    /* タイトルと説明のスタイル */
+    .title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #222;
+    }
+
+    .description {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+      }
+      .box {
+        width: 90%;
+        height: auto;
+      }
+    }
+
+        #topButton {
+            position: fixed;
+            bottom: 500px;
+            left: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}	  
+  </style>
+		     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // モバイル時：ハンバーガーメニューのトグル
+      $("#hamburger").click(function() {
+        $("#top-nav").toggleClass("show");
+      });
+      
+      // スクロールによるトップバーの縮小効果
+      $(window).on("scroll", function() {
+        if($(window).scrollTop() > 50) {
+          $("#top-bar").addClass("scrolled");
+        } else {
+          $("#top-bar").removeClass("scrolled");
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+	 <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <!-- モバイル用ハンバーガーアイコン -->
+    <div id="hamburger">&#9776;</div>
+    <!-- ナビゲーション -->
+    <nav id="top-nav">
+      <a href="/chat">Plus⁺ Chat</a>
+      <a href="/others">メニュー</a>
+      <a href="/qanda">ヘルプ</a>
+      <a href="/help">お問い合わせ</a>
+	&emsp;
+    </nav>
+  </header>
+    <br>
+  <section>
+    <h2>メニュー</h2>
+    <div class="container" id="boxContainer">
+	       <a href="javascript:location.replace('/chat')" class="box">
+        <div class="title">Plus⁺ Chat</div>
+        <div class="description">FireBaseAPIを使用し、全世界の友達と会話を楽しむことができます‼</div>
+      </a>
+	     <a href="javascript:location.replace('/game')" class="box">
+        <div class="title">ゲーム一覧</div>
+        <div class="description">暇を潰しちゃえ!!追加してほしいゲームがあったらお問い合わせかどうぞ</div>
+      </a>
+	  <a href="javascript:location.replace('/tools')" class="box">
+        <div class="title">ツール一覧</div>
+        <div class="description">役立つかもしれないツールの集まりです。</div>
+      </a>
+      <a href="javascript:location.replace('/update')" class="box">
+        <div class="title">アップデート状況</div>
+        <div class="description">アップデート状況が確認でき、機能や注意点が随時更新されています</div>
+      </a>
+	<a href="javascript:location.replace('/qanda')" class="box">
+        <div class="title">ヘルプ</div>
+        <div class="description">困ったときは見てください！！</div>
+      </a>
+      <a href="javascript:location.replace('/help')" class="box">
+        <div class="title">お問い合わせ</div>
+        <div class="description">ヘルプで解決できない場合など、困った場合は送ってね!!</div>
+      </a>
+    </div>
+  </section>
+<button id="topButton" onclick="history.back(-1)" >戻る</button>
+	
+  <script>
+    // DOMの読み込み完了後の動作
+    document.addEventListener("DOMContentLoaded", function() {
+      const container = document.getElementById('boxContainer');
+      const boxes = document.querySelectorAll('.box');
+
+      // ページ全体のフェードイン用
+      setTimeout(() => {
+        container.classList.add('visible');
+      }, 200);
+
+      // IntersectionObserverを使って、各ボックスが画面に見えたら表示
+      if ('IntersectionObserver' in window) {
+        const options = {
+          threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observerRef) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observerRef.unobserve(entry.target);
+            }
+          });
+        }, options);
+
+        boxes.forEach(box => {
+          observer.observe(box);
+        });
+      } else {
+        // 古いブラウザ向けのフォールバック：すべて一括で表示
+        boxes.forEach(box => box.classList.add('visible'));
+      }
+    });
+  </script>
+</body>
+</html>

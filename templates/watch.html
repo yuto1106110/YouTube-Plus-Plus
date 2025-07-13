@@ -444,26 +444,22 @@
 　const video = document.getElementById('video');
 　const audio = document.getElementById('audio');
 
-　//動画が読み込まれたら自動で音声と一緒に再生
 　video.addEventListener('play', () => {
 　audio.play().catch(error => {
 　console.error("オーディオの再生エラー:", error);
 　});
 　});
 
-　//動画が一時停止されたら、音声も一緒に停止
 　video.addEventListener('pause', () => {
 　audio.pause();
 　audio.currentTime = video.currentTime;
 　});
 
-　//動画が終了したら、音声を0秒に戻す
 　video.addEventListener('ended', () => {
 　audio.pause();
 　audio.currentTime = 0; 
 　});
 
-　//動画の再生位置が変更されたら、音声を動画の再生位置になおす
 　video.addEventListener('seeked', () => {
 　video.pause();
 　audio.pause();
@@ -472,14 +468,12 @@
 　audio.play();
 　});
 
-　//音声が0.3秒以上ズレたら、動画の再生位置になおす
 　video.addEventListener('timeupdate', () => {
 　if (Math.abs(video.currentTime - audio.currentTime) > 0.3) {
 　audio.currentTime = video.currentTime;
 　}
 　});
 
-　//リロードされたら動画と音声を再読込する
 　document.getElementById('reloadButton').addEventListener('click', function() {
 　const video = document.getElementById('video');
 　const audio = document.getElementById('audio');
@@ -490,19 +484,16 @@
 　document.getElementById('quality-change').addEventListener('change', function () {
 　const selectedUrl = this.value;
 　const video = document.getElementById('video');
-		
-　// 現在の再生位置を記録
+
 　const currentTime = video.currentTime;
 　const isPlaying = !video.paused;
-		
-　// <source> を置き換え
+
 　video.innerHTML = '';
 　const newSource = document.createElement('source');
 　newSource.src = selectedUrl;
 　newSource.type = 'video/mp4';
 　video.appendChild(newSource);
-		
-　// 再読み込みして再生位置を復元
+
 　video.load();
 　video.currentTime = currentTime;
 		

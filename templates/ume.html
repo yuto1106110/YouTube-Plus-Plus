@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex,nofollow">
+    <title>{{ video_title }} - YouTube Plus⁺</title>
+    <link rel="icon" href="/img/logo/favicon.ico">
+
+    <link rel="stylesheet" href="/css/pure-min.css">
+    <link rel="stylesheet" href="/css/grids-responsive-min.css">
+    <link rel="stylesheet" href="/css/ionicons.min.css">
+    <link rel="stylesheet" href="/css/default.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=thumb_up" />
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="/js/utils/utils.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+    <style>
+      /* もともとのCSS */
+      :root {
+        --yt-spec-base-background: #ffffff;
+        --yt-spec-raised-background: #ffffff;
+        --yt-spec-menu-background: #ffffff;
+        --yt-spec-inverted-background: #0f0f0f;
+        --yt-spec-outline: rgba(0, 0, 0, 0.1);
+        --yt-spec-text-primary: #0f0f0f;
+        --yt-spec-text-secondary: #606060;
+        --yt-spec-red: #ff0000;
+        --yt-spec-brand-button-text: #065fd4;
+      }
+      div.thumbnail {
+        padding: 3%;
+        position: relative;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Roboto, Arial, sans-serif;
+        background-color: var(--yt-spec-base-background);
+        color: var(--yt-spec-text-primary);
+        margin: 0;
+        padding: 0;
+      }
+      @media (max-width: 750px) {
+        .shorts-link span {
+          display: none;
+        }
+      }
+      /* メインコンテンツ */
+      .main-content {
+        margin-top: 56px;
+        min-height: calc(100vh - 56px);
+        padding: 16px;
+      }
+      /* 動画＆動画情報レイアウト */
+      .video-container {
+        display: flex;
+        gap: 16px;
+      }
+      .video-left {
+        flex: 0 0 75%;
+        display: flex;
+        flex-direction: column;
+      }
+      .video-right {
+        flex: 0 0 30%;
+      }
+      .video-player-container {
+        width: 100%;
+      }
+      /* 動画プレーヤーラッパー（絶対配置の基準） */
+      .video-player-wrapper {
+        position: relative;
+      }
+      .video-player-wrapper video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+      }
+      /* ロード中スピナー（動画中央に表示） */
+      #loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #3498db;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        animation: spin 1s linear infinite;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        display: none;  /* 初期状態は非表示 */
+      }
+      @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+      }
+      .video-description {
+        margin-top: 16px;
+        background-color: #f9f9f9;
+        padding: 12px;
+        border-radius: 4px;
+        text-align: left;
+      }
+      .comments-section {
+        margin-top: 16px;
+        background-color: #ffffff;
+        padding: 12px;
+        border: 1px solid var(--yt-spec-outline);
+        border-radius: 4px;
+        text-align: left;
+      }
+      .comments-section h3 {
+        margin-top: 0;
+        font-size: 18px;
+        margin-bottom: 8px;
+      }
+      .comment-item {
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--yt-spec-outline);
+      }
+      .comment-item:last-child {
+        border-bottom: none;
+      }
+      .comment-header {
+        margin-bottom: 4px;
+      }
+      .comment-author {
+        font-weight: bold;
+        margin-right: 8px;
+      }
+      .comment-actions {
+        font-size: 12px;
+        color: var(--yt-spec-text-secondary);
+      }
+      .recommendation {
+        margin-bottom: 8px;
+      }
+      .recommendation a {
+        text-decoration: none;
+        color: var(--yt-spec-text-primary);
+        display: block;
+      }
+      .thumbnail {
+        position: relative;
+        width: 100%;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 4px;
+      }
+      .thumbnail img {
+        width: 100%;
+        display: block;
+      }
+      .length {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .recommendation p {
+        margin: 4px 0 0;
+        font-size: 14px;
+      }
+      @media (max-width: 768px) {
+        .video-container {
+          display: block;
+        }
+        .video-right {
+          margin-top: 16px;
+        }
+      }
+       /* トップバー */
+      #top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #ffffff;
+        height: 56px;
+        padding: 0 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+      }
+      /* トップバー左側：ハンバーガー＆ロゴ */
+      #top-bar .left-section {
+        display: flex;
+        align-items: center;
+      }
+      #open-sidebar {
+        font-size: 30px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #007bff;
+      }
+      /* 検索フォーム・ナビゲーションなど、その他のトップバー要素はそのまま */
+
+      /* サイドバー */
+      #sidebar {
+        position: fixed;
+        top: 56px; /* トップバー分下げる */
+        left: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: calc(100% - 56px); /* 画面全体の高さからトップバー分を除く */
+        background-color: #000;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+        overflow-y: auto;
+        transition: left 0.3s ease;
+        z-index: 1100;
+        color: #fff;
+      }
+      #sidebar.active {
+        left: 0;
+      }
+      #sidebar .sidebar-content {
+        padding: 20px;
+      }
+      #sidebar a {
+        display: block;
+        margin-bottom: 10px;
+        color: #fff;
+        text-decoration: none;
+      }
+      #sidebar button#close-sidebar {
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #fff;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+      }
+
+      /* オーバーレイ */
+      #overlay {
+        position: fixed;
+        top: 56px; /* トップバーの下から開始 */
+        left: 0;
+        width: 100%;
+        height: calc(100% - 56px);
+        background: rgba(0, 0, 0, 0.4);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease;
+        z-index: 1000;
+      }
+      #overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+      /* サイドバー内の各項目を区切る */
+#sidebar .sidebar-content > * {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* 白系の薄い線 */
+  padding: 10px 0;
+  margin: 0; /* 余計な外側のマージンがある場合はリセット */
+}
+
+#sidebar .sidebar-content > *:last-child {
+  border-bottom: none; /* 最後の項目は下線なし */
+}
+
+    </style>
+    <!-- Font Awesome（アイコン用） -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  </head>
+  
+  <body>
+
+ <!-- トップバー -->
+    <header id="top-bar">
+      <div class="left-section">
+        <div class="navbar-logo">
+          <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+        </div>
+      </div>
+	         <div class="search-container">
+        <form class="pure-form" action="/search" method="get">
+            <input id="searchbox" name="q" type="search" placeholder="検索" title="検索" autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false">
+        </form>
+      </div>
+      <nav id="top-nav">
+        <a href=""></a>
+        <a href=""></a>
+        <a href=""></a>
+        <a href=""></a>
+      </nav>
+    </header>
+	  
+    <!-- サイドバー -->
+    <div id="sidebar">
+      <button id="close-sidebar">×</button>
+      <div class="sidebar-content">
+        <a href="{{ videourls[0] }}" download="{{ video_title }}">ダウンロード</a>
+        <a href="javascript:togglePlayer(false);">デフォルトで視聴する</a>
+        <a href="javascript:togglePlayer(true);">埋め込み(nocookie)で視聴する</a>
+        <a href="javascript:location.replace('/w?v={{ videoid }}')">高画質で視聴する</a>
+        <a href="javascript:location.replace('/history')">履歴を閲覧</a>
+        <label for="autonextpage">
+          自動で次の動画に遷移
+          <input id="autonextpage" type="checkbox" onchange="changeAutoNextPage(this)">
+        </label>
+        <label for="loop">
+          ループ再生
+          <input id="loop" type="checkbox" onchange="changeLoop(this)">
+        </label>
+      </div>
+    </div>
+
+    <!-- オーバーレイ -->
+    <div id="overlay"></div>
+
+    <div class="no-theme">
+      <!-- メインコンテンツ -->
+      <main class="main-content">
+        <div class="video-container">
+          <!-- 左カラム：動画プレーヤーとその下に動画説明、コメント -->
+          <div class="video-left">
+            <div class="video-player-container">
+  <div id="defaultPlayer" class="video-player-wrapper">
+    <video id="player" controls playsinline preload="none">
+      {% for videourl in videourls %}
+        <source class="player-source" src="https://www.youtube.com/embed/{{ videoid }}">
+      {% endfor %}
+    </video>
+    <div id="loader"></div>
+  </div>
+  <div id="embeddedPlayer" class="umev" style="display: none;">
+    <iframe width="100%" height="100%" 
+            src="https://www.youtube-nocookie.com/embed/{{ videoid }}" 
+            title="video player" frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            referrerpolicy="strict-origin-when-cross-origin" 
+            allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+<script>
+  // 切り替え用の関数
+  function togglePlayer(isEmbedded) {
+    const defaultPlayer = document.getElementById("defaultPlayer");
+    const embeddedPlayer = document.getElementById("embeddedPlayer");
+    if (isEmbedded) {
+      defaultPlayer.style.display = "none";
+      embeddedPlayer.style.display = "block";
+    } else {
+      defaultPlayer.style.display = "block";
+      embeddedPlayer.style.display = "none";
+    }
+  }
+</script>
+
+            <!-- 動画の説明 -->
+            <div class="video-description" id="descriptionText">
+              <a href="/channel/{{ author_id }}" style="display: inline-block; width: fit-content; width: -moz-fit-content">
+			<div class="channel-profile">
+
+				<img src="{{ author_icon }}">
+
+				<span id="channel-name">{{ author }}</span>
+			</div>
+		</a>
+              <h1>{{ video_title }}</h1>
+              <p style="display: inline-block; margin-right: 10px; vertical-align: super;">{{ view_count }}回視聴</p>
+              <div style="display: inline-block;">
+                <span class="material-symbols-outlined" style="display: inline-block; padding-right: 5px;">thumb_up</span>
+                <p style="display: inline-block; vertical-align: super;">{{ like_count }}</p>
+              </div>
+             <br> {{ description | safe }}
+            </div>
+            <!-- コメントエリア -->
+            <div class="comments-section">
+              <h3>コメント</h3>
+              <div id="comments"></div>
+            </div>
+          </div>
+          <!-- 右カラム：関連動画 -->
+          <div class="video-right">
+            {% for rec_video in recommended_videos %}
+            <div class="recommendation">
+              <a href="/watch?v={{ rec_video['video_id'] }}">
+                <div class="thumbnail">
+                  <img loading="lazy" src="{% if proxy == 'True' %}/thumbnail?v={{ rec_video['video_id'] }}{% else %}https://img.youtube.com/vi/{{ rec_video['video_id'] }}/0.jpg{% endif %}" alt="{{ rec_video['title'] }}">
+                  <span class="length">{{ rec_video["length_text"] }}</span>
+                </div>
+                <p>{{ rec_video["title"] }}</p>
+              </a>
+              <p>{{ rec_video["view_count_text"] }}回視聴</p>
+              <a href="/channel/{{ rec_video['authorId'] }}">{{ rec_video["author"] }}</a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </main>
+    </div>
+
+    
+    <script>
+  const video = document.getElementById("player");
+  const loader = document.getElementById("loader");
+
+  // ユーザーが「再生」をクリックしたとき、video.currentTime が 0 なら loader を表示
+  video.addEventListener("play", () => {
+    if (video.currentTime === 0) {
+      loader.style.display = "block";
+    }
+  });
+
+  // 動画の再生が進んだら loader を非表示にする処理
+  function checkVideoTime() {
+    if (video.currentTime > 0) {
+      loader.style.display = "none";
+      video.removeEventListener("timeupdate", checkVideoTime);
+      video.removeEventListener("playing", checkVideoTime);
+    }
+  }
+  video.addEventListener("timeupdate", checkVideoTime);
+  video.addEventListener("playing", checkVideoTime);
+</script>
+
+
+    <script>
+  const openSidebar = document.getElementById("open-sidebar");
+  const closeSidebar = document.getElementById("close-sidebar");
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
+
+  openSidebar.addEventListener("click", () => {
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
+  });
+
+  const closeSidebarFunc = () => {
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+  };
+
+  closeSidebar.addEventListener("click", closeSidebarFunc);
+  overlay.addEventListener("click", closeSidebarFunc);
+</script>
+
+    <!-- 以降はその他の既存JS -->
+    <script>
+      const xhr = new XMLHttpRequest();
+      xhr.open("GET", "/comments?v=" + getQueryValue('v'));
+      xhr.onload = function () {
+        if (xhr.status == 200) {
+          const comments_div = document.getElementById('comments');
+          comments_div.innerHTML = xhr.responseText;
+          const comments_a_tags = comments_div.getElementsByTagName('a');
+          for(let i = 0; i < comments_a_tags.length; i++) {
+            const jump_time = comments_a_tags[i].getAttribute('data-jump-time')
+            if(jump_time) {
+              comments_a_tags[i].addEventListener('click', function(e) {
+                e.preventDefault();
+                player.currentTime = jump_time;
+              });
+            }
+          }
+        } else {
+          document.getElementById('comments').innerHTML = "コメントの読み込みに失敗しました。再読み込み等をお試し下さい。";
+        }
+      };
+      xhr.send();
+
+      let player = document.getElementById("player");
+      document.cookie = "yuki=True; path=/; max-age=10800;";
+
+      const haveLoopCookie = getCookie("loop") === 'true' ? true : false;
+      player.loop = haveLoopCookie;
+      document.getElementById("loop").checked = haveLoopCookie;
+      document.getElementById("autonextpage").checked = getCookie("autonextpage") === 'true' ? true : false;
+
+      function changeAutoNextPage(checkbox) {
+        document.cookie =  `autonextpage=${checkbox.checked}; path=/; max-age=10800;`;
+      }
+      
+      function autoNextPage() {
+        const enable_autoNextPage = document.getElementById('autonextpage').checked;
+        document.cookie = `autonextpage=${enable_autoNextPage}; max-age=10800;`;
+        if (enable_autoNextPage) {
+          setTimeout(() => {
+            location.replace("/watch?v={{ recommended_videos[0]['video_id'] }}");
+          }, 5000);
+        }
+      }
+      player.addEventListener('ended', autoNextPage);
+      
+      function changeLoop(checkbox) {
+        const enable_loop = checkbox.checked;
+        document.getElementById("player").loop = enable_loop;
+        document.cookie = `loop=${enable_loop}; path=/; max-age=10800;`;
+      }
+      
+      document.getElementById("player").currentTime = getQueryValue('t') || 0;
+      
+document.addEventListener('keydown', function(event) {
+    const activeElement = document.activeElement;
+    if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+        return;
+    }
+    if (event.code === 'Space') {
+        event.preventDefault();
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    }
+    if (event.key === 'f' || event.key === 'F') {
+        event.preventDefault();
+        toggleFullScreen();
+    }
+    if (event.key === 'ArrowRight') {
+        video.currentTime += 10;
+    } 
+    if (event.key === 'ArrowLeft') {
+        video.currentTime -= 10;
+    }
+});
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        if (video.requestFullscreen) {
+            video.requestFullscreen();
+        } else if (video.mozRequestFullScreen) {
+            video.mozRequestFullScreen();
+        } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+        } else if (video.msRequestFullscreen) {
+            video.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+}
+      
+      const description_a_tags = document.getElementById('descriptionWrapper').getElementsByTagName('a');
+      for(let i = 0; i < description_a_tags.length; i++) {
+        const jump_time = description_a_tags[i].getAttribute('data-jump-time')
+        if(jump_time) {
+          description_a_tags[i].addEventListener('click', function(e) {
+            e.preventDefault();
+            player.currentTime = jump_time;
+          });
+        }
+      }
+      
+      player.style.maxHeight = document.documentElement.clientHeight * 0.8 + "px";
+      
+      let info = document.getElementById('video_info');
+      let reload_button_elm = document.createElement('button');
+      reload_button_elm.setAttribute('onclick', 'location.replace(location.href);');
+      reload_button_elm.innerHTML = 'リロード';
+      
+      setTimeout(() => {
+        if(player.networkState === 3){
+          let update_api_xhr = new XMLHttpRequest();
+          update_api_xhr.open("GET", "/api/video/next"); 
+          update_api_xhr.send();
+          
+          info.innerHTML = '動画の読み込みに失敗しました。再読み込み等をお試し下さい。<br>';
+          info.innerHTML += '過度な再読み込みはインスタンスに負荷がかかり、短期間で使用不能に陥ることや、動画等の読み込みが出来なくなることが考えられますのでご遠慮下さい。';
+          player.after(reload_button_elm);
+          player.after(info);
+          player.remove();
+        }
+      }, 1000);
+      
+      (function updateDisplayCurrentTime() {
+        setTimeout(() => {
+          const player = document.getElementById('player');
+          const current_time_elem = document.getElementById('player_current_time');
+          if(player) {
+            current_time_elem.textContent = secToHMS(player.currentTime | 0);
+          } else {
+            current_time_elem.textContent = 'Error';
+          }
+          updateDisplayCurrentTime();
+        }, 100);
+      })();
+
+	    //youtubeのurlを取得
+            function shareVideo(videoId) {
+                    const shareUrl = `https://youtube.com/watch?v={{ videoid }}`;
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        alert('リンクがクリップボードにコピーされました！');
+                    });
+                }
+	    //ビデオIDのみを取得
+            function Videoid(videoId) {
+                    const shareUrl = `{{ videoid }}`;
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        alert('ビデオIDがクリップボードにコピーされました！');
+                    });
+                }
+
+	    
+    </script>
+
+    <script>
+      $('#searchbox').autocomplete({
+        source: function (request, response) {
+          const url = "/suggest?keyword=" + request.term;
+          const xhr = new XMLHttpRequest();
+          xhr.open("GET", url);
+          xhr.onload = function () {
+            response(JSON.parse(xhr.responseText));
+          }
+          xhr.send();
+        },
+        delay: 300
+      });
+    </script>
+    
+    <!-- 動画視聴ページ用の履歴登録スクリプト -->
+    <script>
+      function addToHistory() {
+        const videoData = {
+          video_id: "{{ videoid }}",
+          thumbnail: "{% if proxy == 'True' %}/thumbnail?v={{ videoid }}{% else %}https://img.youtube.com/vi/{{ videoid }}/0.jpg{% endif %}",
+          length: "{{ length_text }}",
+          title: "{{ video_title }}",
+          channel: "{{ author }}",
+          channel_id: "{{ author_id }}",
+          view_count: "{{ view_count }}",
+          published: "{{ published_date }}"
+        };
+        let history = localStorage.getItem('watchHistory');
+        history = history ? JSON.parse(history) : [];
+        history = history.filter(item => item.video_id !== videoData.video_id);
+        history.unshift(videoData);
+        if (history.length > 50) {
+          history = history.slice(0, 50);
+        }
+        localStorage.setItem('watchHistory', JSON.stringify(history));
+      }
+      window.addEventListener('load', addToHistory);
+    </script>
+
+	  
+<!-- ツールボタン（右固定） -->
+<button class="button-31" onclick="openToolPanel()" style="position: fixed; top: 10px; right: 20px; z-index: 1000;">ツール</button>
+
+<!-- ツールパネル本体 -->
+<div id="tool-panel" class="tool-panel">
+	<!-- 閉じるボタン（右上） -->
+	<button onclick="closeToolPanel()" class="close-button">&times;</button> <!-- メインメニュー -->
+	<div id="tool-main" class="tool-content">
+		<h3> ツール一覧 </h3>
+		<p><a href="/">ホーム</a></p>
+		<p><a onclick="location.replace(location.href)">再読み込み</a></p>
+    <p><a href="javascript:openSubTool('tool')">基本ツール →</a></p>
+		<p><a href="javascript:openSubTool('embed')">再生方法の変更 →</a></p>
+		<p><a href="javascript:openSubTool('sonota')">その他 →</a></p>
+    <label for="autonextpage">自動で次の動画へ<input id="autonextpage" type="checkbox" onchange="changeAutoNextPage(this)"></label><br>
+		<label for="loop">ループ再生<input id="loop" type="checkbox" onchange="changeLoop(this)"></label>
+	</div>
+	<!-- サブメニュー: 埋め込みツール -->
+
+	<div id="tool-sub-tool" class="tool-sub">
+		<p><a href="javascript:closeSubTool('tool')">← 戻る</a></p>
+		<h3>基本ツール</h3>
+		<p><a href="javascript:shareVideo('{{ g_videoid }}')">YouTubeのURLを取得</a></p>
+		<p><a href="javascript:Videoid('{{ g_videoid }}')">ビデオIDを取得</a></p>
+		<p><a href="javascript:location.replace('/thumbnail?v={{ videoid }}')">サムネを取得</a></p>
+		<p><a
+				href="javascript:{navigator.share({title: '現時点の動画を共有', text: '{{ video_title }}', url: location.origin + '/watch?v={{ videoid }}' + '&t=' + Math.floor(document.getElementById('player').currentTime)})}">現時点の動画を共有</a><br>
+			<p><a
+					href="javascript:{navigator.share({title: '動画を共有', text: '{{ video_title }}', url: location.href})}">動画を共有</a><br>
+				<p><a href="{{ videourls[0] }}" download="{{ video_title }}">動画をダウンロード</a><br>
+
+
+  </div>
+
+
+					<div id="tool-sub-embed" class="tool-sub">
+						<p><a href="javascript:closeSubTool('embed')">← 戻る</a></p>
+						<h3>再生方法の変更</h3>
+		<p><a href="javascript:togglePlayer(false);">デフォルトで視聴する</a>
+		<p><a href="javascript:togglePlayer(true);">埋め込み(nocookie)で視聴する</a>
+		<p><a href="javascript:location.replace('/ww?v={{ videoid }}')">高画質で視聴する</a>
+					</div>
+
+					<div id="tool-sub-sonota" class="tool-sub">
+						<p><a href="javascript:closeSubTool('sonota')">← 戻る</a></p>
+						<h3>その他</h3>
+            <p>
+          　<p><a href="javascript:location.replace('/chat')">Plus⁺ Chat</a>
+          　<p><a href="javascript:location.replace('/history')">履歴を閲覧</a>
+          　<p><a href="javascript:location.replace('/others')">メニュー</a>
+          　<p><a href="javascript:location.replace('/qanda')">ヘルプ</a>
+          　<p><a href="javascript:location.replace('/help')">お問い合わせ</a>
+					</div>
+
+					<div id="tool-sub-server" class="tool-sub">
+						<p><a href="javascript:closeSubTool('server')">← 戻る</a></p>
+						<h3>サーバー切り替え</h3>
+						<form id="api-selector-form">
+
+					
+					</div>
+	</div><!-- スタイル（CSS） -->
+	<style>
+		.tool-panel {
+			position: fixed;
+			top: 0;
+			right: -350px;
+			width: 280px;
+			height: 100%;
+			background: #222;
+			color: #fff;
+			padding: 20px;
+			transition: right 0.3s ease;
+			box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+			z-index: 9999;
+			overflow-x: hidden;
+			overflow-y: auto;
+			box-sizing: border-box;
+		}
+
+		.tool-panel.open {
+			right: 0 !important;
+		}
+
+		.tool-content,
+		.tool-sub {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			transition: left 0.3s ease;
+			padding: 60px 20px 20px 20px;
+			box-sizing: border-box;
+		}
+
+		.tool-sub {
+			left: 100%;
+		}
+
+		.close-button {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: transparent;
+			color: #fff;
+			border: none;
+			font-size: 20px;
+			cursor: pointer;
+			z-index: 10001;
+		}
+
+		.tool-panel a {
+			color: #4fc3f7;
+			text-decoration: none;
+		}
+
+		.tool-panel a:hover {
+			text-decoration: underline;
+		}
+
+
+		.button-31 {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: relative;
+			width: 180px;
+			margin: 0 auto;
+			padding: .9em 2em;
+			border: 1px solid #2589d0;
+			border-radius: 5px;
+			background-color: #fff;
+			color: #2589d0;
+			font-size: 0.8em;
+			transition: box-shadow .3s ease;
+		}
+
+		.button-31:hover {
+			box-shadow: inset #2589d0 0 0 0 2em;
+			color: #fff;
+		}
+	</style><!-- JavaScript -->
+	<script>
+		function openToolPanel() {
+    const panel = document.getElementById("tool-panel");
+    panel.classList.add("open");
+  }
+
+  function closeToolPanel() {
+    const panel = document.getElementById("tool-panel");
+    panel.classList.remove("open");
+    closeSubTool('embed');
+    closeSubTool('server');
+		closeSubTool('tool');
+	　closeSubTool('sonota');
+  }
+
+  function openSubTool(id) {
+    document.getElementById("tool-main").style.left = "-100%";
+    document.getElementById(`tool-sub-${id}`).style.left = "0";
+  }
+
+  function closeSubTool(id) {
+    document.getElementById("tool-main").style.left = "0";
+    document.getElementById(`tool-sub-${id}`).style.left = "100%";
+  }
+	</script>
+	  
+	  
+  </body>
+</html>

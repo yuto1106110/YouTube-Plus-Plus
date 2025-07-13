@@ -44,6 +44,25 @@
     transform: scale(0.95);
     background-color: #ff6347;
 }
+        #toButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #toButton:hover {
+            background-color: #0056b3;
+        }
+	    #toButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
 		      </style>
 		        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script>
@@ -99,7 +118,7 @@
                         </form>
                     </div>
                 </div>
-		    <button id="topButton" onclick="toggleLink()">読み込み方を変更!</button>
+		    <button id="toButton" onclick="toggleLink()">読み込み方を変更!</button>
 		 <script>
 let isWatch = true; // 現在の状態を管理するフラグ
 

@@ -11,7 +11,7 @@
         <link rel="stylesheet" href="/css/default.css">
         <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
         
-    <title>勉強に集中したい!!勉強への集中力をアップする方法とは？</title>
+    <title>最新情報/アプデ情報 - YouTube Plus⁺</title>
     <style>/* 全体のレイアウト */
 body {
     font-family: Arial, sans-serif;
@@ -122,6 +122,25 @@ body {
       transform: translateY(-5px);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     }
+
+	        #topButton {
+            position: fixed;
+            left: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
 </style>
 </head>
 <body>
@@ -170,5 +189,6 @@ body {
             <p>proxyでinterstellar、spaceを追加,shadowなどの2個目も余裕があったら作る予定</p>      
         </section>
     </main>
+	<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
 </body>
 </html>

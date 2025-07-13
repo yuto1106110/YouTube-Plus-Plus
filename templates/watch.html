@@ -272,7 +272,9 @@
 #sidebar .sidebar-content > *:last-child {
   border-bottom: none; /* 最後の項目は下線なし */
 }
-
+ audio {
+        display: none;
+    }
     </style>
     <!-- Font Awesome（アイコン用） -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
@@ -333,9 +335,12 @@
   <div id="defaultPlayer" class="video-player-wrapper">
     <video id="player" controls playsinline preload="none">
       {% for videourl in videourls %}
-        <source class="player-source" src="{{ videourl }}">
+        <source class="player-source" src="{{ streamUrls[5].url }}">
       {% endfor %}
     </video>
+<audio id="audio" controls>
+<source id="audio" src="{{ videourls[0] }}" type="audio/mp3">
+</audio>
     <div id="loader"></div>
   </div>
   <div id="embeddedPlayer" class="umev" style="display: none;">

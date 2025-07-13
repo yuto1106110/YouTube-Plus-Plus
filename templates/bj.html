@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ブラックジャック ～複数プレイヤー版・ディーラー戦～ - YouTube Plus⁺</title>
+  <style>
+    /* 基本リセット・背景 */
+    * { margin:0; padding:0; box-sizing: border-box; }
+    body, html {
+      width: 100%;
+      height: 100%;
+      background: #006400;
+      font-family: sans-serif;
+    }
+    /* #game-container は画面全体を占める */
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    /* デッキ（中央） */
+    #deck {
+      position: absolute;
+      width: 80px;
+      height: 120px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border: 1px solid #000;
+      border-radius: 8px;
+      background: linear-gradient(to bottom, #0044cc, #002288);
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.6);
+      z-index: 100;
+    }
+    @keyframes shuffle {
+      0%   { transform: translate(-50%, -50%) rotate(0deg); }
+      20%  { transform: translate(-50%, -50%) rotate(-10deg); }
+      40%  { transform: translate(-50%, -50%) rotate(10deg); }
+      60%  { transform: translate(-50%, -50%) rotate(-10deg); }
+      80%  { transform: translate(-50%, -50%) rotate(10deg); }
+      100% { transform: translate(-50%, -50%) rotate(0deg); }
+    }
+    .shuffle-animation { animation: shuffle 0.8s; }
+    
+    /* メッセージ表示：常に最前面（z-indexを高く設定） */
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 20px;
+      text-shadow: 1px 1px 2px #000;
+      white-space: pre-line;
+      pointer-events: none;
+      z-index: 9999;
+    }
+    
+    /* ブラックジャック表示：得点が21の場合 */
+    .blackjack {
+      color: gold !important;
+      font-weight: bold;
+      text-shadow: 0 0 5px gold;
+    }
+    /* バースト時（21超え）のエリア演出 */
+    .bust {
+      background: rgba(0, 0, 0, 0.5) !important;
+      color: red !important;
+      font-weight: bold;
+    }
+    
+    /* ディーラーエリア（上部中央） */
+    #dealer-area {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      height: 150px;
+      border: 1px dashed #fff;
+      border-radius: 10px;
+      padding: 10px;
+      color: #fff;
+    }
+    #dealer-area h3 { margin-bottom: 5px; font-size: 16px; }
+    /* ディーラーの得点表示（右上） */
+    #dealer-area .score {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 16px;
+      z-index: 10;
+    }
+    #dealer-area .hand {
+      position: relative;
+      width: 100%;
+      height: 120px;
+    }
+    
+    /* 各プレイヤーエリア：画面下部を4分割 */
+    .player-area {
+      position: absolute;
+      bottom: 0;
+      height: 150px;
+      border: 1px dashed #fff;
+      box-sizing: border-box;
+      padding: 5px;
+      color: #fff;
+    }
+    /* 横幅は25%ずつ */
+    #player-1 { left: 0; width: 25%; }
+    #player-2 { left: 25%; width: 25%; }
+    #player-3 { left: 50%; width: 25%; }
+    #player-4 { left: 75%; width: 25%; }
+    .player-area h3 { margin-bottom: 5px; font-size: 16px; }
+    /* 各プレイヤーの得点表示（右上） */
+    .player-area .score {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      font-size: 16px;
+      z-index: 10;
+    }
+    /* 各プレイヤーの残金・ベット表示（右下） */
+    .player-area .balance {
+      position: absolute;
+      bottom: 5px;
+      right: 10px;
+      font-size: 14px;
+      z-index: 10;
+    }
+    /* 各プレイヤーの手札エリア */
+    .player-area .hand {
+      position: relative;
+      width: 100%;
+      height: 100px;
+    }
+    
+    /* コントロールエリア（中央下部） */
+    #controls {
+      position: absolute;
+      bottom: 160px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+    }
+    button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    /* カード基本デザイン */
+    .card {
+      width: 80px;
+      height: 120px;
+      border: 1px solid #000;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+      transition: top 0.5s ease, left 0.5s ease;
+      position: absolute;
+    }
+    /* カード内の数字／記号表示（左上固定） */
+    .card .card-value {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      font-size: 18px;
+      font-weight: bold;
+      z-index: 10;
+    }
+    .card .card-suit {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      font-size: 18px;
+      z-index: 10;
+    }
+    .red { color: red; }
+    /* 裏向きカード */
+    .hidden-card {
+      background: linear-gradient(45deg, #ccc, #666);
+      color: transparent;
+    }
+    .hidden-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(45deg, #888, #888 5px, #666 5px, #666 10px);
+    }
+    
+    /* （補足）カードの重なりオフセットは、ここで指定する CSS ではなく、
+       JavaScript 側で各カード（手札エリア内）を配置する際に、left の値として 18px * (カード数) を利用しています。 */
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <!-- デッキ -->
+    <div id="deck"></div>
+    
+    <!-- ディーラーエリア -->
+    <div id="dealer-area">
+      <h3>Dealer</h3>
+      <div class="score">Score: 0</div>
+      <div class="hand"></div>
+    </div>
+    
+    <!-- 各プレイヤーエリア（4名分） -->
+    <div id="player-1" class="player-area">
+      <h3></h3>
+      <div class="score">Score: 0</div>
+      <div class="hand"></div>
+      <div class="balance"></div>
+    </div>
+    <div id="player-2" class="player-area">
+      <h3></h3>
+      <div class="score">Score: 0</div>
+      <div class="hand"></div>
+      <div class="balance"></div>
+    </div>
+    <div id="player-3" class="player-area">
+      <h3></h3>
+      <div class="score">Score: 0</div>
+      <div class="hand"></div>
+      <div class="balance"></div>
+    </div>
+    <div id="player-4" class="player-area">
+      <h3></h3>
+      <div class="score">Score: 0</div>
+      <div class="hand"></div>
+      <div class="balance"></div>
+    </div>
+    
+    <!-- コントロールエリア -->
+    <div id="controls">
+      <button id="startBtn">Start Round</button>
+      <button id="hitBtn" style="display:none;">Hit</button>
+      <button id="standBtn" style="display:none;">Stand</button>
+    </div>
+    
+    <!-- メッセージ表示 -->
+    <div id="message"></div>
+  </div>
+
+  <script>
+    /*******************************************
+     * ブラックジャック（複数プレイヤー版・ディーラー戦）
+     * － 人間プレイヤーの人数（1～4）が入力され、残りはCPUとして補完
+     * － 各エリア右上に得点（Score）が表示（ブラックジャックならゴールド、バーストならエリアが薄黒＋赤文字 "BUST"）
+     * － カードは右に重ねる際のオフセット（left位置）は18pxに設定
+     * － 初期配牌時、すでにブラックジャック（21）の場合は、そのプレイヤーのターンをスキップ
+     * － 持ち金が不足した場合、借金して100にする機能あり
+     *******************************************/
+    
+    let players = []; // 各プレイヤー： { name, isHuman, money, bet, hand, stand }
+    let dealer = { hand: [] };
+    let deck = [];
+    let currentPlayerIndex = 0;
+    let waitingForPlayer = false;
+    let resolvePlayerAction;
+    
+    // プレイヤー初期化：人間プレイヤー数入力（1～4）、残りはCPU
+    function initPlayers() {
+      players = [];
+      let count = prompt("人間プレイヤーの人数を入力してください（1～4）:", "1");
+      count = parseInt(count);
+      if (isNaN(count) || count < 1 || count > 4) count = 1;
+      for (let i = 0; i < 4; i++) {
+        if (i < count) {
+          players.push({ name: "Player " + (i+1), isHuman: true, money: 100, bet: 0, hand: [], stand: false });
+        } else {
+          players.push({ name: "CPU " + (i - count + 1), isHuman: false, money: 100, bet: 0, hand: [], stand: false });
+        }
+      }
+      players.forEach((p, i) => {
+        let area = document.getElementById('player-' + (i+1));
+        area.querySelector('h3').innerText = p.name;
+        area.querySelector('.balance').innerText = "Money: " + p.money + " / Bet: " + p.bet;
+        area.querySelector('.score').innerText = "Score: 0";
+        area.classList.remove("bust");
+      });
+    }
+    
+    // ディーラー初期化
+    function initDealer() {
+      dealer.hand = [];
+      document.querySelector("#dealer-area .hand").innerHTML = "";
+      document.querySelector("#dealer-area .score").innerText = "Score: 0";
+    }
+    
+    // 各プレイヤーの得点更新、ブラックジャック・バーストの判定付き
+    function updatePlayerScore(index) {
+      let area = document.getElementById('player-' + (index+1));
+      let scoreElem = area.querySelector('.score');
+      let score = calculateHandValue(players[index].hand);
+      if (score === 21) {
+        scoreElem.innerText = "BLACKJACK!";
+        scoreElem.classList.add("blackjack");
+      } else if (score > 21) {
+        scoreElem.innerText = "BUST";
+        area.classList.add("bust");
+      } else {
+        scoreElem.innerText = "Score: " + score;
+        scoreElem.classList.remove("blackjack");
+        area.classList.remove("bust");
+      }
+    }
+    
+    // ディーラーの得点更新
+    function updateDealerScore() {
+      let score = calculateHandValue(dealer.hand);
+      document.querySelector("#dealer-area .score").innerText = "Score: " + score;
+    }
+    
+    // 各プレイヤーの残金・ベット更新
+    function updatePlayerBalance(index) {
+      let area = document.getElementById('player-' + (index+1));
+      area.querySelector('.balance').innerText = "Money: " + players[index].money + " / Bet: " + players[index].bet;
+    }
+    
+    // メッセージ表示 (最前面：z-index 9999)
+    function showMessage(msg) {
+      document.getElementById("message").innerText = msg;
+    }
+    
+    // デッキ作成
+    function buildDeck() {
+      deck = [];
+      const suits = ['♠','♥','♦','♣'];
+      const values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+      suits.forEach(suit => {
+        values.forEach(value => {
+          deck.push({ suit, value });
+        });
+      });
+    }
+    
+    // Fisher–Yates シャッフル
+    function shuffleDeck() {
+      const deckElem = document.getElementById('deck');
+      deckElem.classList.add('shuffle-animation');
+      setTimeout(() => deckElem.classList.remove('shuffle-animation'), 800);
+      for (let i = deck.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+    
+    // 得点計算（Aは11、必要なら10ずつ減算）
+    function calculateHandValue(hand) {
+      let sum = 0, aceCount = 0;
+      hand.forEach(card => {
+        if (card.value === 'A') { sum += 11; aceCount++; }
+        else if (['K','Q','J'].includes(card.value)) { sum += 10; }
+        else { sum += parseInt(card.value); }
+      });
+      while (sum > 21 && aceCount > 0) { sum -= 10; aceCount--; }
+      return sum;
+    }
+    
+    // カード要素生成（hidden=trueなら裏向きカード）
+    function createCardElement(card, hidden = false) {
+      const cardElem = document.createElement('div');
+      cardElem.className = 'card';
+      if (hidden) {
+        cardElem.classList.add('hidden-card');
+        cardElem.dataset.value = card.value;
+        cardElem.dataset.suit = card.suit;
+      } else {
+        const valueDiv = document.createElement('div');
+        valueDiv.className = 'card-value';
+        valueDiv.innerText = card.value;
+        const suitDiv = document.createElement('div');
+        suitDiv.className = 'card-suit';
+        suitDiv.innerText = card.suit;
+        if(card.suit === '♥' || card.suit === '♦'){
+          valueDiv.classList.add('red');
+          suitDiv.classList.add('red');
+        }
+        cardElem.appendChild(valueDiv);
+        cardElem.appendChild(suitDiv);
+      }
+      const deckRect = document.getElementById('deck').getBoundingClientRect();
+      const containerRect = document.getElementById('game-container').getBoundingClientRect();
+      cardElem.style.top = (deckRect.top - containerRect.top) + "px";
+      cardElem.style.left = (deckRect.left - containerRect.left) + "px";
+      document.getElementById('game-container').appendChild(cardElem);
+      return cardElem;
+    }
+    
+    // プレイヤーにカード配牌（オフセット18px）
+    function dealCardToPlayer(playerIndex, delay = 0) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const card = deck.pop();
+          players[playerIndex].hand.push(card);
+          const cardElem = createCardElement(card, false);
+          const handElem = document.querySelector('#player-' + (playerIndex+1) + ' .hand');
+          const count = handElem.childElementCount;
+          const offset = 18;  // オフセット18pxに設定
+          cardElem.style.top = "0px";
+          cardElem.style.left = (count * offset) + "px";
+          cardElem.style.zIndex = count + 1;
+          handElem.appendChild(cardElem);
+          updatePlayerScore(playerIndex);
+          resolve();
+        }, delay);
+      });
+    }
+    
+    // ディーラーにカード配牌（オフセット18px）
+    function dealCardToDealer(delay = 0, hidden = false) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          const card = deck.pop();
+          dealer.hand.push(card);
+          const cardElem = createCardElement(card, hidden);
+          const handElem = document.querySelector('#dealer-area .hand');
+          const count = handElem.childElementCount;
+          const offset = 18;  // オフセット18px
+          cardElem.style.top = "0px";
+          cardElem.style.left = (count * offset) + "px";
+          cardElem.style.zIndex = count + 1;
+          handElem.appendChild(cardElem);
+          updateDealerScore();
+          resolve();
+        }, delay);
+      });
+    }
+    
+    // 裏向きのディーラーのカードを表向きにする
+    function revealDealerCards() {
+      const dealerHandElem = document.querySelector('#dealer-area .hand');
+      const hiddenCards = dealerHandElem.querySelectorAll('.hidden-card');
+      hiddenCards.forEach(cardElem => {
+        cardElem.classList.remove('hidden-card');
+        cardElem.innerHTML = "";
+        const valueDiv = document.createElement('div');
+        valueDiv.className = 'card-value';
+        valueDiv.innerText = cardElem.dataset.value;
+        const suitDiv = document.createElement('div');
+        suitDiv.className = 'card-suit';
+        suitDiv.innerText = cardElem.dataset.suit;
+        if(cardElem.dataset.suit === '♥' || cardElem.dataset.suit === '♦'){
+          valueDiv.classList.add('red');
+          suitDiv.classList.add('red');
+        }
+        cardElem.appendChild(valueDiv);
+        cardElem.appendChild(suitDiv);
+      });
+      updateDealerScore();
+    }
+    
+    // 手札リセット
+    function resetRound() {
+      document.querySelectorAll('.card').forEach(card => card.remove());
+      players.forEach(p => { p.hand = []; p.stand = false; p.bet = 0; });
+      dealer.hand = [];
+      for (let i = 1; i <= 4; i++) {
+        document.querySelector('#player-' + i + ' .hand').innerHTML = "";
+        document.querySelector('#player-' + i + ' .score').innerText = "Score: 0";
+        document.getElementById('player-' + i).classList.remove("bust");
+      }
+      document.querySelector('#dealer-area .hand').innerHTML = "";
+      document.querySelector('#dealer-area .score').innerText = "Score: 0";
+    }
+    
+    // プレイヤー入力待ち（Hit/Stand）
+    function waitForPlayerAction() {
+      return new Promise(resolve => {
+        waitingForPlayer = true;
+        resolvePlayerAction = resolve;
+      });
+    }
+    
+    // 単純な delay 関数
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    // プレイヤーのターン処理（各プレイヤー順に）、初期配牌でブラックジャックの場合はターンをスキップ
+    async function playerTurns() {
+      for (currentPlayerIndex = 0; currentPlayerIndex < players.length; currentPlayerIndex++) {
+        let p = players[currentPlayerIndex];
+        let score = calculateHandValue(p.hand);
+        // すでにブラックジャックならターンをスキップ
+        if (score === 21) {
+          showMessage(p.name + " はブラックジャックのため、ターンをスキップします。");
+          await delay(1000);
+          continue;
+        }
+        showMessage(p.name + " のターンです。");
+        if (p.isHuman) {
+          document.getElementById('hitBtn').style.display = 'inline-block';
+          document.getElementById('standBtn').style.display = 'inline-block';
+          let action = await waitForPlayerAction();
+          while(action === 'hit') {
+            await dealCardToPlayer(currentPlayerIndex, 300);
+            updatePlayerScore(currentPlayerIndex);
+            if (calculateHandValue(p.hand) >= 21) break;
+            showMessage(p.name + " のターンです。");
+            action = await waitForPlayerAction();
+          }
+          document.getElementById('hitBtn').style.display = 'none';
+          document.getElementById('standBtn').style.display = 'none';
+        } else {
+          showMessage(p.name + " (CPU) のターンです。");
+          await delay(800);
+          while(calculateHandValue(p.hand) < 18) {
+            await dealCardToPlayer(currentPlayerIndex, 300);
+            updatePlayerScore(currentPlayerIndex);
+            if (calculateHandValue(p.hand) >= 21) break;
+            await delay(500);
+          }
+          showMessage(p.name + " のターン終了。");
+          await delay(800);
+        }
+      }
+    }
+    
+    // ディーラーターン：裏カード公開後、合計が18未満ならヒット
+    async function dealerTurn() {
+      showMessage("ディーラーのターンです。");
+      revealDealerCards();
+      await delay(1000);
+      while(calculateHandValue(dealer.hand) < 18) {
+        await dealCardToDealer(500, false);
+        await delay(500);
+      }
+      showMessage("ディーラーのターン終了。");
+      await delay(800);
+    }
+    
+    // 勝敗判定・ベット精算
+    function settleBets() {
+      let dealerScore = calculateHandValue(dealer.hand);
+      let resultMsg = "ディーラーの得点: " + dealerScore + "\n\n";
+      players.forEach(p => {
+        let playerScore = calculateHandValue(p.hand);
+        resultMsg += p.name + " (得点:" + playerScore + ") → ";
+        if (playerScore > 21) {
+          resultMsg += "バストで負け";
+        } else if (dealerScore > 21) {
+          resultMsg += "ディーラーバスト！ 勝ち";
+          p.money += p.bet * 2;
+        } else if (playerScore > dealerScore) {
+          resultMsg += "勝ち";
+          p.money += p.bet * 2;
+        } else if (playerScore === dealerScore) {
+          resultMsg += "引き分け";
+          p.money += p.bet;
+        } else {
+          resultMsg += "負け";
+        }
+        resultMsg += " (残金:" + p.money + ")\n";
+        updatePlayerBalance(players.indexOf(p));
+      });
+      showMessage(resultMsg);
+    }
+    
+    // ベット入力：各プレイヤー（人間は入力、CPUはランダム）。持ち金が0以下なら借金して100に。
+    async function takeBets() {
+      for (let i = 0; i < players.length; i++) {
+        if (players[i].money <= 0) {
+          if (players[i].isHuman) {
+            let ans = confirm(players[i].name + " の持ち金が不足しています。借金して100にしますか？");
+            if (ans) { players[i].money = 100; }
+          } else {
+            players[i].money = 100;
+          }
+          updatePlayerBalance(i);
+        }
+        if (players[i].money <= 0) {
+          players[i].bet = 0;
+          updatePlayerBalance(i);
+          continue;
+        }
+        if (players[i].isHuman) {
+          let inp = prompt(players[i].name + " の持ち金: " + players[i].money + "\nベット金額を入力してください (1～" + players[i].money + "):", "10");
+          let bet = parseInt(inp);
+          if (isNaN(bet) || bet < 1 || bet > players[i].money) { bet = 1; }
+          players[i].bet = bet;
+        } else {
+          let maxBet = Math.min(50, players[i].money);
+          let bet = Math.floor(Math.random() * maxBet) + 1;
+          players[i].bet = bet;
+        }
+        players[i].money -= players[i].bet;
+        updatePlayerBalance(i);
+      }
+    }
+    
+    // ラウンド開始処理
+    async function startRound() {
+      resetRound();
+      await takeBets();
+      buildDeck();
+      shuffleDeck();
+      // 初期配牌：各プレイヤー2枚、ディーラー2枚（ディーラーは1枚目表、2枚目裏）
+      for (let round = 0; round < 2; round++) {
+        for (let i = 0; i < players.length; i++) {
+          await dealCardToPlayer(i, 300);
+        }
+        if (round === 0) {
+          await dealCardToDealer(300, false);
+        } else {
+          await dealCardToDealer(300, true);
+        }
+      }
+      players.forEach((p, i) => updatePlayerScore(i));
+      // プレイヤーターン
+      currentPlayerIndex = 0;
+      await playerTurns();
+      // ディーラーターン
+      await dealerTurn();
+      updateDealerScore();
+      // 勝敗判定・精算
+      settleBets();
+      // 次ラウンドへ：Start Round ボタン再表示
+      document.getElementById('startBtn').style.display = 'inline-block';
+    }
+    
+    // ボタンイベント
+    document.getElementById('startBtn').addEventListener('click', () => {
+      document.getElementById('startBtn').style.display = 'none';
+      startRound();
+    });
+    document.getElementById('hitBtn').addEventListener('click', () => {
+      if (waitingForPlayer && resolvePlayerAction) {
+        waitingForPlayer = false;
+        resolvePlayerAction('hit');
+        resolvePlayerAction = null;
+      }
+    });
+    document.getElementById('standBtn').addEventListener('click', () => {
+      if (waitingForPlayer && resolvePlayerAction) {
+        waitingForPlayer = false;
+        resolvePlayerAction('stand');
+        resolvePlayerAction = null;
+      }
+    });
+    
+    // プレイヤーターン処理：各プレイヤー順に、初期配牌時にブラックジャックならターンをスキップ
+    async function playerTurns() {
+      for (currentPlayerIndex = 0; currentPlayerIndex < players.length; currentPlayerIndex++) {
+        let p = players[currentPlayerIndex];
+        let score = calculateHandValue(p.hand);
+        if (score === 21) {
+          showMessage(p.name + " はブラックジャックのため、ターンをスキップします。");
+          await delay(1000);
+          continue;
+        }
+        showMessage(p.name + " のターンです。");
+        if (p.isHuman) {
+          document.getElementById('hitBtn').style.display = 'inline-block';
+          document.getElementById('standBtn').style.display = 'inline-block';
+          let action = await waitForPlayerAction();
+          while(action === 'hit') {
+            await dealCardToPlayer(currentPlayerIndex, 300);
+            updatePlayerScore(currentPlayerIndex);
+            if (calculateHandValue(p.hand) >= 21) break;
+            showMessage(p.name + " のターンです。");
+            action = await waitForPlayerAction();
+          }
+          document.getElementById('hitBtn').style.display = 'none';
+          document.getElementById('standBtn').style.display = 'none';
+        } else {
+          showMessage(p.name + " (CPU) のターンです。");
+          await delay(800);
+          while(calculateHandValue(p.hand) < 18) {
+            await dealCardToPlayer(currentPlayerIndex, 300);
+            updatePlayerScore(currentPlayerIndex);
+            if (calculateHandValue(p.hand) >= 21) break;
+            await delay(500);
+          }
+          showMessage(p.name + " のターン終了。");
+          await delay(800);
+        }
+      }
+    }
+    
+    // 初回起動：参加者初期化
+    (function(){
+      initPlayers();
+      initDealer();
+      showMessage("ブラックジャックへようこそ！\nStart Round ボタンを押してラウンド開始。");
+    })();
+  </script>
+</body>
+</html>

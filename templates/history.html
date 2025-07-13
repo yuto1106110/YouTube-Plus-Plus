@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <!-- モバイル対応のための viewport 指定 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>視聴履歴 - YouTube Plus⁺</title>
+         <link rel="icon" href="/img/logo/favicon.ico">
+        <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <style>
+    /* 必要に応じてレイアウトや余白の調整 */
+    .history-container {
+      padding: 20px;
+    }
+    .history-grid {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <!-- ヘッダー（既存ページと同じヘッダーを利用） -->
+  <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <nav id="top-nav">
+      <a href="/chat">Plus⁺ Chat</a>
+      <a href="/others">メニュー</a>
+      <a href="/qanda">ヘルプ</a>
+      <a href="/help">お問い合わせ</a>
+    </nav>
+  </header>
+  <div class="no-theme">
+  <div class="history-container">
+    <h1>視聴履歴</h1>
+    <div class="pure-g history-grid" id="historyContainer">
+      <!-- JavaScriptで履歴アイテムがここに挿入されます -->
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function(){
+      // localStorage から視聴履歴を取得
+      let history = localStorage.getItem('watchHistory');
+      history = history ? JSON.parse(history) : [];
+
+      const container = document.getElementById('historyContainer');
+
+      if(history.length === 0) {
+        container.innerHTML = "<p>paa</p>";
+        return;
+      }
+
+      // 各動画の情報をカード形式で生成
+      history.forEach(video => {
+        // 例示していただいた構造に沿ったHTMLを生成
+        const cardDiv = document.createElement('div');
+        // pure-u-1:全幅、pure-u-md-1-4:中画面以上では1/4幅のグリッド
+        cardDiv.className = "pure-u-1 pure-u-md-1-4";
+        cardDiv.innerHTML = `
+          <div class="h-box">
+            <a id="dynamic-link" href="/watch?v=${video.video_id}" style="width:100%">
+              <div class="thumbnail">
+                <img class="thumbnail" loading="lazy" src="${video.thumbnail}" onerror="document.cookie = 'proxy=True;max-age=2592000;';">
+                <p class="length">${video.length}</p>
+              </div>
+              <p dir="auto">${video.title}</p>
+            </a>
+            <div class="video-card-row flexible">
+              <a href="/channel/${video.channel_id}">${video.channel}</a>
+            </div>
+            <div class="video-card-row flexible">
+              <div class="flex-left">
+                <p class="video-data" dir="auto">${video.view_count}</p>
+                <p class="video-data" dir="auto">${video.published}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(cardDiv);
+      });
+    });
+  </script>
+  </div>
+</body>
+</html>

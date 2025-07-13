@@ -151,6 +151,25 @@
         transform: scale(1.05);
         outline: none;
       }
+
+	        #topButton {
+            position: fixed;
+            left: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
     </style>
 
     <!-- モーダルウィンドウ（使い方説明） -->
@@ -177,7 +196,8 @@
         <br><br>
       </form>
     </div>
-
+<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
+	
     <script>
       // モーダルを閉じる処理
       document.getElementById("modalClose").addEventListener("click", function() {

@@ -464,13 +464,13 @@
     
     // Firebase 設定
     const firebaseConfig = {
-      apiKey: "AIzaSyBy2-A1aPIJ5sgdIkdtVP8M3ejYWh1SUU4",
-      authDomain: "chat-chat-2518e.firebaseapp.com",
-      projectId: "chat-chat-2518e",
-      storageBucket: "chat-chat-2518e.firebasestorage.app",
-      messagingSenderId: "465019906626",
-      appId: "1:465019906626:web:1de95eec38a8bbf5c65bdb",
-      measurementId: "G-HVV4XD4D6J"
+  apiKey: "AIzaSyC7m86dWHVcNF_rZBVSS15WWwRre2NAYlk",
+  authDomain: "eviter-chat.firebaseapp.com",
+  databaseURL: "https://eviter-chat-default-rtdb.firebaseio.com",
+  projectId: "eviter-chat",
+  storageBucket: "eviter-chat.appspot.com",
+  messagingSenderId: "838666832539",
+  appId: "1:838666832539:web:3471b7b5f83a140eda543e"
     };
     
     // 初期化
@@ -740,15 +740,15 @@ function extractVideoId(url) {
 
   let [currentName, forcedId = ""] = mainPart.split("#");
 
-  // 新しい名前が入力されている場合、「ねむい」への変更は不可
-  if (newName !== "" && newName === "ねむい") {
-    alert("名前を「ねむい」に変更することはできません。");
+  // 新しい名前が入力されている場合、「Yuto-110」への変更は不可
+  if (newName !== "" && newName === "Yuto-110") {
+    alert("名前を「Yuto-110」に変更することはできません。");
     return;
   }
 
   let finalName;
-  if (currentName === "ねむい") {
-    finalName = "ねむい";
+  if (currentName === "Yuto-110") {
+    finalName = "Yuto-110";
   } else {
     let namePart = newName !== "" ? newName : currentName;
     forcedId = forcedId || generateForcedId();
@@ -811,9 +811,9 @@ function extractVideoId(url) {
         return;
       }
       
-      // /adminadd コマンド：この操作は「ねむい」専用
+      // /adminadd コマンド：この操作は「Yuto-110」専用
       if (messageText.startsWith("/adminadd ")) {
-        if (userBaseName.split("#")[0] !== "ねむい") {
+        if (userBaseName.split("#")[0] !== "Yuto-110") {
           alert("この操作は権限がありません。");
           return;
         }
@@ -835,7 +835,7 @@ function extractVideoId(url) {
       
       // /admin コマンド
       if (messageText === "/admin") {
-        if (userBaseName.split("#")[0] !== "ねむい") {
+        if (userBaseName.split("#")[0] !== "Yuto-110") {
           alert("この操作は権限がありません。");
           return;
         }
@@ -850,7 +850,7 @@ function extractVideoId(url) {
       
       // /adminre コマンド：擬似管理者として登録されている対象は削除できるようにする
       if (messageText.startsWith("/adminre ")) {
-        if (userBaseName.split("#")[0] !== "ねむい") {
+        if (userBaseName.split("#")[0] !== "Yuto-110") {
           alert("この操作は権限がありません。");
           return;
         }
@@ -905,7 +905,7 @@ if (messageText.startsWith("/you ")) {
 
       
       if (messageText.startsWith("/delete ")) {
-        if (userBaseName.split("#")[0] === "ねむい" || pseudoAdmins.has(userBaseName.split("#")[0])) {
+        if (userBaseName.split("#")[0] === "Yuto-110" || pseudoAdmins.has(userBaseName.split("#")[0])) {
           const parts = messageText.split(" ");
           if (parts.length < 2) {
             alert("使い方: /delete [ユーザー名]");
@@ -940,7 +940,7 @@ if (messageText.startsWith("/you ")) {
       }
       
       if (messageText === CLEAR_CHAT_PASSWORD) {
-        if (userBaseName.split("#")[0] === "ねむい" || pseudoAdmins.has(userBaseName.split("#")[0])) {
+        if (userBaseName.split("#")[0] === "Yuto-110" || pseudoAdmins.has(userBaseName.split("#")[0])) {
           try {
             const chatCollection = collection(db, "chat");
             const snapshot = await getDocs(chatCollection);
@@ -988,7 +988,7 @@ if (messageText.startsWith("/you ")) {
       
       // ★ /topic コマンド ★
 if (messageText.startsWith("/topic ")) {
-  if (userBaseName.split("#")[0] !== "ねむい") {
+  if (userBaseName.split("#")[0] !== "Yuto-110") {
     alert("この操作は権限がありません。");
     return;
   }

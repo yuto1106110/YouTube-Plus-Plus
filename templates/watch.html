@@ -338,9 +338,6 @@
         <source class="player-source" src="{{ streamUrls[5].url }}">
       {% endfor %}
     </video>
-　<audio id="audio" controls>
-　<source src="{{ videourls[0] }}" type="audio/mp3">
-　</audio>
 　<div id="loader"></div>
   </div>
     <div id="loader"></div>
@@ -908,6 +905,11 @@ function toggleFullScreen() {
     document.getElementById(`tool-sub-${id}`).style.left = "100%";
   }
 	</script>
+
+　<audio id="audio" controls>
+　<source src="{{ videourls[0] }}" type="audio/mp3">
+　</audio>
+
 <script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript> 
   </body>
 </html>

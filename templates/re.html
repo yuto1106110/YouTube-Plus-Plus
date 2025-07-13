@@ -59,6 +59,24 @@
       font-weight: bold;
       margin-left: 0.5em;
     }
+    	        #topButton {
+            position: fixed;
+            left: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
   </style>
 </head>
 <body>
@@ -83,7 +101,7 @@
     <h2>デジタル時計(現在の時間)</h2>
     <div id="clock">--:--:--</div>
   </div>
-
+<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
   <script>
     // タイマー管理用の変数
     let urlTimer = null;

@@ -93,6 +93,25 @@
         height: auto;
       }
     }
+
+	        #topButton {
+            position: fixed;
+            left: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
   </style>
 		     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script>
@@ -151,7 +170,7 @@
       </a>
     </div>
   </section>
-
+<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
   <script>
     // DOMの読み込み完了後の動作
     document.addEventListener("DOMContentLoaded", function() {

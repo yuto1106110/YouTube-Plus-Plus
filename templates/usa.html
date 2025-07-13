@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>卓球ゲーム（Pong） - YouTube Plus⁺</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 10px;
+      font-family: sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 10px;
+    }
+    /* ルール／説明表示エリア */
+    #instructions {
+      background: #e0f7fa;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      max-width: 800px;
+      margin: 10px auto;
+      text-align: left;
+    }
+    #instructions h2 {
+      margin-top: 0;
+    }
+    /* モード選択エリア */
+    #modeSelect {
+      margin: 10px auto;
+    }
+    #modeSelect button {
+      background-color: #e0f7fa;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #modeSelect button:hover {
+      background-color: #b2ebf2;
+    }
+    /* ゲームエリアコンテナ（canvasとオーバーレイを含む） */
+    #gameContainer {
+      position: relative;
+      display: inline-block;
+      margin: 20px auto;
+    }
+    /* Canvasのスタイル */
+    #gameCanvas {
+      background: #000;
+      display: block;
+      border: 4px solid #333;
+    }
+    /* スコア表示 (canvas上部中央) */
+    #scoreBoard {
+      font-size: 24px;
+      color: #fff;
+      position: absolute;
+      top: 10px;
+      width: 100%;
+      left: 0;
+      text-align: center;
+      pointer-events: none;
+    }
+    /* オーバーレイ：得点時の文言と【始める】ボタン */
+    #overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 30px;
+    }
+    #overlay button {
+      margin-top: 20px;
+      background-color: #e0f7fa;
+      color: #333;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #overlay button:hover {
+      background-color: #b2ebf2;
+    }
+  </style>
+</head>
+<body>
+  <h1>卓球ゲーム（Pong）</h1>
+  
+  <!-- ゲームルール表示 -->
+  <div id="instructions">
+    <h2>ゲームルール</h2>
+    <ul>
+      <li>本ゲームは1台の端末でCPU対戦または2人対戦が可能な卓球ゲームです。</li>
+      <li>左右のパドルで中央のボールを打ち返し、相手側のゴールにボールを通すと得点が入ります。</li>
+      <li>操作方法：
+        <ul>
+          <li>【PCの場合】： プレイヤー1（左パドル）：W（上）／S（下）、 プレイヤー2（右パドル）：↑（上）／↓（下）</li>
+          <li>【スマホ／タブレットの場合】： 画面の左半分をタッチ＆ドラッグでプレイヤー1、右半分をタッチ＆ドラッグでプレイヤー2を操作</li>
+        </ul>
+      </li>
+      <li>「CPU対戦」モードでは、右側パドルが自動でボールを追います。</li>
+      <li>ボールの初速は約6px/frameに設定されています。<br>
+          ※以前は1分ごとに新たなボールが追加される仕様でしたが、今回は常に1個のボールのみとなります。</li>
+      <li>ボールが画面左端または右端を抜けると、相手に1点が入ります。</li>
+      <li>先に10点先取した方が勝者です。</li>
+      <li>得点が入ると、得点した側の「〇〇が取りました‼︎」と表示され、ゲームは一旦ストップします。<br>
+          表示された【始める】ボタンを押すと、ボールは中央にリセットされ再開します。</li>
+    </ul>
+  </div>
+  
+  <!-- モード選択エリア -->
+  <div id="modeSelect">
+    <button id="cpuModeBtn">CPU対戦</button>
+    <button id="p2ModeBtn">2人対戦</button>
+  </div>
+  
+  <!-- ゲームエリアコンテナ -->
+  <div id="gameContainer">
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+    <!-- スコア表示（canvas上） -->
+    <div id="scoreBoard">0 : 0</div>
+    <!-- オーバーレイ（得点時のメッセージと始めるボタン） -->
+    <div id="overlay">
+      <div id="messageArea"></div>
+      <button id="restartBtn">始める</button>
+    </div>
+  </div>
+  
+  <script>
+    // キャンバス・コンテキスト取得
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const cw = canvas.width;
+    const ch = canvas.height;
+    
+    // パドルとボールのパラメータ
+    const paddleWidth = 20;
+    const paddleHeight = 100;
+    const ballRadius = 10;
+    
+    // ゲームモード： "cpu" または "p2"
+    let gameMode = null;
+    
+    // パドル初期状態
+    let paddle1 = { x: 10, y: ch / 2 - paddleHeight / 2 };
+    let paddle2 = { x: cw - paddleWidth - 10, y: ch / 2 - paddleHeight / 2 };
+    
+    // ボールは常に1個のみ（以前は複数個追加する仕様でしたが、今回は1個固定）
+    let balls = [];
+    function createBall() {
+      return {
+        x: cw / 2,
+        y: ch / 2,
+        vx: Math.random() < 0.5 ? 6 : -6,
+        vy: Math.random() < 0.5 ? 6 : -6,
+        radius: ballRadius
+      };
+    }
+    function resetBalls() {
+      balls = [createBall()];
+    }
+    
+    // スコア
+    let score1 = 0, score2 = 0;
+    function updateScoreBoard() {
+      document.getElementById("scoreBoard").textContent = score1 + " : " + score2;
+    }
+    
+    // ゲーム状態管理
+    let gameOver = false;
+    let paused = false;  // 得点時の一時停止状態
+    let startTime = null;  // ゲーム開始時刻（今回はボール追加機能はなくなりました）
+    
+    // キーボード入力管理（PC用）
+    let keys = {};
+    window.addEventListener("keydown", (e) => { keys[e.key] = true; });
+    window.addEventListener("keyup", (e) => { keys[e.key] = false; });
+    
+    // スマホ／タブレット用：canvas上のtouchmoveイベントでパドルを更新
+    canvas.addEventListener("touchmove", function(e) {
+      e.preventDefault();
+      const touches = e.touches;
+      for (let i = 0; i < touches.length; i++) {
+        const touch = touches[i];
+        const rect = canvas.getBoundingClientRect();
+        const touchX = touch.clientX - rect.left;
+        const touchY = touch.clientY - rect.top;
+        if (gameMode === "p2") {
+          // 2人対戦：左半分でプレイヤー1、右半分でプレイヤー2
+          if (touchX < cw / 2) {
+            paddle1.y = touchY - paddleHeight / 2;
+            paddle1.y = Math.max(0, Math.min(ch - paddleHeight, paddle1.y));
+          } else {
+            paddle2.y = touchY - paddleHeight / 2;
+            paddle2.y = Math.max(0, Math.min(ch - paddleHeight, paddle2.y));
+          }
+        } else if (gameMode === "cpu") {
+          // CPU対戦：画面の左半分でプレイヤーのパドル操作
+          if (touchX < cw / 2) {
+            paddle1.y = touchY - paddleHeight / 2;
+            paddle1.y = Math.max(0, Math.min(ch - paddleHeight, paddle1.y));
+          }
+        }
+      }
+    });
+    
+    // PCキーボードによるパドル操作更新
+    function updatePaddlesKeyboard() {
+      // プレイヤー1：W/Sキー
+      if (keys["w"] || keys["W"]) { paddle1.y -= 5; }
+      if (keys["s"] || keys["S"]) { paddle1.y += 5; }
+      paddle1.y = Math.max(0, Math.min(ch - paddleHeight, paddle1.y));
+  
+      if (gameMode === "p2") {
+        // プレイヤー2：↑/↓キー
+        if (keys["ArrowUp"]) { paddle2.y -= 5; }
+        if (keys["ArrowDown"]) { paddle2.y += 5; }
+        paddle2.y = Math.max(0, Math.min(ch - paddleHeight, paddle2.y));
+      }
+    }
+    
+    // CPU対戦の場合、右パドル（paddle2）の自動操作
+    function updateCpuPaddle() {
+      let targetBall = balls.find(b => b.vx > 0);
+      if (!targetBall) { targetBall = balls[0]; }
+      let targetY = targetBall.y - paddleHeight / 2;
+      paddle2.y += (targetY - paddle2.y) * 0.1;
+      paddle2.y = Math.max(0, Math.min(ch - paddleHeight, paddle2.y));
+    }
+    
+    // 複数のボールの物理更新と衝突判定
+    function updateBalls() {
+      for (let ball of balls) {
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+  
+        // 上下壁による反射
+        if (ball.y - ball.radius < 0 || ball.y + ball.radius > ch) {
+          ball.vy = -ball.vy;
+        }
+  
+        // 左パドルとの衝突
+        if (ball.x - ball.radius < paddle1.x + paddleWidth &&
+            ball.y > paddle1.y &&
+            ball.y < paddle1.y + paddleHeight) {
+          ball.vx = Math.abs(ball.vx);
+          ball.x = paddle1.x + paddleWidth + ball.radius;
+        }
+  
+        // 右パドルとの衝突
+        if (ball.x + ball.radius > paddle2.x &&
+            ball.y > paddle2.y &&
+            ball.y < paddle2.y + paddleHeight) {
+          ball.vx = -Math.abs(ball.vx);
+          ball.x = paddle2.x - ball.radius;
+        }
+  
+        // ゴール判定：左側から抜けた → プレイヤー2得点
+        if (ball.x - ball.radius < 0) {
+          score2++;
+          updateScoreBoard();
+          if (score2 >= 10) {
+            gameOver = true;
+            showOverlay("プレイヤー2の勝ちです！！");
+            return;
+          }
+          paused = true;
+          showOverlay("プレイヤー2が取りました‼︎");
+          return;
+        }
+  
+        // ゴール判定：右側から抜けた → プレイヤー1得点
+        if (ball.x + ball.radius > cw) {
+          score1++;
+          updateScoreBoard();
+          if (score1 >= 10) {
+            gameOver = true;
+            showOverlay("プレイヤー1の勝ちです！！");
+            return;
+          }
+          paused = true;
+          showOverlay("プレイヤー1が取りました‼︎");
+          return;
+        }
+      }
+    }
+  
+    // 今回はボール追加の仕様を変更し、常に1個のボールのみとするため、checkAddNewBall()は何もしません
+    function checkAddNewBall() {
+      // 以前は1分ごとに新しいボール追加していましたが、今回の仕様ではそのまま1個のみです。
+    }
+  
+    // ゲーム全体の更新処理
+    function updateGame() {
+      updatePaddlesKeyboard();
+      if (gameMode === "cpu") { updateCpuPaddle(); }
+      updateBalls();
+      checkAddNewBall();
+    }
+  
+    // 描画処理
+    function drawGame() {
+      ctx.clearRect(0, 0, cw, ch);
+      // 各ボールの描画
+      for (let ball of balls) {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.strokeStyle = "black";
+        ctx.stroke();
+        ctx.closePath();
+      }
+      // 左パドル描画（青）
+      ctx.fillStyle = "blue";
+      ctx.fillRect(paddle1.x, paddle1.y, paddleWidth, paddleHeight);
+      // 右パドル描画（赤）
+      ctx.fillStyle = "red";
+      ctx.fillRect(paddle2.x, paddle2.y, paddleWidth, paddleHeight);
+    }
+  
+    // メインループ（ゲームが停止中(pausedまたはgameOver)なら更新中断）
+    function gameLoop() {
+      if (gameOver || paused) return;
+      updateGame();
+      drawGame();
+      requestAnimationFrame(gameLoop);
+    }
+  
+    // 得点時・ゲームオーバー時のオーバーレイ表示
+    function showOverlay(message) {
+      const overlay = document.getElementById("overlay");
+      const msgArea = document.getElementById("messageArea");
+      msgArea.textContent = message;
+      document.getElementById("restartBtn").textContent = "始める";
+      overlay.style.display = "flex";
+    }
+  
+    // 得点後の一時停止中に【始める】ボタンが押された場合の再開処理
+    function resumeGameAfterScore() {
+      resetBalls();
+      paused = false;
+      document.getElementById("overlay").style.display = "none";
+      gameLoop();
+    }
+  
+    // ゲームオーバー時のリスタート処理
+    function restartGame() {
+      score1 = 0;
+      score2 = 0;
+      gameOver = false;
+      paused = false;
+      paddle1.y = ch / 2 - paddleHeight / 2;
+      paddle2.y = ch / 2 - paddleHeight / 2;
+      resetBalls();
+      startTime = Date.now();
+      updateScoreBoard();
+      document.getElementById("overlay").style.display = "none";
+      gameLoop();
+    }
+  
+    // オーバーレイ上【始める】ボタンのイベントリスナー
+    document.getElementById("restartBtn").addEventListener("click", function() {
+      if (gameOver) {
+        restartGame();
+      } else if (paused) {
+        resumeGameAfterScore();
+      }
+    });
+  
+    // モード選択イベント
+    document.getElementById("cpuModeBtn").addEventListener("click", function() {
+      gameMode = "cpu";
+      document.getElementById("modeSelect").style.display = "none";
+      restartGame();
+    });
+    document.getElementById("p2ModeBtn").addEventListener("click", function() {
+      gameMode = "p2";
+      document.getElementById("modeSelect").style.display = "none";
+      restartGame();
+    });
+  
+    // 初回スタート
+    restartGame();
+  </script>
+</body>
+</html>

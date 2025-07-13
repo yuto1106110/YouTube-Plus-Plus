@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+    <head>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+       .counter-card {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      color: black;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      z-index: 30;
+      width: 200px;
+      /* ドラッグさせないためにカーソルを変更 */
+      cursor: default;
+
+      /* CSSで「浮遊」するアニメーション */
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* 「浮遊」アニメーション用のキーフレーム */
+    @keyframes float {
+      0%   { transform: translateY(0); }
+      50%  { transform: translateY(-10px); }
+      100% { transform: translateY(0); }
+    }
+    @keyframes fadeInDown {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+	            
+
+ 
+    
+    /* ダミーコンテンツ用 */
+    .content {
+      margin-top: 80px;
+      padding: 20px;
+      line-height: 1.6;
+    }
+/* 最新情報欄の基本スタイル（雰囲気づけたデザイン例） */
+.latest-info {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 220px;
+  background: linear-gradient(135deg, #fdfbfb, #ebedee);
+  border-left: 4px solid #007bff;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 40;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  animation: fadeIn 1s ease-out;
+}
+
+/* 見出しにアクセント */
+.latest-info h3 {
+  margin: 0 0 10px;
+  padding-bottom: 5px;
+  font-size: 18px;
+  color: #007bff;
+  border-bottom: 1px solid #007bff;
+}
+
+/* 本文のスタイル */
+.latest-info p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+}
+
+/* フェードインのキーフレーム */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* タブレットサイズ以下（幅768px以下）の設定 */
+@media (max-width: 768px) {
+  .latest-info {
+    width: 35%;
+    right: 5%;
+    bottom: 15px;
+    padding: 12px;
+  }
+  .latest-info h3 {
+    font-size: 16px;
+  }
+  .latest-info p {
+    font-size: 13px;
+  }
+}
+
+/* スマートフォンサイズ以下（幅480px以下）の設定 */
+@media (max-width: 480px) {
+  .latest-info {
+    width: 80%;
+    right: 5%;
+    bottom: 10px;
+    padding: 10px;
+  }
+  .latest-info h3 {
+    font-size: 14px;
+  }
+  .latest-info p {
+    font-size: 12px;
+  }
+}
+
+        
+  </style>
+
+<script type="module">
+	
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+	        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+	
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+apiKey: "AIzaSyCC8u5IlLlQDQald9lgCq7RjH80GZI8Jbk",
+authDomain: "eviter-web.firebaseapp.com",
+databaseURL: "https://eviter-web-default-rtdb.firebaseio.com",
+projectId: "eviter-web",
+storageBucket: "eviter-web.firebasestorage.app",
+messagingSenderId: "385558603673",
+appId: "1:385558603673:web:bf8e6e2a719b5dbe761508",
+measurementId: "G-Z7TZ8CMYMQ"
+};
+	
+	        const app = initializeApp(firebaseConfig);
+	        const database = getDatabase(app);
+	
+	        const today = new Date().toISOString().split('T')[0];
+	        const counterRef = ref(database, `accessCount/${today}`);
+	        const totalCountRef = ref(database, 'accessCount/totalCount');
+	        const urlRef = ref(database, 'hostedUrls');
+	
+	        function saveHostUrl() {
+	            const hostUrl = window.location.origin;
+	
+	            get(urlRef).then((snapshot) => {
+	                const existingUrls = snapshot.exists() ? snapshot.val() : [];
+	
+	                if (!existingUrls.includes(hostUrl)) {
+	                    existingUrls.push(hostUrl);
+	                    set(urlRef, existingUrls).then(() => {
+	                        console.log('ホストURLが保存されました:', hostUrl);
+	                    }).catch((error) => {
+	                        console.error('URLの保存に失敗しました:', error);
+	                    });
+	                } else {
+	                    console.log('このURLはすでに保存されています:', hostUrl);
+	                }
+	            }).catch((error) => {
+	                console.error('URLの取得に失敗しました:', error);
+	            });
+	        }
+	
+	        function incrementAccessCount() {
+	            get(counterRef).then((snapshot) => {
+	                let currentCount = snapshot.exists() ? snapshot.val().count : 0;
+	                currentCount++;
+	
+	                set(counterRef, { count: currentCount }).then(() => {
+	                    displayAccessCount(currentCount);
+	                }).catch((error) => {
+	                    console.error('データの書き込みに失敗しました:', error);
+	                });
+	
+	                get(totalCountRef).then((totalSnapshot) => {
+	                    let totalCount = totalSnapshot.exists() ? totalSnapshot.val().count : 0;
+	                    totalCount++;
+	
+	                    set(totalCountRef, { count: totalCount }).then(() => {
+	                        displayTotalCount(totalCount);
+	                    }).catch((error) => {
+	                        console.error('総アクセス数の書き込みに失敗しました:', error);
+	                    });
+	                }).catch((error) => {
+	                    console.error('総アクセス数の取得に失敗しました:', error);
+	                });
+	            }).catch((error) => {
+	                console.error('データの取得に失敗しました:', error);
+	            });
+	        }
+	
+	        function displayAccessCount(count) {
+	            document.getElementById('todayAccessCount').textContent = `今日のアクセス数: ${count}`;
+	        }
+	
+	        function displayTotalCount(count) {
+	            document.getElementById('totalAccessCount').textContent = `総アクセス数: ${count}`;
+	        }
+	
+	        window.onload = function() {
+	            incrementAccessCount();
+	            saveHostUrl(); 
+	        };
+	    </script>
+  
+  <!-- jQuery（DOM操作用） -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // モバイル時：ハンバーガーメニューのトグル
+      $("#hamburger").click(function() {
+        $("#top-nav").toggleClass("show");
+      });
+      
+      // スクロールによるトップバーの縮小効果
+      $(window).on("scroll", function() {
+        if($(window).scrollTop() > 50) {
+          $("#top-bar").addClass("scrolled");
+        } else {
+          $("#top-bar").removeClass("scrolled");
+        }
+      });
+    });
+  </script>
+    </style>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="robots" content="noindex,nofollow">
+
+
+        <title>YouTube Plus⁺</title>
+	    <link rel="icon" href="/img/logo/favicon.ico">
+             <link rel="stylesheet" href="/css/empty.css">
+        <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+        
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script src="./scripts.js"></script>
+</head>
+</head>
+
+    <body>
+    <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <div id="hamburger">&#9776;</div>
+    <nav id="top-nav">
+      <a href="/chat">Plus⁺ Chat</a>
+      <a href="/others">メニュー</a>
+      <a href="/qanda">ヘルプ</a>
+      <a href="/help">お問い合わせ</a>&emsp;
+    </nav>
+  </header>
+	    <div class="counter-card" id="counterCard">
+	<div id="todayAccessCount">今日のアクセス数: 0</div>
+	<div id="totalAccessCount">総アクセス数: 0</div>
+</div>
+	    <!-- 最新情報欄（右下固定） -->
+<!-- 最新情報欄（右下固定） -->
+<div class="latest-info" id="latestInfo">
+  <h3>welcome!!</h3>
+  <div id="infoContent">YouTube Plus<sup>+</sup>にようこそ!!</div>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const infoContent = document.getElementById("infoContent");
+    let toggle = true;
+    
+    // 5秒ごとに「内容1」と「内容2」を交互に表示
+    setInterval(() => {
+      infoContent.textContent = toggle ? "高画質機能追加！使い方は、Q&Aに載っています" : "僕にメッセージを送る前にQ&Aを見ると問題が解決するかも";
+      toggle = !toggle;
+    }, 5000);
+  });
+</script>
+
+	<div class="no-theme">
+		<div id="search-widget" class="pure-g h-box">
+			        <div id="logo" class="pure-u-1">
+                <h1 href="javascript:location.replace('/')" class="pure-menu-heading">YouTube Plus<sup>+</sup></h1>
+            </div>
+		</div>
+            <div class="pure-u-1-4"></div>
+            
+            <div class="pure-u-1 pure-u-md-12-24 searchbar">
+                <form class="pure-form" action="/search" method="get">
+                    <fieldset>
+                        <input id="searchbox" name="q" type="search" placeholder="検索" value="" title="検索" autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false" autofocus="">
+                    </fieldset>
+                </form>
+            </div>
+            
+            <div class="pure-u-1-4"></div>
+        </div>
+        <div class="pure-g h-box">
+            <div class="pure-u-1 pure-u-lg-1-5"></div>
+        </div>
+        <script>
+            $('#searchbox').autocomplete({
+                source: function (request, response) {
+                    {
+                        var url = "/suggest?keyword=" + request.term
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("GET", url);
+                        xhr.onload = function() {
+                            response(JSON.parse(xhr.responseText));
+                        }
+                        xhr.send();
+                    }
+                },delay:300
+            });
+        </script>
+	    
+
+	     <script>
+    function openAboutBlank() {
+        const currentUrl = window.location.href; // ホストしているサイトのURLを取得
+        const aboutBlankWindow = window.open('about:blank', '_blank'); // about:blankを開く
+
+        // about:blankに埋め込む内容を組み立てる
+        const content = '
+            <html>
+                <head>
+                    <title>yahoo! JAPAN</title>
+                    <style>
+                        body { margin: 0; }
+                        iframe { width: 100vw; height: 100vh; border: none; }
+                    </style>
+                </head>
+                <body>
+                    <iframe src="${currentUrl}" allowfullscreen></iframe>
+                </body>
+            </html>
+        ';
+        
+        // about:blankウィンドウに内容を埋め込む
+        aboutBlankWindow.document.write(content);
+        aboutBlankWindow.document.close(); // Documentを閉じて描画を完了する
+    }
+    </script>
+	     <script>
+    $(document).ready(function() {
+      // 以前はここで $(".counter-card").draggable(); を呼び出していましたが、
+      // 今回はドラッグできないようにするため、呼び出しを削除しています。
+      
+      // ※もし以前にドラッグが有効化済みの場合は、以下のようにして無効にすることも可能です：
+      // $(".counter-card").draggable("disable");
+    });
+  </script>
+
+</html>

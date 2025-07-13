@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="robots" content="noindex,nofollow">
+        <title>[検索] {{ word }} - YouTube Plus⁺</title>
+        <link rel="icon" href="/img/logo/favicon.ico">
+        <link rel="stylesheet" href="/css/pure-min.css">
+        <link rel="stylesheet" href="/css/grids-responsive-min.css">
+        <link rel="stylesheet" href="/css/ionicons.min.css">
+        <link rel="stylesheet" href="/css/default.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+              <style>        
+                 .contents #searchbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            text-align: right;
+            z-index: 20;
+	　　 color: #fffff;
+			     }
+        #topButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #topButton:hover {
+            background-color: #0056b3;
+        }
+	    #topButton:active {
+    transform: scale(0.95);
+    background-color: #ff6347;
+}
+		        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // モバイル時：ハンバーガーメニューのトグル
+      $("#hamburger").click(function() {
+        $("#top-nav").toggleClass("show");
+      });
+      
+      // スクロールによるトップバーの縮小効果
+      $(window).on("scroll", function() {
+        if($(window).scrollTop() > 50) {
+          $("#top-bar").addClass("scrolled");
+        } else {
+          $("#top-bar").removeClass("scrolled");
+        }
+      });
+    });
+  </script>
+                      </style>
+    </head>
+    <body>
+   <header id="top-bar">
+    <div class="navbar-logo">
+      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+    </div>
+    <!-- モバイル用ハンバーガーアイコン -->
+    <div id="hamburger">&#9776;</div>
+    <!-- ナビゲーション -->
+    <nav id="top-nav">
+      <a href="/chat">Plus⁺ Chat</a>
+      <a href="/others">メニュー</a>
+      <a href="/qanda">ヘルプ</a>
+      <a href="/help">お問い合わせ</a>
+	&emsp;
+    </nav>
+  </header>
+<a onclick="history.back(-1)" class="link-button link-back-button" style="position: fixed; top: 100px; left: 20px; z-index: 1000;">戻る</a>
+	    
+	    <br>
+	    <div  class="no-theme">
+        <span id="dark_mode_pref" style="display: none;"></span>
+        <div class="pure-g">
+            <div class="pure-u-1 pure-u-md-2-24"></div>
+            
+            <div id="contents" class="pure-u-1 pure-u-md-20-24">
+                <div class="pure-g navbar h-box">
+                    <div class="pure-u-1 pure-u-md-12-24 searchbar">
+                        <form class="pure-form" action="/search" method="get">
+                            <fieldset>
+                                <input id="searchbox" name="q" type="search" placeholder="検索" value="{{ word }}" title="検索"  autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false">
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+		    <button id="topButton" onclick="toggleLink()">読み込み方を変更!</button>
+		 <script>
+let isWatch = true; // 現在の状態を管理するフラグ
+
+function toggleLink() {
+    const link = document.getElementById("dynamic-link");
+    const currentHref = link.getAttribute("href");
+    let message = ""; // メッセージ用の変数
+
+    if (isWatch) {
+        // /watch を /ume に変更
+        const updatedHref = currentHref.replace("/watch", "/ume");
+        link.setAttribute("href", updatedHref);
+        message = "埋め込みモードに変更されました！";
+    } else {
+        // /ume を /watch に戻す
+        const updatedHref = currentHref.replace("/ume", "/watch");
+        link.setAttribute("href", updatedHref);
+        message = "デフォルトモードに変更されました！";
+    }
+
+    // 状態を反転
+    isWatch = !isWatch;
+
+    // メッセージをアラートで表示
+    alert(message);
+}
+</script>
+                    
+                <div class="pure-g">
+                    {% for result in results %}
+                    <div class="pure-u-1 pure-u-md-1-4">
+                            
+                        <div class="h-box">
+                            {% if result["type"] == "video" %}
+                                
+                            <a id="dynamic-link" href="/watch?v={{ result['id'] }}" style="width:100%">
+                                <div class="thumbnail">
+                                    <img class="thumbnail" loading="lazy" src="{% if proxy == 'True' %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/0.jpg{% endif %}" onerror="document.cookie = 'proxy=True;max-age=2592000;';">
+                                    <p class="length">{{ result["length"] }}</p>
+                                </div>
+                                <p dir="auto">{{ result['title'] }}</p>
+                            </a>
+                                
+                            <div class="video-card-row flexible">
+                                <a href="/channel/{{ result['authorId'] }}">{{ result["author"] }}</a>
+                            </div>
+                                
+                            <div class="video-card-row flexible">
+                                <div class="flex-left">
+                                    <p class="video-data" dir="auto">{{ result["view_count_text"] }}</p>
+                                    <p class="video-data" dir="auto">{{ result["published"] }}</p>
+                                </div>
+                            </div>
+                                
+                            {% elif result["type"] == "channel" %}
+                            <a href="/channel/{{ result["id"] }}">
+                                <center>
+                                    <img loading="lazy" tabindex="-1" style="width:56.25%" src="{{ result["thumbnail"] }}">
+                                </center>
+                                <p dir="auto">{{ result["author"] }}</p>
+                            </a>
+                                
+                            {% elif result["type"] == "playlist" %}
+                            <a style="width: 100%;" href="/playlist?list={{ result["id"] }}">
+                
+                                <div class="thumbnail">
+
+                                    <img loading="lazy" tabindex="-1" class="thumbnail" src="{{ result['thumbnail'] }}">
+                                    
+                                    <p class="length">{{ result["count"] }}個の動画</p>
+                                </div>
+                                <p dir="auto">{{ result["title"] }}</p>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="pure-g h-box">
+            <div class="pure-u-1 pure-u-lg-1-5"></div>
+        </div>
+        
+        <div class="pure-u-1 pure-u-lg-3-5"></div>
+            <div class="pure-u-1 pure-u-lg-1-5" style="text-align:right">
+                <a href="{{ next }}">次のページ</a>
+            </div>
+        </div>
+        <script>
+            $('#searchbox').autocomplete({
+                source: function (request, response) {
+                    {
+                        var url = "/suggest?keyword=" + request.term
+                        var xhr = new XMLHttpRequest();
+                        xhr.open("GET", url);
+                        xhr.onload = function() {
+                            response(JSON.parse(xhr.responseText));
+                        }
+                        xhr.send();
+                    }
+                },delay:300
+            });
+        </script>
+    </body>
+</html>

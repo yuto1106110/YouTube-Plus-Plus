@@ -521,9 +521,17 @@ document.addEventListener('keydown', function(event) {
             video.pause();
         }
     }
-    if (event.key === 'f' || event.key === 'F') {
+        if (event.key === 'k' || event.key === 'K') {
         event.preventDefault();
-        toggleFullScreen();
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    }
+    if (event.key === 'f' || event.key === 'F') {
+    event.preventDefault();
+    toggleFullScreen();
     }
     if (event.key === 'ArrowRight') {
         video.currentTime += 10;

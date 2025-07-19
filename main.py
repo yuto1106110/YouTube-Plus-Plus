@@ -915,7 +915,21 @@ def list_page(response: Response, request: Request):
 @app.get("/setting", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("settings.html", {"request": request})
-
+@app.get("/among", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("among.html", {"request": request})
+@app.get("/among-1", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("among-1.html", {"request": request})
+@app.get("/among-2", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("among-2.html", {"request": request})
+@app.get("/interland", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("interland.html", {"request": request})
+@app.get("/denki", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("denki.html", {"request": request})
 
 @app.exception_handler(500)
 def error500(request: Request, __):

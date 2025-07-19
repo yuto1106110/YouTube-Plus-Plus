@@ -1,6 +1,5 @@
 # YouTube Plus⁺
 
----
 
 # Deploy / デプロイ
 <a href="https://render.com/deploy?repo=https://github.com/yuto1106110/YouTube-Plus-Plus.git">

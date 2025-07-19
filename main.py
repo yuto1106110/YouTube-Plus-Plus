@@ -930,6 +930,9 @@ def list_page(response: Response, request: Request):
 @app.get("/denki", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("denki.html", {"request": request})
+@app.get("/dog", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("dog.html", {"request": request})
 
 @app.exception_handler(500)
 def error500(request: Request, __):

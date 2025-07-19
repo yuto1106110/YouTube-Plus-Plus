@@ -24,7 +24,7 @@
 ## Yuto-110 
 <br><a href="https://scratch.mit.edu/users/yuto_110/" target="_blank">Scratch</a>
 <br><a href="https://www.instagram.com/yuto110_110?igsh=MTFtYWg3aDBnZXdnag==" target="_blank">instagram</a>
-<br>↑急用とか大事なときに使ってください↑
+<br>↑急用とか大事なときに使ってください(インスタを)
 ## sleepy-300
 <br><a href="https://scratch.mit.edu/users/sleepy-300/" target="_blank">Scratch</a>
-©2025 Yuto-110
+<br>©2025 Yuto-110

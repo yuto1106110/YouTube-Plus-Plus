@@ -936,6 +936,9 @@ def list_page(response: Response, request: Request):
 @app.get("/dash", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("dash.html", {"request": request})
+@app.get("/dairan", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("dairan.html", {"request": request})
 
 @app.exception_handler(500)
 def error500(request: Request, __):

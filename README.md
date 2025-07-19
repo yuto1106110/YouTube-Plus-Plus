@@ -11,4 +11,4 @@
 
 [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?type=git&builder=buildpack&repository=github.com/yuto1106110/YouTube-Plus-Plus&branch=main&name=YouTube-Plus-Plus)
 <br>
-©2024 mino_hobby
+©2025 Yuto-110

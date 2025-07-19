@@ -1,5 +1,5 @@
 # YouTube Plus⁺
-##概要
+##　概要
 <br>YouTube Plus⁺はYouTubeを広告なしで、追跡されずに視聴ができます。
 <br>このプロジェクトは<a href="https://github.com/yuto1106110/invidious-instance-plus-plus.git"><ruby>invidiousインスタンスを自動で選別するシステムを使用しています。<rt>プロジェクトへ移動する</rt></ruby>
 

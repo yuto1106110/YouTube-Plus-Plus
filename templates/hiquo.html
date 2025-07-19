@@ -285,7 +285,6 @@
  <!-- トップバー -->
     <header id="top-bar">
       <div class="left-section">
-        <button id="open-sidebar">☰</button>
         <div class="navbar-logo">
           <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
         </div>
@@ -298,10 +297,10 @@
         </form>
       </div>
       <nav id="top-nav">
-        <a href="/bbs">掲示板</a>
-        <a href="/proxypage">Proxy</a>
-        <a href="/others">その他</a>
-        <a href="/sitsumon">回答よろ</a>
+        <a href="/bbs"></a>
+        <a href="/proxypage"></a>
+        <a href="/others"></a>
+        <a href="/sitsumon"></a>
       </nav>
     </header>
 
@@ -345,10 +344,16 @@
         </div>
         <!-- 動画の説明を動画の真下に配置 -->
         <div class="video-description" id="descriptionText">
+		        <a href="/channel/{{ author_id }}" style="display: inline-block; width: fit-content; width: -moz-fit-content">
+			<div class="channel-profile">
+			<img src="{{ author_icon }}">
+			<span id="channel-name">{{ author }}</span>
+			</div>
+		</a>
 			<h1>{{ video_title }}</h1>
                     <p style="display: inline-block; margin-right: 10px; vertical-align: super;">{{ view_count }}回視聴</p>
                     <div style="display: inline-block;"><span class="material-symbols-outlined" style="display: inline-block; padding-right: 5px;">thumb_up</span><p style="display: inline-block; vertical-align: super; ">{{ like_count }}</p></div>
-          {{ description | safe }}
+          <br>{{ description | safe }}
         </div>
 	      
         <!-- コメントエリア -->
@@ -480,17 +485,61 @@
       
       document.getElementById("player").currentTime = getQueryValue('t') || 0;
       
-      function keydown(key) {
-        if (key.keyCode == 32 || key.keyCode == 75) {
-          const v = document.getElementById("player");
-          if (v.paused === true) {
-            v.play();
-          } else {
-            v.pause();
-          }
+document.addEventListener('keydown', function(event) {
+    const activeElement = document.activeElement;
+    if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+        return;
+    }
+    if (event.code === 'Space') {
+        event.preventDefault();
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
         }
-      }
-      window.addEventListener('keydown', keydown);
+    }
+        if (event.key === 'k' || event.key === 'K') {
+        event.preventDefault();
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    }
+    if (event.key === 'f' || event.key === 'F') {
+    event.preventDefault();
+    toggleFullScreen();
+    }
+    if (event.key === 'ArrowRight') {
+        video.currentTime += 10;
+    } 
+    if (event.key === 'ArrowLeft') {
+        video.currentTime -= 10;
+    }
+});
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        if (video.requestFullscreen) {
+            video.requestFullscreen();
+        } else if (video.mozRequestFullScreen) {
+            video.mozRequestFullScreen();
+        } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+        } else if (video.msRequestFullscreen) {
+            video.msRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+}
       
       const description_a_tags = document.getElementById('descriptionWrapper').getElementsByTagName('a');
       for(let i = 0; i < description_a_tags.length; i++) {
@@ -536,6 +585,21 @@
           updateDisplayCurrentTime();
         }, 100);
       })();
+
+ //youtubeのurlを取得
+            function shareVideo(videoId) {
+                    const shareUrl = `https://youtube.com/watch?v={{ videoid }}`;
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        alert('リンクがクリップボードにコピーされました！');
+                    });
+                }
+	    //ビデオIDのみを取得
+            function Videoid(videoId) {
+                    const shareUrl = `{{ videoid }}`;
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        alert('ビデオIDがクリップボードにコピーされました！');
+                    });
+                }	    
     </script>
 
     <script>
@@ -553,23 +617,6 @@
       });
     </script>
     
-    <div class="latest-info" id="latestInfo">
-      <h3>welcome!!</h3>
-      <div id="infoContent">
-        chatにきてください‼︎「その他」のところにあります‼︎
-      </div>
-    </div>
-    
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const infoContent = document.getElementById("infoContent");
-        let toggle = true;
-        setInterval(() => {
-          infoContent.textContent = toggle ? "高画質機能追加！左にある高画質再生を押してみて‼︎" : "chatにきてください‼︎「その他」のところにあります‼︎";
-          toggle = !toggle;
-        }, 5000);
-      });
-    </script>
 		       <script>
     $(document).ready(function(){
           // 動画と音声の要素を取得
@@ -687,6 +734,176 @@
       }
       window.addEventListener('load', addToHistory);
     </script>
+
+<!-- ツールボタン（右固定） -->
+<button class="button-31" onclick="openToolPanel()" style="position: fixed; top: 10px; right: 20px; z-index: 1000;">ツール</button>
+
+<!-- ツールパネル本体 -->
+<div id="tool-panel" class="tool-panel">
+	<!-- 閉じるボタン（右上） -->
+	<button onclick="closeToolPanel()" class="close-button">&times;</button> <!-- メインメニュー -->
+	<div id="tool-main" class="tool-content">
+		<h3> ツール一覧 </h3>
+		<p><a href="/">ホーム</a></p>
+		<p><a onclick="location.replace(location.href)">再読み込み</a></p>
+    <p><a href="javascript:openSubTool('tool')">基本ツール →</a></p>
+		<p><a href="javascript:openSubTool('embed')">再生方法の変更 →</a></p>
+		<p><a href="javascript:openSubTool('sonota')">その他 →</a></p>
+    <label for="autonextpage">自動で次の動画へ<input id="autonextpage" type="checkbox" onchange="changeAutoNextPage(this)"></label><br>
+		<label for="loop">ループ再生<input id="loop" type="checkbox" onchange="changeLoop(this)"></label>
+	</div>
+	<!-- サブメニュー: 埋め込みツール -->
+
+	<div id="tool-sub-tool" class="tool-sub">
+		<p><a href="javascript:closeSubTool('tool')">← 戻る</a></p>
+		<h3>基本ツール</h3>
+		<p><a href="javascript:shareVideo('{{ g_videoid }}')">YouTubeのURLを取得</a></p>
+		<p><a href="javascript:Videoid('{{ g_videoid }}')">ビデオIDを取得</a></p>
+		<p><a href="javascript:location.replace('/thumbnail?v={{ videoid }}')">サムネを取得</a></p>
+		<p><a
+				href="javascript:{navigator.share({title: '現時点の動画を共有', text: '{{ video_title }}', url: location.origin + '/watch?v={{ videoid }}' + '&t=' + Math.floor(document.getElementById('player').currentTime)})}">現時点の動画を共有</a><br>
+			<p><a
+					href="javascript:{navigator.share({title: '動画を共有', text: '{{ video_title }}', url: location.href})}">動画を共有</a><br>
+				<p><a href="{{ videourls[0] }}" download="{{ video_title }}">動画をダウンロード</a><br>
+
+
+  </div>
+
+
+					<div id="tool-sub-embed" class="tool-sub">
+						<p><a href="javascript:closeSubTool('embed')">← 戻る</a></p>
+						<h3>再生方法の変更</h3>
+		<p><a href="javascript:togglePlayer(false);">デフォルトで視聴する</a>
+		<p><a href="javascript:togglePlayer(true);">埋め込み(nocookie)で視聴する</a>
+		<p><a href="javascript:location.replace('/ww?v={{ videoid }}')">高画質で視聴する</a>
+					</div>
+
+					<div id="tool-sub-sonota" class="tool-sub">
+						<p><a href="javascript:closeSubTool('sonota')">← 戻る</a></p>
+						<h3>その他</h3>
+            <p>
+          　<p><a href="javascript:location.replace('/chat')">Plus⁺ Chat</a>
+          　<p><a href="javascript:location.replace('/history')">履歴を閲覧</a>
+          　<p><a href="javascript:location.replace('/others')">メニュー</a>
+          　<p><a href="javascript:location.replace('/qanda')">ヘルプ</a>
+          　<p><a href="javascript:location.replace('/help')">お問い合わせ</a>
+					</div>
+
+					<div id="tool-sub-server" class="tool-sub">
+						<p><a href="javascript:closeSubTool('server')">← 戻る</a></p>
+						<h3>サーバー切り替え</h3>
+						<form id="api-selector-form">
+
+					
+					</div>
+	</div><!-- スタイル（CSS） -->
+	<style>
+		.tool-panel {
+			position: fixed;
+			top: 0;
+			right: -350px;
+			width: 280px;
+			height: 100%;
+			background: #222;
+			color: #fff;
+			padding: 20px;
+			transition: right 0.3s ease;
+			box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+			z-index: 9999;
+			overflow-x: hidden;
+			overflow-y: auto;
+			box-sizing: border-box;
+		}
+
+		.tool-panel.open {
+			right: 0 !important;
+		}
+
+		.tool-content,
+		.tool-sub {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			transition: left 0.3s ease;
+			padding: 60px 20px 20px 20px;
+			box-sizing: border-box;
+		}
+
+		.tool-sub {
+			left: 100%;
+		}
+
+		.close-button {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			background: transparent;
+			color: #fff;
+			border: none;
+			font-size: 20px;
+			cursor: pointer;
+			z-index: 10001;
+		}
+
+		.tool-panel a {
+			color: #4fc3f7;
+			text-decoration: none;
+		}
+
+		.tool-panel a:hover {
+			text-decoration: underline;
+		}
+
+
+		.button-31 {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			position: relative;
+			width: 180px;
+			margin: 0 auto;
+			padding: .9em 2em;
+			border: 1px solid #2589d0;
+			border-radius: 5px;
+			background-color: #fff;
+			color: #2589d0;
+			font-size: 0.8em;
+			transition: box-shadow .3s ease;
+		}
+
+		.button-31:hover {
+			box-shadow: inset #2589d0 0 0 0 2em;
+			color: #fff;
+		}
+	</style><!-- JavaScript -->
+	<script>
+		function openToolPanel() {
+    const panel = document.getElementById("tool-panel");
+    panel.classList.add("open");
+  }
+
+  function closeToolPanel() {
+    const panel = document.getElementById("tool-panel");
+    panel.classList.remove("open");
+    closeSubTool('embed');
+    closeSubTool('server');
+		closeSubTool('tool');
+	　closeSubTool('sonota');
+  }
+
+  function openSubTool(id) {
+    document.getElementById("tool-main").style.left = "-100%";
+    document.getElementById(`tool-sub-${id}`).style.left = "0";
+  }
+
+  function closeSubTool(id) {
+    document.getElementById("tool-main").style.left = "0";
+    document.getElementById(`tool-sub-${id}`).style.left = "100%";
+  }
+	</script>
+		
 	<script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
   </body>
 </html>

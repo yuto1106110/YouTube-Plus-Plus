@@ -741,14 +741,14 @@ function extractVideoId(url) {
   let [currentName, forcedId = ""] = mainPart.split("#");
 
   // 新しい名前が入力されている場合、「ねむい」への変更は不可
-  if (newName !== "" && newName === "ねむい") {
-    alert("名前を「ねむい」に変更することはできません。");
+  if (newName !== "" && newName === "yuto_110") {
+    alert("名前を「yuto_110」に変更することはできません。");
     return;
   }
 
   let finalName;
-  if (currentName === "ねむい") {
-    finalName = "ねむい";
+  if (currentName === "yuto_110") {
+    finalName = "yuto_110";
   } else {
     let namePart = newName !== "" ? newName : currentName;
     forcedId = forcedId || generateForcedId();
@@ -811,9 +811,9 @@ function extractVideoId(url) {
         return;
       }
       
-      // /adminadd コマンド：この操作は「ねむい」専用
+      // /adminadd コマンド：この操作は「yuto_110」専用
       if (messageText.startsWith("/adminadd ")) {
-        if (userBaseName.split("#")[0] !== "ねむい") {
+        if (userBaseName.split("#")[0] !== "yuto_110") {
           alert("この操作は権限がありません。");
           return;
         }
@@ -835,7 +835,7 @@ function extractVideoId(url) {
       
       // /admin コマンド
       if (messageText === "/admin") {
-        if (userBaseName.split("#")[0] !== "ねむい") {
+        if (userBaseName.split("#")[0] !== "yuto_110") {
           alert("この操作は権限がありません。");
           return;
         }
@@ -850,7 +850,7 @@ function extractVideoId(url) {
       
       // /adminre コマンド：擬似管理者として登録されている対象は削除できるようにする
       if (messageText.startsWith("/adminre ")) {
-        if (userBaseName.split("#")[0] !== "ねむい") {
+        if (userBaseName.split("#")[0] !== "yuto_110") {
           alert("この操作は権限がありません。");
           return;
         }
@@ -905,7 +905,7 @@ if (messageText.startsWith("/you ")) {
 
       
       if (messageText.startsWith("/delete ")) {
-        if (userBaseName.split("#")[0] === "ねむい" || pseudoAdmins.has(userBaseName.split("#")[0])) {
+        if (userBaseName.split("#")[0] === "yuto_110" || pseudoAdmins.has(userBaseName.split("#")[0])) {
           const parts = messageText.split(" ");
           if (parts.length < 2) {
             alert("使い方: /delete [ユーザー名]");
@@ -940,7 +940,7 @@ if (messageText.startsWith("/you ")) {
       }
       
       if (messageText === CLEAR_CHAT_PASSWORD) {
-        if (userBaseName.split("#")[0] === "ねむい" || pseudoAdmins.has(userBaseName.split("#")[0])) {
+        if (userBaseName.split("#")[0] === "yuto_110" || pseudoAdmins.has(userBaseName.split("#")[0])) {
           try {
             const chatCollection = collection(db, "chat");
             const snapshot = await getDocs(chatCollection);
@@ -988,7 +988,7 @@ if (messageText.startsWith("/you ")) {
       
       // ★ /topic コマンド ★
 if (messageText.startsWith("/topic ")) {
-  if (userBaseName.split("#")[0] !== "ねむい") {
+  if (userBaseName.split("#")[0] !== "yuto_110") {
     alert("この操作は権限がありません。");
     return;
   }

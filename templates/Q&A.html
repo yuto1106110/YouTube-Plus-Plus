@@ -131,24 +131,26 @@
 			}
 		}
 
-        #topButton {
-            position: fixed;
-            left: 20px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        #topButton:hover {
-            background-color: #0056b3;
-        }
-	    #topButton:active {
-    transform: scale(0.95);
-    background-color: #ff6347;
-}		
+		#topButton {
+			position: fixed;
+			left: 20px;
+			background-color: #007BFF;
+			color: white;
+			padding: 10px 15px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			font-size: 16px;
+		}
+
+		#topButton:hover {
+			background-color: #0056b3;
+		}
+
+		#topButton:active {
+			transform: scale(0.95);
+			background-color: #ff6347;
+		}
 	</style>
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 	<script>
@@ -191,18 +193,34 @@
 		<p>
 			このページでは、当サービスに関する簡易的な情報をご案内しております。<br>
       ここでも解決ができない場合は<a href="/help">お問い合わせ</a>まで、詳しい状況を兼ねてお送りください！
-    </p>
+		</p>
 	</div>
+
+
 	<div class="faq-container">
+
 		<div class="faq-item">
 			<div class="faq-question">
-				「読み込み中...」の画面のまま動画が再生されない
+基本操作について
+			</div>
+			<div class="faq-answer">
+				<p>
+		好きなワードを検索してください！好きな動画を視聴しよう！
+    <br>ここには様々なツールや、ゲームがあります！
+    <br>チャットにもよっていってください！
+				</p>
+			</div>
+		</div>
+
+		<div class="faq-item">
+			<div class="faq-question">
+「読み込み中...」の画面のまま動画が再生されない
 			</div>
 			<div class="faq-answer">
 				<p>
 					① : その動画が刺激的な内容だった場合、読み込めません、親のスマホで見ましょう()
-          <br>② : 一度そのタブを消して入りなおしてみてください。それでも無理なら、APIかプログラムの問題です、僕に<a href="/help">お問い合わせ</a>でurlとともに送ってください!
-        </p>
+					<br>② : 一度そのタブを消して入りなおしてみてください。それでも無理なら、APIかプログラムの問題です、僕に<a href="/help">お問い合わせ</a>でurlとともに送ってください!
+				</p>
 			</div>
 		</div>
 
@@ -212,9 +230,28 @@
 			</div>
 			<div class="faq-answer">
 				<p>
-				その場合は5回ほど読み込みをしてみてください。それでもだめなら僕に<a href="/help">お問い合わせ</a>でurlとともに送ってください!
-        <br>APIかプログラムに問題があると思うので、logを解析して、直す…はずです()
+					その場合は5回ほど読み込みをしてみてください。それでもだめなら僕に<a href="/help">お問い合わせ</a>でurlとともに送ってください!
+					<br>APIかプログラムに問題があると思うので、logを解析して、直す…はずです()
         </p>
+			</div>
+		</div>
+
+		<div class="faq-item">
+			<div class="faq-question">
+		YouTube Plus⁺を作成したい
+			</div>
+			<div class="faq-answer">
+				<p>
+          githubリポジトリを使ってデプロイしてください！
+    <br>リポジトリ : https://github.com/yuto1106110/YouTube-Plus-Plus/
+    <br>下のボタンを押してもデプロイできます！
+<br><a href="https://render.com/deploy?repo=https://github.com/yuto1106110/YouTube-Plus-Plus.git">
+	<img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render"><br>
+</a>
+	<br><a href="https://vercel.com/new/clone?repository-url=https://github.com/yuto1106110/YouTube-Plus-Plus.git">
+		<img src="https://vercel.com/button" alt="Deploy to Vercel">
+</a>
+				</p>
 			</div>
 		</div>
 
@@ -225,7 +262,7 @@
 			<div class="faq-answer">
 				<p>
 					たいていは僕が悪いです()数分後に再読み込みしてみてください。
-          <br>治らなければ、僕に<a href="/help">お問い合わせ</a>でurlとともに送ってください！
+					<br>治らなければ、僕に<a href="/help">お問い合わせ</a>でurlとともに送ってください！
 				</p>
 			</div>
 		</div>
@@ -238,29 +275,57 @@
 					・高画質再生<br>
 1.見たい動画を選択<br>
 2.ツールにある、「再生方法の変更」から「高画質で視聴」を押す<br>
-3.画質調整が可能なページにリダイレクトされます！お好みの画質をお楽しみください！！
-<br>・埋め込み再生
-<br>1.見たい動画を選択
-<br>2.ツールにある、「再生方法の変更」から「埋め込み(nocookie)で視聴する」を押す
-<br>3.埋め込みで視聴することができます！(大体の人がブロックされて使えません)
+3.高画質再生ができるページにリダイレクトされます！お楽しみください！！
+					<br>・埋め込み再生
+					<br>1.見たい動画を選択
+					<br>2.ツールにある、「再生方法の変更」から「埋め込み(nocookie)で視聴する」を押す
+					<br>3.埋め込みで視聴することができます！(大体の人がブロックされて使えません)
         </p>
 			</div>
 		</div>
 
 		<div class="faq-item">
 			<div class="faq-question">
-			<a href="/help">お問い合わせ</a>での対応はどのようになっていますか？
+				ショートカットキーについて
+			</div>
+			<div class="faq-answer">
+				<p>
+				<br> space/k キー　 ：　再生、停止
+        <br> fキー　　　　　：　全画面表示
+        <br> 右矢印キー　　 ：　10秒進める
+        <br> 左矢印キー　　 ：　10秒戻す
+		        </p>
+			</div>
+		</div>
+
+		<div class="faq-item">
+			<div class="faq-question">
+		お問い合わせがしたい
+			</div>
+			<div class="faq-answer">
+				<p>
+		<a href="/help">お問い合わせ</a>から送ってください！意味わからないのは無視します笑
+    <br>緊急や、大きな欠点をすぐ伝えたい場合は、instagramよりユーザーネーム「yuto110_110」に連絡をしてください
+			<br>↓こちらです↓
+      <br>https://www.instagram.com/yuto110_110?igsh=MTFtYWg3aDBnZXdnag==
+        </p>
+			</div>
+		</div>
+
+		<div class="faq-item">
+			<div class="faq-question">
+				<a href="/help">お問い合わせ</a>での対応はどのようになっていますか？
 			</div>
 			<div class="faq-answer">
 				<p>
 					一週間に1~3度見るくらいです。
-          <br>意味わからない物が飛んでくるので、ちゃんとした要件以外ほとんど見てません()
-          <br>いやよくわからないの書くほうが悪いからね！？
+					<br>意味わからない物が飛んでくるので、ちゃんとした要件以外ほとんど見てません()
+					<br>いやよくわからないの書くほうが悪いからね！？
 				</p>
 			</div>
 		</div>
 	</div>
-<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
+	<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
 	<script>
 		// 各 FAQ の質問をクリックで開閉する動作
     const faqItems = document.querySelectorAll('.faq-item');
@@ -279,7 +344,8 @@
       });
     });
 	</script>
-	<script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
+	<script src="//accaii.com/yuto110/script.js" async></script>
+	<noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
 </body>
 
 </html>

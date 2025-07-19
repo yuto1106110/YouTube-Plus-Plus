@@ -6,7 +6,7 @@
 <br>invidiousを中心とした、YouTubeクライアントを使用し、動画を取得します。
 <br>高画質での視聴も可能です。
 ## Plus⁺ Chat
-<br>Fire Basw APIを使用し、世界中とつながることができます。
+<br>Fire Base APIを使用し、世界中とつながることができます。
 ## Game
 <br>様々な種類のゲームをブラウザ内でプレイすることができます。
 # Deploy / デプロイ

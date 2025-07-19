@@ -3,63 +3,288 @@
 
 <head>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Among Us - YouTube Plus⁺</title>
+	<link rel="icon" href="/img/logo/favicon.ico">
+	<link rel="stylesheet" href="/css/empty.css">
+	<link rel="stylesheet" href="/css/pure-min.css">
+	<link rel="stylesheet" href="/css/grids-responsive-min.css">
+	<link rel="stylesheet" href="/css/ionicons.min.css">
+	<link rel="stylesheet" href="/css/default.css">
+	<style>
+		/* 共通リセットと基本設定 */
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
 
+		body {
+			background: #fff;
+			/* 背景は白 */
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			padding: 0;
+			color: #333;
+		}
+
+		/* ページ説明セクション */
+		.page-description {
+			max-width: 700px;
+			margin: 0 auto 30px;
+			text-align: center;
+			padding: 20px;
+			border-bottom: 1px solid #e0e0e0;
+		}
+
+		.page-description h1 {
+			font-size: 2em;
+			margin-bottom: 10px;
+		}
+
+		.page-description p {
+			font-size: 1.1em;
+			color: #555;
+		}
+
+		/* FAQ コンテナ — 余裕のある配置と影 */
+		.faq-container {
+			max-width: 700px;
+			margin: 0 auto;
+			background: #fdfdfd;
+			border-radius: 10px;
+			padding: 20px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+		}
+
+		/* 各 FAQ アイテム */
+		.faq-item {
+			background: #fff;
+			margin-bottom: 15px;
+			border: 1px solid #e0e0e0;
+			border-radius: 8px;
+			overflow: hidden;
+			transition: transform 0.2s ease, box-shadow 0.3s ease;
+		}
+
+		.faq-item:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+
+		/* FAQ 質問部分 — グラデーション背景とアイコン（CSS擬似要素）*/
+		.faq-question {
+			background: linear-gradient(90deg, #fdfdfd, #fafafa);
+			cursor: pointer;
+			padding: 18px 20px;
+			position: relative;
+			transition: background 0.3s ease;
+		}
+
+		.faq-question:hover {
+			background: linear-gradient(90deg, #f6f6f6, #f0f0f0);
+		}
+
+		.faq-question::after {
+			content: "\25B6";
+			font-size: 1.2em;
+			color: #666;
+			position: absolute;
+			right: 20px;
+			top: 50%;
+			transform: translateY(-50%);
+			transition: transform 0.3s ease;
+		}
+
+		/* 回答部分 */
+		.faq-answer {
+			padding: 0 20px;
+			max-height: 0;
+			overflow: hidden;
+			background: #fff;
+			transition: all 0.4s ease;
+		}
+
+		/* アクティブ状態 */
+		.faq-item.active .faq-answer {
+			padding: 15px 20px;
+			max-height: 500px;
+			/* 内容に合わせて調整可能 */
+		}
+
+		.faq-item.active .faq-question::after {
+			transform: translateY(-50%) rotate(90deg);
+		}
+
+		/* 回答内テキストのフェードインアニメーション */
+		.faq-item.active .faq-answer p {
+			animation: fadeIn 0.6s ease forwards;
+		}
+
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(8px);
+			}
+
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+
+		#topButton {
+			position: fixed;
+			left: 20px;
+			background-color: #007BFF;
+			color: white;
+			padding: 10px 15px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			font-size: 16px;
+		}
+
+		#topButton:hover {
+			background-color: #0056b3;
+		}
+
+		#topButton:active {
+			transform: scale(0.95);
+			background-color: #ff6347;
+		}
+	</style>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script>
+		$(document).ready(function() {
+      // モバイル時：ハンバーガーメニューのトグル
+      $("#hamburger").click(function() {
+        $("#top-nav").toggleClass("show");
+      });
+      
+      // スクロールによるトップバーの縮小効果
+      $(window).on("scroll", function() {
+        if($(window).scrollTop() > 50) {
+          $("#top-bar").addClass("scrolled");
+        } else {
+          $("#top-bar").removeClass("scrolled");
+        }
+      });
+    });
+	</script>
 </head>
 
 <body>
-	<header>
-		<div class="container">
-			<h1>Among Us</h1>
+	<header id="top-bar">
+		<div class="navbar-logo">
+			<a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
 		</div>
+		<!-- モバイル用ハンバーガーアイコン -->
+		<div id="hamburger">&#9776; &emsp;</div>
+		<!-- ナビゲーション -->
+		<nav id="top-nav">
+			<a href="/chat">Plus⁺ Chat</a>
+			<a href="/others">メニュー</a>
+			<a href="/qanda">ヘルプ</a>
+			<a href="/help">お問い合わせ</a>
+			&emsp;
+		</nav>
 	</header>
-
-	<main>
-		<div class="container">
-			<h2>
-				公式TurboWarpサーバー
-			</h2>
-		
-        <p>
-				公式のTurboWarpなだけあってまぁまぁ人がいます。
-			</p>
-	<a href="/among-1">Go!</a>
-			<h2>
-				YouTube Plus⁺独自サーバー
-			</h2>
-			<p>
-				僕がリミってるサーバーで遊べます。
-        <br>公式がいっぱいだったり、友達とだけでやりたいときに使ってください。
-        <br>基本、過疎りまくってると思ってください笑
-			</p>
-			<a href="/among-2">Go!</a>
-		
-    <h2>操作説明,遊び方</h2>
-    <p>
-詳しい説明は<a href="https://scratch.mit.edu/projects/557315349/" target="_blank">公式</a>を確認してください
-	
-  <p> <ショートカットキー>
-  <br>[wasd] / [矢印キー] - 移動
-	<br>[スペース] - 使用/排気(インポスターとして)
-	<br>[r] - 死体の報告
-	<br>[q] - 殺す（インポスターとして)
-
-<p> <遊び方>
-<br>・ゲームを開始するには、ホストは "start "ボタンをクリックする必要があります。
-<br>・ゲーム開始時に、各プレイヤーは「クルーメイト」か「インポスター」のどちらかの役割を与えられます。6人以上のプレイヤーがいる部屋では、2人のインポスターがいることになります。
-<br>・クルーメイトは、タスクをこなしたり、死体を報告したり、インポスターを追い出したりします。彼らはまた、管理テーブルをチェックして、不審な活動を探すこともできます。
-<br>・インポスターはクルーに溶け込み、タスクを実行するふりをして、クルーを殺すことになっている。彼らは、ベントに忍び込むこともできます。
-<br>・インポスターが全員死ぬか（クルーの勝利）、生きているインポスターがクルーと同数になると（インポスターの勝利）、ゲームは終了する。
-<br>・Reactorの妨害行為を止めるには、2人の人間がそれぞれの場所で手を押さなければならない。O2の妨害行為を止めるには、両方の場所にコードを入力しなければなりません。
- <br>・マップの中央にある赤いボタンは緊急会議を呼び出すものなので、無造作に押さないようにしてください。
-    </div>
-	</main>
+	<div class="page-description">
+		<h1>Among Us - YouTube Plus⁺</h1>
+		<p>
+	Among UsのScratchバージョンをプレイすることができます！
+			<br>
+		</p>
+	</div>
 
 
+	<div class="faq-container">
+
+		<div class="faq-item">
+			<div class="faq-question">
+基本操作
+			</div>
+			<div class="faq-answer">
+				<p>
+	詳しい説明は<a href="https://scratch.mit.edu/projects/557315349/" target="_blank">公式</a>を確認してください
+
+	<p>
+		<ショートカットキー>
+			<br>[wasd] / [矢印キー] - 移動
+			<br>[スペース] - 使用/排気(インポスターとして)
+			<br>[r] - 死体の報告
+			<br>[q] - 殺す（インポスターとして)
+			</div>
+		</div>
+
+		<div class="faq-item">
+			<div class="faq-question">
+説明
+			</div>
+			<div class="faq-answer">
+	<p>
+	詳しい説明は<a href="https://scratch.mit.edu/projects/557315349/" target="_blank">公式</a>を確認してください
+		<br><遊び方>
+			<br>・ゲームを開始するには、ホストは "start "ボタンをクリックする必要があります。
+			<br>・ゲーム開始時に、各プレイヤーは「クルーメイト」か「インポスター」のどちらかの役割を与えられます。6人以上のプレイヤーがいる部屋では、2人のインポスターがいることになります。
+			<br>・クルーメイトは、タスクをこなしたり、死体を報告したり、インポスターを追い出したりします。彼らはまた、管理テーブルをチェックして、不審な活動を探すこともできます。
+			<br>・インポスターはクルーに溶け込み、タスクを実行するふりをして、クルーを殺すことになっている。彼らは、ベントに忍び込むこともできます。
+			<br>・インポスターが全員死ぬか（クルーの勝利）、生きているインポスターがクルーと同数になると（インポスターの勝利）、ゲームは終了する。
+			<br>・Reactorの妨害行為を止めるには、2人の人間がそれぞれの場所で手を押さなければならない。O2の妨害行為を止めるには、両方の場所にコードを入力しなければなりません。
+			<br>・マップの中央にある赤いボタンは緊急会議を呼び出すものなので、無造作に押さないようにしてください。
+					</p>
+			</div>
+		</div>
+
+		<div class="faq-item">
+			<div class="faq-question">
+公式TurboWarpサーバー
+			</div>
+			<div class="faq-answer">
+				<p>
+					公式のTurboWarpなだけあってまぁまぁ人がいます。
+					</p>
+					<a href="/among-1">Go!</a>
+				</p>
+			</div>
+		</div>
+
+		<div class="faq-item">
+			<div class="faq-question">
+YouTube Plus⁺独自サーバー
+			</div>
+			<div class="faq-answer">
+				<p>
+					僕がリミってるサーバーで遊べます。
+					<br>公式がいっぱいだったり、友達とだけでやりたいときに使ってください。
+					<br>基本、過疎りまくってると思ってください笑
+								</p>
+					<a href="/among-2">Go!</a>
+        </p>
+			</div>
+		</div>
+
+	</div>
+	<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
+	<script>
+		// 各 FAQ の質問をクリックで開閉する動作
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+      item.querySelector('.faq-question').addEventListener('click', () => {
+        // アクティブ状態のトグル
+        item.classList.toggle('active');
+        // ※他の項目を閉じたい場合は下記のコード（コメントアウト）を有効にしてください
+        /*
+        faqItems.forEach(other => {
+          if(other !== item) {
+            other.classList.remove('active');
+          }
+        });
+        */
+      });
+    });
+	</script>
 	<script src="//accaii.com/yuto110/script.js" async></script>
 	<noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
-
 </body>
 
 </html>

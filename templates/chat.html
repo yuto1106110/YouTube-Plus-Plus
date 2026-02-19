@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Plus Chat</title>
+    <title>Plus Chat - Secure</title>
     <style>
         :root {
             --bg-color: #0f0f0f; --container-bg: #1e1e1e; --text-color: #ffffff;
@@ -37,9 +37,6 @@
         .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:90; }
         .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; padding: 25px; border-radius: 15px; border: 1px solid var(--accent-color); z-index: 100; width: 85%; max-width: 320px; text-align: center; }
         .btn-m { width: 100%; padding: 10px; margin-top: 8px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #444; color: white; }
-        .mute-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-top: 10px; }
-        .btn-s { padding: 5px; font-size: 10px; background: #333; color: #ccc; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
-        
         .status-box { background: #111; padding: 8px; border-radius: 6px; font-size: 11px; margin: 10px 0; text-align: left; border: 1px solid #333; }
     </style>
 </head>
@@ -49,10 +46,10 @@
     <div id="auth-page" class="auth-page">
         <div class="auth-card">
             <h2 id="auth-title">ログイン - Plus Chat</h2>
-            <input type="text" id="auth-user" placeholder="ユーザー名">
+            <input type="text" id="auth-user" placeholder="ユーザー名(英数字・漢字・かな)" maxlength="15">
             <input type="password" id="auth-pass" placeholder="パスワード">
             <button class="auth-btn" onclick="handleAuth()" id="auth-btn-text">ログイン</button>
-            <p style="text-align:center; font-size:14px; margin-top:20px; color:#aaa;">
+            <p style="text-align:center; font-size:12px; margin-top:20px; color:#aaa;">
                 <span style="color:var(--accent-color); cursor:pointer; font-weight:bold;" onclick="toggleAuth()" id="toggle-text">新規登録はこちら</span>
             </p>
         </div>
@@ -69,7 +66,7 @@
         <ul id="messages" onscroll="handleScroll()"></ul>
         <button id="scroll-btn" onclick="scrollToBottom()">↓</button>
         <div class="input-area">
-            <input type="text" id="msg-input" class="chat-input" placeholder="メッセージを入力..." onkeypress="if(event.key==='Enter') send()">
+            <input type="text" id="msg-input" class="chat-input" placeholder="メッセージを入力..." maxlength="500" onkeypress="if(event.key==='Enter') send()">
         </div>
     </div>
 
@@ -85,18 +82,20 @@
     const ROLES = { OWNER: 100, ADMIN: 50, USER: 0 };
     let socket, myName, myId, myRole, isAutoScroll = true, mode = 'login';
 
-    // HTMLエスケープ処理（XSS対策）
+    // 強力なエスケープ関数
     function escapeHTML(str) {
         if (!str) return "";
-        return str.replace(/[&<>"']/g, function(match) {
-            const escape = {
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-            };
-            return escape[match];
-        });
+        return String(str).replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[m]));
     }
 
-    // 自動ログインチェック
+    // 名前のバリデーション（記号を弾く）
+    function isValidName(name) {
+        const regex = /^[a-zA-Z0-9ぁ-んァ-ヶー一-龠]+$/;
+        return regex.test(name) && name.length <= 15;
+    }
+
     window.onload = () => {
         const savedUser = localStorage.getItem('plus_chat_user');
         const savedPass = localStorage.getItem('plus_chat_pass');
@@ -111,13 +110,19 @@
         mode = (mode === 'login' ? 'register' : 'login');
         document.getElementById('auth-title').innerText = mode === 'login' ? 'ログイン - Plus Chat' : '新規登録 - Plus Chat';
         document.getElementById('auth-btn-text').innerText = mode === 'login' ? 'ログイン' : '登録する';
-        document.getElementById('toggle-text').innerText = mode === 'login' ? '新規登録はこちら' : 'ログインに戻る';
     }
 
     async function handleAuth(isAuto = false) {
-        const u = document.getElementById('auth-user').value;
+        const u = document.getElementById('auth-user').value.trim();
         const p = document.getElementById('auth-pass').value;
         if(!u || !p) return;
+
+        // 記号が含まれていたら弾く（荒らし対策）
+        if (!isValidName(u)) {
+            alert("ユーザー名に記号は使えません。");
+            localStorage.clear();
+            return;
+        }
 
         try {
             const res = await fetch(`${SERVER}/api/${mode}`, {
@@ -126,46 +131,34 @@
             });
             const data = await res.json();
             if (data.success) {
-                if (mode === 'register') { 
-                    alert('登録完了！ログインしてください'); toggleAuth(); 
-                } else {
+                if (mode === 'register') { alert('完了'); toggleAuth(); }
+                else {
                     localStorage.setItem('plus_chat_user', u);
                     localStorage.setItem('plus_chat_pass', p);
                     myName = data.username; myId = data.userId; myRole = data.role;
                     startChat();
                 }
-            } else { 
-                if(!isAuto) alert(data.message || '失敗しました');
-                else logout();
-            }
-        } catch(e) { if(!isAuto) alert('サーバー接続エラー'); }
+            } else { logout(); }
+        } catch(e) { console.error(e); }
     }
 
     function startChat() {
         document.getElementById('auth-page').classList.add('hidden');
         document.getElementById('chat-page').classList.remove('hidden');
+        // 自分の名前表示もエスケープ
         document.getElementById('my-display-name').innerHTML = `⚙️ <span class="role-${myRole}">${escapeHTML(myName)}</span>`;
         
         socket = io(SERVER);
-
         socket.on('online count', c => { document.getElementById('online-count').innerText = c + ' Online'; });
-
         socket.on('load messages', msgs => { 
             const list = document.getElementById('messages');
             list.innerHTML = ''; msgs.forEach(addMsg); scrollToBottom();
         });
-
         socket.on('chat message', data => { addMsg(data); if (isAutoScroll) scrollToBottom(); });
-
         socket.on('delete message', id => { document.getElementById(`msg-${id}`)?.remove(); });
-        
-        socket.on('system message', t => alert(t));
-
         socket.on('user status data', data => {
             const box = document.getElementById('status-box');
-            if(box) {
-                box.innerHTML = `状態: ${data.isBanned ? '<span style="color:red">BAN中</span>' : '<span style="color:#28a745">正常</span>'}<br>ミュート: ${data.muteStatus}`;
-            }
+            if(box) box.innerHTML = `状態: ${data.isBanned ? 'BAN' : '正常'}<br>Mute: ${data.muteStatus}`;
         });
     }
 
@@ -173,77 +166,46 @@
         const li = document.createElement('li');
         li.className = 'message-item' + (d.user === myName ? ' me' : '');
         li.id = `msg-${d.id}`;
-        const time = d.createdAt ? new Date(d.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--';
         
-        // テキストをエスケープして安全にする
-        const safeText = escapeHTML(d.text);
-        const safeUser = escapeHTML(d.user);
+        // 名前のクリックイベントでも変なことが起きないよう、IDなどは文字列として扱う
+        const sUser = escapeHTML(d.user);
+        const sText = escapeHTML(d.text);
+        const sId = String(d.userId).replace(/[^a-zA-Z0-9]/g, '');
 
         li.innerHTML = `
-            <span class="user-name role-${d.role || 'USER'}" onclick="openMenu('${safeUser}', '${d.userId}', '${d.role}', ${d.id})">${safeUser}</span>
-            <div style="font-size:15px; color:#eee; word-break: break-all;">${safeText}</div>
-            <span class="time">${time}</span><div style="clear:both;"></div>
+            <span class="user-name role-${d.role || 'USER'}" onclick="openMenu('${sUser}', '${sId}', '${d.role}', ${d.id})">${sUser}</span>
+            <div style="font-size:15px; color:#eee; word-break: break-all;">${sText}</div>
         `;
         document.getElementById('messages').appendChild(li);
     }
 
     function openMenu(name, targetId, targetRole, msgId) {
         const content = document.getElementById('modal-content');
-        const myLevel = ROLES[myRole];
-        content.innerHTML = `<h3 class="role-${targetRole}">${escapeHTML(name)}</h3><p style="color:#888; font-size:11px;">ID: ${targetId}</p>`;
-        content.innerHTML += `<div id="status-box" class="status-box">取得中...</div>`;
+        // モーダル内も徹底的にエスケープ
+        content.innerHTML = `<h3 class="role-${targetRole}">${escapeHTML(name)}</h3><p style="font-size:10px; color:#666;">ID: ${escapeHTML(targetId)}</p>`;
+        content.innerHTML += `<div id="status-box" class="status-box">...</div>`;
         socket.emit('get user status', targetId);
-        content.innerHTML += `<button class="btn-m" onclick="navigator.clipboard.writeText('${targetId}');alert('IDをコピー')">IDコピー</button>`;
 
-        if (myLevel >= ROLES.ADMIN && myName !== name) {
-            content.innerHTML += `<button class="btn-m" onclick="doAdmin('delete', '${targetId}', null, ${msgId})">メッセージ削除</button>`;
-            content.innerHTML += `
-                <div style="margin-top:10px; border:1px solid #444; padding:8px; border-radius:8px; background:#1a1a1a;">
-                    <div class="mute-grid">
-                        <button class="btn-s" onclick="doMute('${targetId}', 10)">10分</button>
-                        <button class="btn-s" onclick="doMute('${targetId}', 60)">1時間</button>
-                        <button class="btn-s" onclick="doMute('${targetId}', 1440)">1日</button>
-                        <button class="btn-s" style="color:#ff4e4e;" onclick="doMute('${targetId}', null)">永遠</button>
-                    </div>
-                    <button class="btn-m" style="background:#28a745; margin-top:10px;" onclick="doAdmin('unmute', '${targetId}')">ミュート解除</button>
-                </div>`;
+        if (ROLES[myRole] >= ROLES.ADMIN && myName !== name) {
+            content.innerHTML += `<button class="btn-m" onclick="doAdmin('delete', '${targetId}', null, ${msgId})">削除</button>`;
+            content.innerHTML += `<button class="btn-m" style="background:#cc0000;" onclick="doAdmin('ban', '${targetId}')">即BAN</button>`;
         }
-        if (myRole === 'OWNER' && myName !== name) {
-            content.innerHTML += `<hr style="border:0.5px solid #444; margin:10px 0;">`;
-            if (targetRole === 'USER') content.innerHTML += `<button class="btn-m" style="background:#ffa500; color:black;" onclick="doAdmin('promote', '${targetId}')">ADMIN任命</button>`;
-            else content.innerHTML += `<button class="btn-m" onclick="doAdmin('demote', '${targetId}')">権限剥奪</button>`;
-            content.innerHTML += `<button class="btn-m" style="background:#cc0000;" onclick="doAdmin('ban', '${targetId}')">追放(BAN)</button>`;
-            content.innerHTML += `<button class="btn-m" style="background:#28a745;" onclick="doAdmin('unban', '${targetId}')">BAN解除</button>`;
-        }
-        content.innerHTML += `<button class="btn-m" style="background:none; color:#888;" onclick="closeModal()">閉じる</button>`;
+        content.innerHTML += `<button class="btn-m" onclick="closeModal()">閉じる</button>`;
         document.getElementById('modal-area').classList.remove('hidden');
     }
 
-    function doMute(targetId, mins) {
-        if(confirm(mins ? `${mins}分間ミュート？` : '永遠にミュート？')){
-            socket.emit('admin command', { type: 'mute', targetId, myId, minutes: mins }); closeModal();
-        }
-    }
-
     function doAdmin(type, targetId, newRole, msgId) {
-        if(confirm('実行しますか？')){ socket.emit('admin command', { type, targetId, myId, newRole, msgId }); closeModal(); }
+        socket.emit('admin command', { type, targetId, myId, newRole, msgId }); 
+        closeModal();
     }
 
     function handleScroll() {
         const l = document.getElementById('messages');
-        const bottom = l.scrollHeight - l.scrollTop - l.clientHeight < 100;
-        isAutoScroll = bottom;
-        document.getElementById('scroll-btn').style.display = bottom ? 'none' : 'block';
+        isAutoScroll = l.scrollHeight - l.scrollTop - l.clientHeight < 100;
     }
-
     function scrollToBottom() { const l = document.getElementById('messages'); l.scrollTop = l.scrollHeight; }
     function closeModal() { document.getElementById('modal-area').classList.add('hidden'); }
-    
-    function logout() { 
-        localStorage.removeItem('plus_chat_user'); localStorage.removeItem('plus_chat_pass');
-        location.reload(); 
-    }
-    
+    function logout() { localStorage.clear(); location.reload(); }
     function send() { 
         const i = document.getElementById('msg-input'); 
         if(i.value.trim()){ socket.emit('chat message', {user:myName, text:i.value}); i.value=''; } 
@@ -251,3 +213,4 @@
 </script>
 </body>
 </html>
+

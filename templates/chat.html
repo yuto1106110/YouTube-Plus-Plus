@@ -22,6 +22,7 @@
         .auth-card { width: 100%; max-width: 360px; background-color: var(--container-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); }
         .auth-card input { width: 100%; padding: 12px; margin-bottom: 15px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 6px; color: white; box-sizing: border-box; }
         .auth-btn { width: 100%; padding: 12px; background: var(--accent-color); color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .auth-btn:disabled { background: #555; cursor: not-allowed; }
 
         .header { padding: 10px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #252525; }
         #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; list-style: none; margin: 0; }
@@ -33,11 +34,11 @@
         #scroll-btn { position: absolute; bottom: 100px; right: 20px; background: var(--accent-color); border: none; border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: none; font-size: 24px; z-index: 20; }
         .input-area { padding: 15px; border-top: 1px solid var(--border-color); background: var(--container-bg); display: flex; gap: 10px; }
         .chat-input { flex: 1; padding: 12px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 24px; color: white; outline: none; font-size: 16px; }
+        .chat-input:disabled { opacity: 0.5; }
 
         .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:90; }
         .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #222; padding: 25px; border-radius: 15px; border: 1px solid var(--accent-color); z-index: 100; width: 85%; max-width: 320px; text-align: center; }
         .btn-m { width: 100%; padding: 10px; margin-top: 8px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; background: #444; color: white; }
-        .status-box { background: #111; padding: 8px; border-radius: 6px; font-size: 11px; margin: 10px 0; text-align: left; border: 1px solid #333; }
     </style>
 </head>
 <body>
@@ -46,7 +47,7 @@
     <div id="auth-page" class="auth-page">
         <div class="auth-card">
             <h2 id="auth-title">ログイン - Plus Chat</h2>
-            <input type="text" id="auth-user" placeholder="ユーザー名(英数字・漢字・かな)" maxlength="15">
+            <input type="text" id="auth-user" placeholder="ユーザー名" maxlength="15">
             <input type="password" id="auth-pass" placeholder="パスワード">
             <button class="auth-btn" onclick="handleAuth()" id="auth-btn-text">ログイン</button>
             <p style="text-align:center; font-size:12px; margin-top:20px; color:#aaa;">
@@ -66,7 +67,7 @@
         <ul id="messages" onscroll="handleScroll()"></ul>
         <button id="scroll-btn" onclick="scrollToBottom()">↓</button>
         <div class="input-area">
-            <input type="text" id="msg-input" class="chat-input" placeholder="メッセージを入力..." maxlength="500" onkeypress="if(event.key==='Enter') send()">
+            <input type="text" id="msg-input" class="chat-input" placeholder="メッセージを入力..." maxlength="300" onkeypress="if(event.key==='Enter') send()">
         </div>
     </div>
 
@@ -81,8 +82,8 @@
     const SERVER = "https://plus-chat-api.onrender.com";
     const ROLES = { OWNER: 100, ADMIN: 50, USER: 0 };
     let socket, myName, myId, myRole, isAutoScroll = true, mode = 'login';
+    let isCoolingDown = false; // 連投対策用フラグ
 
-    // 強力なエスケープ関数
     function escapeHTML(str) {
         if (!str) return "";
         return String(str).replace(/[&<>"']/g, m => ({
@@ -90,9 +91,9 @@
         }[m]));
     }
 
-    // 名前のバリデーション（記号を弾く）
     function isValidName(name) {
-        const regex = /^[a-zA-Z0-9ぁ-んァ-ヶー一-龠]+$/;
+        // - と _ を許可
+        const regex = /^[a-zA-Z0-9ぁ-んァ-ヶー一-龠\-_]+$/;
         return regex.test(name) && name.length <= 15;
     }
 
@@ -116,13 +117,7 @@
         const u = document.getElementById('auth-user').value.trim();
         const p = document.getElementById('auth-pass').value;
         if(!u || !p) return;
-
-        // 記号が含まれていたら弾く（荒らし対策）
-        if (!isValidName(u)) {
-            alert("ユーザー名に記号は使えません。");
-            localStorage.clear();
-            return;
-        }
+        if (!isValidName(u)) return alert("名前は英数字・漢字・かな・ハイフン・アンダースコアのみ使用可能です");
 
         try {
             const res = await fetch(`${SERVER}/api/${mode}`, {
@@ -131,21 +126,20 @@
             });
             const data = await res.json();
             if (data.success) {
-                if (mode === 'register') { alert('完了'); toggleAuth(); }
+                if (mode === 'register') { alert('登録完了'); toggleAuth(); }
                 else {
                     localStorage.setItem('plus_chat_user', u);
                     localStorage.setItem('plus_chat_pass', p);
                     myName = data.username; myId = data.userId; myRole = data.role;
                     startChat();
                 }
-            } else { logout(); }
+            } else { if(!isAuto) alert(data.message); logout(); }
         } catch(e) { console.error(e); }
     }
 
     function startChat() {
         document.getElementById('auth-page').classList.add('hidden');
         document.getElementById('chat-page').classList.remove('hidden');
-        // 自分の名前表示もエスケープ
         document.getElementById('my-display-name').innerHTML = `⚙️ <span class="role-${myRole}">${escapeHTML(myName)}</span>`;
         
         socket = io(SERVER);
@@ -156,42 +150,62 @@
         });
         socket.on('chat message', data => { addMsg(data); if (isAutoScroll) scrollToBottom(); });
         socket.on('delete message', id => { document.getElementById(`msg-${id}`)?.remove(); });
-        socket.on('user status data', data => {
-            const box = document.getElementById('status-box');
-            if(box) box.innerHTML = `状態: ${data.isBanned ? 'BAN' : '正常'}<br>Mute: ${data.muteStatus}`;
+        
+        // 全員強制退出コマンドを受け取った場合
+        socket.on('force logout', () => {
+            alert("管理者によって全員強制退出されました。");
+            logout();
         });
+
+        // 全メッセージ削除を受け取った場合
+        socket.on('clear all messages', () => {
+            document.getElementById('messages').innerHTML = '';
+        });
+
+        socket.on('system message', t => alert(t));
     }
 
     function addMsg(d) {
         const li = document.createElement('li');
         li.className = 'message-item' + (d.user === myName ? ' me' : '');
         li.id = `msg-${d.id}`;
-        
-        // 名前のクリックイベントでも変なことが起きないよう、IDなどは文字列として扱う
         const sUser = escapeHTML(d.user);
         const sText = escapeHTML(d.text);
-        const sId = String(d.userId).replace(/[^a-zA-Z0-9]/g, '');
+        const time = d.createdAt ? new Date(d.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--';
 
         li.innerHTML = `
-            <span class="user-name role-${d.role || 'USER'}" onclick="openMenu('${sUser}', '${sId}', '${d.role}', ${d.id})">${sUser}</span>
+            <span class="user-name role-${d.role || 'USER'}" onclick="openMenu('${sUser}', '${d.userId}', '${d.role}', ${d.id})">${sUser}</span>
             <div style="font-size:15px; color:#eee; word-break: break-all;">${sText}</div>
+            <span class="time">${time}</span><div style="clear:both;"></div>
         `;
         document.getElementById('messages').appendChild(li);
     }
 
     function openMenu(name, targetId, targetRole, msgId) {
         const content = document.getElementById('modal-content');
-        // モーダル内も徹底的にエスケープ
-        content.innerHTML = `<h3 class="role-${targetRole}">${escapeHTML(name)}</h3><p style="font-size:10px; color:#666;">ID: ${escapeHTML(targetId)}</p>`;
-        content.innerHTML += `<div id="status-box" class="status-box">...</div>`;
-        socket.emit('get user status', targetId);
-
+        content.innerHTML = `<h3 class="role-${targetRole}">${escapeHTML(name)}</h3><p style="font-size:10px; color:#666;">ID: ${targetId}</p>`;
+        
         if (ROLES[myRole] >= ROLES.ADMIN && myName !== name) {
-            content.innerHTML += `<button class="btn-m" onclick="doAdmin('delete', '${targetId}', null, ${msgId})">削除</button>`;
-            content.innerHTML += `<button class="btn-m" style="background:#cc0000;" onclick="doAdmin('ban', '${targetId}')">即BAN</button>`;
+            content.innerHTML += `<button class="btn-m" onclick="doAdmin('delete', '${targetId}', null, ${msgId})">メッセージ削除</button>`;
+            content.innerHTML += `<button class="btn-m" style="background:#cc0000;" onclick="doAdmin('ban', '${targetId}')">BAN</button>`;
         }
+        
+        // OWNER限定：全体操作
+        if (myRole === 'OWNER') {
+            content.innerHTML += `<hr style="margin:10px 0; border:0.5px solid #444;">`;
+            content.innerHTML += `<button class="btn-m" style="background:#ff4e4e;" onclick="adminCommand('kickall')">全員強制退出</button>`;
+            content.innerHTML += `<button class="btn-m" style="background:#ffa500; color:black;" onclick="adminCommand('clearall')">メッセージ全消去</button>`;
+        }
+
         content.innerHTML += `<button class="btn-m" onclick="closeModal()">閉じる</button>`;
         document.getElementById('modal-area').classList.remove('hidden');
+    }
+
+    // 全体操作コマンド
+    function adminCommand(type) {
+        if(!confirm("本当に実行しますか？")) return;
+        socket.emit('admin global command', { type: type, myId: myId });
+        closeModal();
     }
 
     function doAdmin(type, targetId, newRole, msgId) {
@@ -206,9 +220,27 @@
     function scrollToBottom() { const l = document.getElementById('messages'); l.scrollTop = l.scrollHeight; }
     function closeModal() { document.getElementById('modal-area').classList.add('hidden'); }
     function logout() { localStorage.clear(); location.reload(); }
+
     function send() { 
+        if (isCoolingDown) return; // クールダウン中なら何もしない
+
         const i = document.getElementById('msg-input'); 
-        if(i.value.trim()){ socket.emit('chat message', {user:myName, text:i.value}); i.value=''; } 
+        const text = i.value.trim();
+        if(!text) return;
+
+        // 連投対策
+        isCoolingDown = true;
+        i.disabled = true;
+        
+        socket.emit('chat message', {user:myName, text:text}); 
+        i.value=''; 
+
+        // 3秒後に解除
+        setTimeout(() => {
+            isCoolingDown = false;
+            i.disabled = false;
+            i.focus();
+        }, 3000);
     }
 </script>
 </body>

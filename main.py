@@ -376,6 +376,61 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
         "recommended_videos": video_data[1],
         "proxy": proxy
     })
+
+@app.get('/api/ytdlp/{video_id}')
+def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return {"error": "unauthorized"}
+    try:
+        import yt_dlp
+        ydl_opts = {"quiet": True, "format": "bestvideo[ext=webm]+bestaudio[ext=m4a]/best"}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(
+                f"https://youtube.com/watch?v={video_id}",
+                download=False
+            )
+
+        # 画質ストリーム
+        quality_streams = []
+        audio_url = None
+        for f in info.get("formats", []):
+            if f.get("vcodec") != "none" and f.get("acodec") == "none":
+                quality_streams.append({
+                    "url": f["url"],
+                    "resolution": f"{f.get('height', '?')}p",
+                })
+            elif f.get("acodec") != "none" and f.get("vcodec") == "none":
+                if not audio_url:
+                    audio_url = f["url"]
+
+        quality_streams.sort(
+            key=lambda x: int(x["resolution"].replace("p","")) if x["resolution"].replace("p","").isdigit() else 0,
+            reverse=True
+        )
+        # 重複解像度を除去
+        seen = set()
+        unique_streams = []
+        for s in quality_streams:
+            if s["resolution"] not in seen:
+                seen.add(s["resolution"])
+                unique_streams.append(s)
+
+        # HLS（ライブ）
+        hls_url = None
+        if info.get("is_live"):
+            for f in info.get("formats", []):
+                if f.get("protocol", "").startswith("m3u8"):
+                    hls_url = f["url"]
+                    break
+
+        return {
+            "quality_streams": unique_streams,
+            "audio_url": audio_url,
+            "hlsUrl": hls_url,
+            "provider": "ytdlp"
+        }
+    except Exception as e:
+        return {"error": str(e)}
   
 @app.get('/w', response_class=HTMLResponse)
 def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):

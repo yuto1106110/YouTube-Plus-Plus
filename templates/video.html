@@ -369,9 +369,19 @@
                     {% endif %}
                 </div>
                 <div class="channel-row">
-                    <img src="{{ author_icon }}" alt="{{ author }}">
-                    <a href="/channel/{{ author_id }}">{{ author }}</a>
-                    <span style="color:var(--text-sub); font-size:12px;">{{ subscribers_count }}</span>
+    <img src="{{ author_icon }}" alt="{{ author }}">
+    <a href="/channel/{{ author_id }}">{{ author }}</a>
+    <span style="color:var(--text-sub); font-size:12px;">{{ subscribers_count }}</span>
+    <button id="subscribe-btn" onclick="toggleSubscribe('{{ author_id }}', '{{ author }}', '{{ author_icon }}')"
+        style="
+            margin-left: 8px; padding: 6px 14px;
+            border-radius: 20px; border: none; cursor: pointer;
+            font-size: 13px; font-weight: bold;
+            background: var(--text); color: var(--bg);
+            transition: background 0.2s;
+        ">
+        読み込み中...
+    </button>
                 </div>
                 <div class="description-box" id="desc-box" onclick="toggleDesc()">
                     {{ description | safe }}
@@ -674,6 +684,53 @@ function setPlayback(mode) {
     closeAllMenus();
 }
 
+// ===== チャンネル登録 =====
+function getSubscriptions() {
+    return JSON.parse(localStorage.getItem('subscriptions') || '[]');
+}
+
+function saveSubscriptions(subs) {
+    localStorage.setItem('subscriptions', JSON.stringify(subs));
+}
+
+function isSubscribed(channelId) {
+    return getSubscriptions().some(s => s.id === channelId);
+}
+
+function toggleSubscribe(channelId, channelName, channelIcon) {
+    let subs = getSubscriptions();
+    if (isSubscribed(channelId)) {
+        subs = subs.filter(s => s.id !== channelId);
+        saveSubscriptions(subs);
+        updateSubscribeBtn(false);
+    } else {
+        subs.push({
+            id: channelId,
+            name: channelName,
+            icon: channelIcon,
+            subscribedAt: Date.now()
+        });
+        saveSubscriptions(subs);
+        updateSubscribeBtn(true);
+    }
+}
+
+function updateSubscribeBtn(subscribed) {
+    const btn = document.getElementById('subscribe-btn');
+    if (subscribed) {
+        btn.textContent = '✓ 登録済み';
+        btn.style.background = 'rgba(128,128,128,0.3)';
+        btn.style.color = 'var(--text)';
+    } else {
+        btn.textContent = 'チャンネル登録';
+        btn.style.background = 'var(--text)';
+        btn.style.color = 'var(--bg)';
+    }
+}
+
+// ページ読み込み時にボタン状態を設定
+updateSubscribeBtn(isSubscribed("{{ author_id }}"));
+    
 // ===== 共有 =====
 function copyToClipboard(text, el) {
     navigator.clipboard.writeText(text).then(() => {

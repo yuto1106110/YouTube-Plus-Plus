@@ -169,23 +169,6 @@ def getVideoData(videoid):
     )
     highstream_url = quality_streams[0]["url"] if quality_streams else None
 
-    for stream in adaptiveFormats:
-        if (stream.get("container") == "m4a" and
-            stream.get("audioQuality") == "AUDIO_QUALITY_MEDIUM" and
-            stream.get("audioTrack", {}).get("languageCode", "") in ["ja", "jpn"]):
-            audio_url = stream.get("url")
-            break
-    if not audio_url:
-        for stream in adaptiveFormats:
-            if stream.get("container") == "m4a" and stream.get("audioQuality") == "AUDIO_QUALITY_MEDIUM":
-                audio_url = stream.get("url")
-                break
-    if not audio_url:
-        for stream in adaptiveFormats:
-            if stream.get("container") == "m4a":
-                audio_url = stream.get("url")
-                break
-
     streamUrls = [
         {"url": s["url"], "resolution": s["resolution"]}
         for s in adaptiveFormats

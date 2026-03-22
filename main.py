@@ -151,6 +151,20 @@ def formatViewCount(count):
     except:
         return str(count)
 
+def convertSubCount(text):
+    try:
+        text = str(text).upper().replace(',', '')
+        if 'K' in text:
+            return formatViewCount(int(float(text.replace('K', '')) * 1000)) + "人"
+        elif 'M' in text:
+            return formatViewCount(int(float(text.replace('M', '')) * 1000000)) + "人"
+        elif 'B' in text:
+            return formatViewCount(int(float(text.replace('B', '')) * 1000000000)) + "人"
+        else:
+            return formatViewCount(int(text)) + "人"
+    except:
+        return text
+
 def formatPublished(timestamp):
     try:
         now = int(time.time())
@@ -228,7 +242,7 @@ def getVideoData(videoid):
             "view_count_text": formatViewCount(t.get("viewCount", 0)),
             "published_text": formatPublished(t.get("published", 0)),
             "like_count": t.get("likeCount", 0),
-            "subscribers_count": formatViewCount(t.get("subCount", 0)) + "人" if t.get("subCount") else t.get("subCountText", ""),
+            "subscribers_count": convertSubCount(t.get("subCountText", "")),
             "streamUrls": streamUrls
         },
         [

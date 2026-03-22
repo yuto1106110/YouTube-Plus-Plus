@@ -488,6 +488,29 @@ def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie
     except Exception as e:
         return {"error": str(e)}
 
+@app.get("/api/channel_videos/{channel_id}")
+def get_channel_videos(channel_id: str, yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return {"error": "unauthorized"}
+    try:
+        t = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channel_id)}?hl=ja&gl=JP", invidious_api.channel))
+        latest = t.get('latestVideos', t.get('latestvideo', []))
+        videos = [
+            {
+                "id": v["videoId"],
+                "title": v["title"],
+                "author": t["author"],
+                "length": str(datetime.timedelta(seconds=v["lengthSeconds"])),
+                "published": v.get("published", 0),
+                "published_text": v.get("publishedText", ""),
+                "view_count_text": v.get("viewCountText", ""),
+            }
+            for v in latest
+        ]
+        return {"videos": videos}
+    except Exception as e:
+        return {"error": str(e), "videos": []}
+
 @app.get('/w', response_class=HTMLResponse)
 def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
     # v: video_id

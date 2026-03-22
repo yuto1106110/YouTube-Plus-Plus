@@ -211,8 +211,8 @@ def getVideoData(videoid):
         if s.get("container") == "webm" and s.get("resolution")
     ]
 
-    return [
-        {
+     [
+        {return
             "video_urls": list(reversed([i["url"] for i in t["formatStreams"]]))[:2],
             "highstream_url": highstream_url,
             "audio_url": audio_url,
@@ -226,7 +226,7 @@ def getVideoData(videoid):
             "author_thumbnails_url": t["authorThumbnails"][-1]["url"],
             "view_count": t["viewCount"],
             "view_count_text": formatViewCount(t.get("viewCount", 0)),
-            "published": t.get("published", 0),
+            "published_text": formatPublished(t.get("published", 0)),
             "like_count": t["likeCount"],
             "subscribers_count": t["subCountText"],
             "streamUrls": streamUrls

@@ -214,14 +214,19 @@ def getVideoData(videoid):
     highstream_url = None
     audio_url = None
 
- # 全画質のwebmストリームを取得
-quality_streams = []
-for stream in adaptiveFormats:
-    if stream.get("container") == "webm" and stream.get("resolution"):
-        quality_streams.append({
-            "url": stream.get("url"),
-            "resolution": stream.get("resolution"),
-        })
+# 高画質ストリーム（全画質取得）
+    quality_streams = []
+    for stream in adaptiveFormats:
+        if stream.get("container") == "webm" and stream.get("resolution"):
+            quality_streams.append({
+                "url": stream.get("url"),
+                "resolution": stream.get("resolution"),
+            })
+    quality_streams.sort(
+        key=lambda x: int(x["resolution"].replace("p", "")) if x["resolution"].replace("p", "").isdigit() else 0,
+        reverse=True
+    )
+    highstream_url = quality_streams[0]["url"] if quality_streams else None
 
 # 高画質順に並べる（1080p → 720p → 480p ...）
 quality_streams.sort(
@@ -429,7 +434,6 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
         return redirect("/")
     response.set_cookie("yuki", "True", max_age=7*24*60*60)
     video_data = getVideoData(v)
-    response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
     return template('video.html', {
         "request": request,
         "videoid": v,

@@ -384,23 +384,32 @@ def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie
     try:
         import yt_dlp
         ydl_opts = {
-    "quiet": True,
-    "format": "bestvideo[ext=webm]+bestaudio[ext=m4a]/best",
-    # Botチェック回避
-    "extractor_args": {
-        "youtube": {
-            "player_client": ["android", "web"],
+            "quiet": True,
+            "format": "bestvideo[ext=webm]+bestaudio[ext=m4a]/best",
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["android", "web"],
+                    "player_skip": ["js", "configs"],
+                }
+            },
+            "http_headers": {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36",
+                "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Encoding": "gzip, deflate",
+                "DNT": "1",
+            },
+            "sleep_interval": 2,
+            "max_sleep_interval": 5,
+            "socket_timeout": 30,
+            "retries": {"max_retries": 3, "backoff_factor": 0.5},
+            "nocheckcertificate": True,
         }
-    },
-    "http_headers": {
-        "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36",
-        "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
-    },
-    "sleep_interval": 1,
-    "max_sleep_interval": 3,
-}
+      
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
 
-        # 画質ストリーム
+      # 画質ストリーム
         quality_streams = []
         audio_url = None
         for f in info.get("formats", []):
@@ -412,7 +421,6 @@ def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie
             elif f.get("acodec") != "none" and f.get("vcodec") == "none":
                 if not audio_url:
                     audio_url = f["url"]
-
         quality_streams.sort(
             key=lambda x: int(x["resolution"].replace("p","")) if x["resolution"].replace("p","").isdigit() else 0,
             reverse=True
@@ -424,7 +432,6 @@ def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie
             if s["resolution"] not in seen:
                 seen.add(s["resolution"])
                 unique_streams.append(s)
-
         # HLS（ライブ）
         hls_url = None
         if info.get("is_live"):
@@ -432,7 +439,6 @@ def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie
                 if f.get("protocol", "").startswith("m3u8"):
                     hls_url = f["url"]
                     break
-
         return {
             "quality_streams": unique_streams,
             "audio_url": audio_url,
@@ -441,7 +447,7 @@ def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie
         }
     except Exception as e:
         return {"error": str(e)}
-  
+
 @app.get('/w', response_class=HTMLResponse)
 def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
     # v: video_id

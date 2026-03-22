@@ -65,14 +65,12 @@
             gap: 8px;
         }
         #top-bar .logo-area { flex-shrink: 0; }
-        /* ロゴ画像をテーマに合わせてフィルター */
         #top-bar .logo-area img {
             height: 28px; display: block;
-            filter: none;
+            mix-blend-mode: normal;
         }
-        html[data-theme="dark"] #top-bar .logo-area img,
-        @media (prefers-color-scheme: dark) {
-            #top-bar .logo-area img { filter: brightness(0) invert(1); }
+        html[data-theme="dark"] #top-bar .logo-area img {
+            mix-blend-mode: screen;
         }
         .search-container { flex: 1; min-width: 0; max-width: 480px; }
         .search-container form { display: flex; width: 100%; }
@@ -93,8 +91,6 @@
             flex-shrink: 0; color: var(--text-sub);
             font-size: 13px; text-decoration: none; white-space: nowrap;
         }
-
-        /* スマホではメニューリンクを隠す */
         @media (max-width: 480px) {
             #top-bar .menu-link { display: none; }
             .search-container { max-width: 100%; }
@@ -128,7 +124,7 @@
         }
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* コントロールバー（動画直下） */
+        /* コントロールバー */
         #player-controls-bar {
             display: flex; align-items: center; gap: 6px;
             padding: 6px 10px;
@@ -145,10 +141,8 @@
             transition: background 0.15s;
         }
         .ctrl-btn:hover { background: rgba(128,128,128,0.15); }
-        .ctrl-btn.active { background: #ff0000; color: #fff; border-color: #ff0000; }
         #quality-display {
-            font-size: 12px; color: var(--text-sub);
-            margin-left: auto;
+            font-size: 12px; color: var(--text-sub); margin-left: auto;
         }
 
         /* ポップアップメニュー */
@@ -164,7 +158,8 @@
         .popup-menu .menu-title {
             padding: 8px 16px; font-size: 12px;
             color: #aaa; text-transform: uppercase;
-            letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 4px;
         }
         .popup-menu .menu-item {
@@ -175,7 +170,9 @@
         }
         .popup-menu .menu-item:hover { background: rgba(255,255,255,0.1); }
         .popup-menu .menu-item.active { color: #3ea6ff; }
-        .popup-menu .menu-divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0; }
+        .popup-menu .menu-divider {
+            border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0;
+        }
 
         /* 動画情報 */
         .video-info { margin-top: 12px; }
@@ -242,7 +239,6 @@
     <div class="video-container">
         <div class="video-left">
 
-            <!-- プレイヤー -->
             <div class="video-player-wrapper">
                 <video id="videoPlayer" controls playsinline preload="auto"
                     poster="https://img.youtube.com/vi/{{ videoid }}/mqdefault.jpg">
@@ -262,7 +258,7 @@
                 <div id="loader"></div>
             </div>
 
-            <!-- コントロールバー（画質・再生方法・設定） -->
+            <!-- コントロールバー -->
             <div id="player-controls-bar">
                 <button class="ctrl-btn" onclick="openMenu('quality', this)">🎬 画質</button>
                 <button class="ctrl-btn" onclick="openMenu('playback', this)">▶ 再生方法</button>
@@ -336,7 +332,7 @@
             <div class="video-info">
                 <h1>{{ video_title }}</h1>
                 <div class="video-meta">
-                    <span>{{ view_count }}回視聴</span>
+                    <span>👁 {{ view_count }}回視聴</span>
                     <span>👍 {{ like_count }}</span>
                     <span>⏱ {{ length_text }}</span>
                 </div>
@@ -357,7 +353,6 @@
             </div>
         </div>
 
-        <!-- 関連動画 -->
         <div class="video-right">
             <h3 style="margin-bottom:12px; font-size:15px;">関連動画</h3>
             {% for rec in recommended_videos %}
@@ -385,7 +380,6 @@
 const video = document.getElementById('videoPlayer');
 const audio = document.getElementById('audioPlayer');
 const loader = document.getElementById('loader');
-const embedPlayer_id = 'embedPlayer';
 const videoid = "{{ videoid }}";
 let hlsInstance = null;
 let currentPlayback = 'normal';
@@ -394,15 +388,12 @@ let autoNextEnabled = false;
 let isDash = {{ 'true' if highstream_url else 'false' }};
 let activeMenuId = null;
 
-// ===== サムネポスター（再生前表示）=====
-// posterはHTML側で設定済み
-
 // ===== ローディング =====
 video.addEventListener('waiting', () => loader.style.display = 'block');
 video.addEventListener('playing', () => loader.style.display = 'none');
 video.addEventListener('canplay', () => loader.style.display = 'none');
 
-// ===== 音声同期（ズレ修正）=====
+// ===== 音声同期 =====
 function syncAudio() {
     if (!isDash || currentPlayback !== 'normal' || video.paused) return;
     const diff = Math.abs(audio.currentTime - video.currentTime);
@@ -440,22 +431,20 @@ video.addEventListener('ended', () => {
 function openMenu(name, btn) {
     const menuId = 'menu-' + name;
     const menu = document.getElementById(menuId);
-    // 同じメニューをクリックしたら閉じる
     if (activeMenuId === menuId && menu.style.display === 'block') {
         closeAllMenus();
         return;
     }
     closeAllMenus();
-    // ボタンの位置に合わせて表示
     const rect = btn.getBoundingClientRect();
     menu.style.display = 'block';
-    // 上に表示（メニューの高さを考慮）
     const menuH = menu.offsetHeight || 200;
-    let top = rect.top - menuH - 8;
-    if (top < 8) top = rect.bottom + 8; // 上に収まらない場合は下に
-    let left = rect.left;
     const menuW = menu.offsetWidth || 220;
+    let top = rect.top - menuH - 8;
+    if (top < 8) top = rect.bottom + 8;
+    let left = rect.left;
     if (left + menuW > window.innerWidth - 8) left = window.innerWidth - menuW - 8;
+    if (left < 8) left = 8;
     menu.style.top = top + 'px';
     menu.style.left = left + 'px';
     activeMenuId = menuId;
@@ -477,14 +466,12 @@ function changeQuality(url, label, type) {
     const currentTime = video.currentTime;
     const wasPlaying = !video.paused;
 
-    // 全画質ボタンのアクティブ解除
     document.querySelectorAll('[id^="q-"]').forEach(el => {
         el.classList.remove('active');
         const span = el.querySelector('span:first-child');
         if (span) span.textContent = span.textContent.replace('✓ ', '');
     });
 
-    // 音声をリセット
     audio.pause();
     isDash = false;
 
@@ -500,33 +487,31 @@ function changeQuality(url, label, type) {
             video.src = url;
             if (wasPlaying) video.play();
         }
-        // 音声を無効化
         document.getElementById('audiosrc').src = '';
         audio.load();
         currentPlayback = 'hls';
 
-        } else if (type === 'dash') {
-            // 高画質（映像+別音声）→ 音声ソースを毎回元のURLから復元
-            const audioSrc = document.getElementById('audiosrc').dataset.original;
-            if (audioSrc) {
-                document.getElementById('audiosrc').src = audioSrc;
-                audio.load();
-            }
-
-            document.getElementById('videosrc').src = url;
-            video.load();
-            video.currentTime = currentTime;
-            isDash = true;
-            if (wasPlaying) {
-                video.play().then(() => {
-                    audio.currentTime = video.currentTime;
-                    audio.play().catch(() => {});
-                }).catch(() => {});
-            }
-            currentPlayback = 'normal';
+    } else if (type === 'dash') {
+        // 音声ソースをオリジナルから復元
+        const audioSrc = document.getElementById('audiosrc').dataset.original;
+        if (audioSrc) {
+            document.getElementById('audiosrc').src = audioSrc;
+            audio.load();
+        }
+        document.getElementById('videosrc').src = url;
+        video.load();
+        video.currentTime = currentTime;
+        isDash = true;
+        if (wasPlaying) {
+            video.play().then(() => {
+                audio.currentTime = video.currentTime;
+                audio.play().catch(() => {});
+            }).catch(() => {});
+        }
+        currentPlayback = 'normal';
 
     } else {
-        // 通常画質（音声込み）→ 音声タグを無効化
+        // 通常画質：音声を無効化
         document.getElementById('audiosrc').src = '';
         audio.load();
         document.getElementById('videosrc').src = url;
@@ -550,10 +535,10 @@ function changeQuality(url, label, type) {
 
 // ===== 再生方法 =====
 function setPlayback(mode) {
-    let embed = document.getElementById(embedPlayer_id);
+    let embed = document.getElementById('embedPlayer');
     if (!embed) {
         embed = document.createElement('iframe');
-        embed.id = embedPlayer_id;
+        embed.id = 'embedPlayer';
         embed.style.cssText = 'display:none; width:100%; aspect-ratio:16/9; border:none;';
         embed.allowFullscreen = true;
         document.querySelector('.video-player-wrapper').appendChild(embed);
@@ -579,6 +564,7 @@ function setPlayback(mode) {
 
 // ===== テーマ =====
 let currentTheme = localStorage.getItem('theme') || 'system';
+
 function setTheme(theme) {
     currentTheme = theme;
     localStorage.setItem('theme', theme);
@@ -588,21 +574,23 @@ function setTheme(theme) {
     } else {
         html.setAttribute('data-theme', theme);
     }
-    // ロゴ調整
     updateLogo();
-    // チェックマーク更新
     ['system','dark','light'].forEach(t => {
         const el = document.getElementById('th-' + t + '-check');
         if (el) el.style.display = t === theme ? 'inline' : 'none';
     });
+    closeAllMenus();
 }
+
 function updateLogo() {
     const logo = document.getElementById('logo-img');
     if (!logo) return;
     const isDark = currentTheme === 'dark' ||
         (currentTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    logo.style.filter = isDark ? 'brightness(0) invert(1)' : 'none';
+    logo.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    logo.style.filter = 'none';
 }
+
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateLogo);
 setTheme(currentTheme);
 
@@ -635,14 +623,12 @@ function toggleDesc() {
 $.get('/comments?v=' + videoid, function(data) {
     const div = document.createElement('div');
     div.innerHTML = data;
-    // チャンネルリンクを削除
     div.querySelectorAll('a[href^="/channel/"]').forEach(a => {
         const span = document.createElement('span');
         span.textContent = a.textContent;
         span.style.fontWeight = 'bold';
         a.replaceWith(span);
     });
-    // 時間ジャンプ
     div.querySelectorAll('a[data-jump-time]').forEach(a => {
         a.addEventListener('click', e => {
             e.preventDefault();

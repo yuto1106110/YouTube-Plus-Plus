@@ -383,12 +383,22 @@ def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie
         return {"error": "unauthorized"}
     try:
         import yt_dlp
-        ydl_opts = {"quiet": True, "format": "bestvideo[ext=webm]+bestaudio[ext=m4a]/best"}
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(
-                f"https://youtube.com/watch?v={video_id}",
-                download=False
-            )
+        ydl_opts = {
+    "quiet": True,
+    "format": "bestvideo[ext=webm]+bestaudio[ext=m4a]/best",
+    # Botチェック回避
+    "extractor_args": {
+        "youtube": {
+            "player_client": ["android", "web"],
+        }
+    },
+    "http_headers": {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36",
+        "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+    },
+    "sleep_interval": 1,
+    "max_sleep_interval": 3,
+}
 
         # 画質ストリーム
         quality_streams = []

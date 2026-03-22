@@ -398,9 +398,12 @@ video.addEventListener('canplay', () => loader.style.display = 'none');
 function syncAudio() {
     if (!isDash || currentPlayback !== 'normal' || video.paused) return;
     const diff = Math.abs(audio.currentTime - video.currentTime);
-    if (diff > 0.2) audio.currentTime = video.currentTime;
+    // ズレが1秒以上の時だけ修正
+    if (diff > 1.0) {
+        audio.currentTime = video.currentTime;
+    }
 }
-setInterval(syncAudio, 500);
+setInterval(syncAudio, 3000); // 3秒ごとに確認
 
 video.addEventListener('play', () => {
     if (!isDash || currentPlayback !== 'normal') return;
@@ -410,8 +413,11 @@ video.addEventListener('play', () => {
 video.addEventListener('pause', () => audio.pause());
 video.addEventListener('seeked', () => {
     if (!isDash) return;
-    audio.currentTime = video.currentTime;
-    if (!video.paused) audio.play().catch(() => {});
+    // シーク後は少し待ってから同期（バッファリング待ち）
+    setTimeout(() => {
+        audio.currentTime = video.currentTime;
+        if (!video.paused) audio.play().catch(() => {});
+    }, 300);
 });
 video.addEventListener('volumechange', () => {
     audio.volume = video.volume;

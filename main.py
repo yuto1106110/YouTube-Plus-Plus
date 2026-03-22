@@ -191,7 +191,7 @@ def gettingVideoData(videoid):
     ]
 
 def getVideoData(videoid):
-    t = json.loads(requestAPI(f"/videos/{urllib.parse.quote(videoid)}", invidious_api.video))
+    t = json.loads(requestAPI(f"/videos/{urllib.parse.quote(videoid)}?hl=ja&gl=JP", invidious_api.video))
 
     if 'recommendedvideo' in t:
         recommended_videos = t["recommendedvideo"]

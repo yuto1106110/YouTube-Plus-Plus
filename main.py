@@ -190,11 +190,9 @@ def gettingVideoData(videoid):
         ]
     ]
 
-
 def getVideoData(videoid):
     t = json.loads(requestAPI(f"/videos/{urllib.parse.quote(videoid)}", invidious_api.video))
 
-    # 推奨動画の情報（キー名の違いに対応）
     if 'recommendedvideo' in t:
         recommended_videos = t["recommendedvideo"]
     elif 'recommendedVideos' in t:
@@ -209,78 +207,63 @@ def getVideoData(videoid):
             "viewCountText": "Load Failed"
         }]
 
-    # 【新規追加】adaptiveFormats から高画質動画と音声の URL を抽出する
     adaptiveFormats = t.get("adaptiveFormats", [])
     highstream_url = None
     audio_url = None
-
-# 高画質ストリーム（全画質取得）
     quality_streams = []
+
     for stream in adaptiveFormats:
         if stream.get("container") == "webm" and stream.get("resolution"):
             quality_streams.append({
                 "url": stream.get("url"),
                 "resolution": stream.get("resolution"),
             })
+
     quality_streams.sort(
         key=lambda x: int(x["resolution"].replace("p", "")) if x["resolution"].replace("p", "").isdigit() else 0,
         reverse=True
     )
     highstream_url = quality_streams[0]["url"] if quality_streams else None
 
-# 高画質順に並べる（1080p → 720p → 480p ...）
-quality_streams.sort(
-    key=lambda x: int(x["resolution"].replace("p", "")) if x["resolution"].replace("p", "").isdigit() else 0,
-    reverse=True
-)
-
-# highstream_urlは後方互換のため一番高画質をセット
-highstream_url = quality_streams[0]["url"] if quality_streams else None
-    # 音声: container == 'm4a' かつ audioQuality == 'AUDIO_QUALITY_MEDIUM' のストリーム
     for stream in adaptiveFormats:
         if stream.get("container") == "m4a" and stream.get("audioQuality") == "AUDIO_QUALITY_MEDIUM":
             audio_url = stream.get("url")
             break
 
-    adaptive = t.get('adaptiveFormats', [])
     streamUrls = [
-        {
-            'url': stream['url'],
-            'resolution': stream['resolution']
-        }
-        for stream in adaptive
-        if stream.get('container') == 'webm' and stream.get('resolution')
+        {"url": s["url"], "resolution": s["resolution"]}
+        for s in adaptiveFormats
+        if s.get("container") == "webm" and s.get("resolution")
     ]
-    return [
-      {
-        # 既存処理（ここでは formatStreams のURLを逆順にして上位2件を使用）
-        'video_urls': list(reversed([i["url"] for i in t["formatStreams"]]))[:2],
-        'highstream_url': highstream_url,
-        'audio_url': audio_url,
-        'quality_streams': quality_streams,
-        'description_html': t["descriptionHtml"].replace("\n", "<br>"),
-        'title': t["title"],
-        'length_text': str(datetime.timedelta(seconds=t["lengthSeconds"])),
-        'author_id': t["authorId"],
-        'author': t["author"],
-        'author_thumbnails_url': t["authorThumbnails"][-1]["url"],
-        'view_count': t["viewCount"],
-        'like_count': t["likeCount"],
-        'subscribers_count': t["subCountText"],
-        'streamUrls': streamUrls
-    },
 
-    [
-      {
-        "video_id": i["videoId"],
-        "title": i["title"],
-        "author_id": i["authorId"],
-        "author": i["author"],
-        "length_text": str(datetime.timedelta(seconds=i["lengthSeconds"])),
-        "view_count_text": i["viewCountText"]
-    } for i in recommended_videos]
-    
-]
+    return [
+        {
+            "video_urls": list(reversed([i["url"] for i in t["formatStreams"]]))[:2],
+            "highstream_url": highstream_url,
+            "audio_url": audio_url,
+            "quality_streams": quality_streams,
+            "description_html": t["descriptionHtml"].replace("\n", "<br>"),
+            "title": t["title"],
+            "length_text": str(datetime.timedelta(seconds=t["lengthSeconds"])),
+            "author_id": t["authorId"],
+            "author": t["author"],
+            "author_thumbnails_url": t["authorThumbnails"][-1]["url"],
+            "view_count": t["viewCount"],
+            "like_count": t["likeCount"],
+            "subscribers_count": t["subCountText"],
+            "streamUrls": streamUrls
+        },
+        [
+            {
+                "video_id": i["videoId"],
+                "title": i["title"],
+                "author_id": i["authorId"],
+                "author": i["author"],
+                "length_text": str(datetime.timedelta(seconds=i["lengthSeconds"])),
+                "view_count_text": i["viewCountText"]
+            } for i in recommended_videos
+        ]
+    ]
 
 def getSearchData(q, page):
 

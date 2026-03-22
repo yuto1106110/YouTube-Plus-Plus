@@ -332,9 +332,12 @@
             <div class="video-info">
                 <h1>{{ video_title }}</h1>
                 <div class="video-meta">
-                    <span>👁 {{ view_count }}回視聴</span>
+                    <span>👁 {{ view_count_text }}回視聴</span>
                     <span>👍 {{ like_count }}</span>
                     <span>⏱ {{ length_text }}</span>
+                    {% if published_text %}
+                    <span>🕐 {{ published_text }}</span>
+                    {% endif %}
                 </div>
                 <div class="channel-row">
                     <img src="{{ author_icon }}" alt="{{ author }}">

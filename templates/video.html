@@ -254,9 +254,9 @@
                 </video>
                 <audio id="audioPlayer">
                     {% if audio_url %}
-                    <source id="audiosrc" src="{{ audio_url }}" type="audio/mp4">
+                    <source id="audiosrc" src="{{ audio_url }}" type="audio/mp4" data-original="{{ audio_url }}">
                     {% elif videourls %}
-                    <source id="audiosrc" src="{{ videourls[0] }}" type="audio/mp4">
+                    <source id="audiosrc" src="{{ videourls[0] }}" type="audio/mp4" data-original="{{ videourls[0] }}">
                     {% endif %}
                 </audio>
                 <div id="loader"></div>
@@ -336,7 +336,7 @@
             <div class="video-info">
                 <h1>{{ video_title }}</h1>
                 <div class="video-meta">
-                    <span>👁 {{ view_count }}回視聴</span>
+                    <span>{{ view_count }}回視聴</span>
                     <span>👍 {{ like_count }}</span>
                     <span>⏱ {{ length_text }}</span>
                 </div>
@@ -505,24 +505,25 @@ function changeQuality(url, label, type) {
         audio.load();
         currentPlayback = 'hls';
 
-    } else if (type === 'dash') {
-        // 高画質（映像+別音声）
-        // まず音声ソースを復元
-        const audioSrc = "{{ audio_url if audio_url else (videourls[0] if videourls else '') }}";
-        document.getElementById('audiosrc').src = audioSrc;
-        audio.load();
+        } else if (type === 'dash') {
+            // 高画質（映像+別音声）→ 音声ソースを毎回元のURLから復元
+            const audioSrc = document.getElementById('audiosrc').dataset.original;
+            if (audioSrc) {
+                document.getElementById('audiosrc').src = audioSrc;
+                audio.load();
+            }
 
-        document.getElementById('videosrc').src = url;
-        video.load();
-        video.currentTime = currentTime;
-        isDash = true;
-        if (wasPlaying) {
-            video.play().then(() => {
-                audio.currentTime = video.currentTime;
-                audio.play().catch(() => {});
-            }).catch(() => {});
-        }
-        currentPlayback = 'normal';
+            document.getElementById('videosrc').src = url;
+            video.load();
+            video.currentTime = currentTime;
+            isDash = true;
+            if (wasPlaying) {
+                video.play().then(() => {
+                    audio.currentTime = video.currentTime;
+                    audio.play().catch(() => {});
+                }).catch(() => {});
+            }
+            currentPlayback = 'normal';
 
     } else {
         // 通常画質（音声込み）→ 音声タグを無効化

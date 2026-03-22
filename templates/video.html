@@ -60,7 +60,6 @@
             overflow-x: hidden; min-height: 100vh;
         }
 
-        /* トップバー */
         #top-bar {
             display: flex; align-items: center;
             background: var(--topbar-bg); height: 56px; padding: 0 12px;
@@ -69,13 +68,8 @@
             gap: 8px;
         }
         #top-bar .logo-area { flex-shrink: 0; }
-        #top-bar .logo-area img {
-            height: 28px; display: block;
-            mix-blend-mode: normal;
-        }
-        html[data-theme="dark"] #top-bar .logo-area img {
-            mix-blend-mode: screen;
-        }
+        #top-bar .logo-area img { height: 28px; display: block; mix-blend-mode: normal; }
+        html[data-theme="dark"] #top-bar .logo-area img { mix-blend-mode: screen; }
         .search-container { flex: 1; min-width: 0; max-width: 480px; }
         .search-container form { display: flex; width: 100%; }
         .search-container input {
@@ -100,13 +94,11 @@
             .search-container { max-width: 100%; }
         }
 
-        /* メインレイアウト */
         .main-content { margin-top: 56px; padding: 12px; max-width: 100vw; overflow-x: hidden; }
         .video-container { display: flex; gap: 16px; max-width: 100%; }
         .video-left { flex: 0 0 70%; min-width: 0; display: flex; flex-direction: column; }
         .video-right { flex: 1; min-width: 0; }
 
-        /* プレイヤー */
         .video-player-wrapper {
             position: relative; background: #000;
             border-radius: 8px 8px 0 0; overflow: hidden; width: 100%;
@@ -117,7 +109,6 @@
         }
         audio { display: none; }
 
-        /* ローディング */
         #loader {
             border: 6px solid rgba(255,255,255,0.2);
             border-top: 6px solid #fff;
@@ -128,7 +119,6 @@
         }
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* コントロールバー */
         #player-controls-bar {
             display: flex; align-items: center; gap: 6px;
             padding: 6px 10px;
@@ -145,11 +135,8 @@
             transition: background 0.15s;
         }
         .ctrl-btn:hover { background: rgba(128,128,128,0.15); }
-        #quality-display {
-            font-size: 12px; color: var(--text-sub); margin-left: auto;
-        }
+        #quality-display { font-size: 12px; color: var(--text-sub); margin-left: auto; }
 
-        /* ポップアップメニュー */
         .popup-menu {
             display: none; position: fixed;
             background: var(--menu-bg);
@@ -160,25 +147,19 @@
             max-height: 70vh; overflow-y: auto;
         }
         .popup-menu .menu-title {
-            padding: 8px 16px; font-size: 12px;
-            color: #aaa; text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 4px;
+            padding: 8px 16px; font-size: 12px; color: #aaa;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 4px;
         }
         .popup-menu .menu-item {
-            padding: 10px 16px; color: var(--menu-text);
-            cursor: pointer;
+            padding: 10px 16px; color: var(--menu-text); cursor: pointer;
             display: flex; justify-content: space-between; align-items: center;
             font-size: 14px; transition: background 0.15s;
         }
         .popup-menu .menu-item:hover { background: rgba(255,255,255,0.1); }
         .popup-menu .menu-item.active { color: #3ea6ff; }
-        .popup-menu .menu-divider {
-            border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0;
-        }
+        .popup-menu .menu-divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 4px 0; }
 
-        /* 動画情報 */
         .video-info { margin-top: 12px; }
         .video-info h1 { font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 8px; }
         .video-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -188,7 +169,6 @@
         .channel-row a { color: var(--text); text-decoration: none; font-size: 14px; font-weight: 500; }
         .channel-row a:hover { color: var(--link); }
 
-        /* 説明欄 */
         .description-box {
             background: var(--desc-bg); border-radius: 8px; padding: 12px;
             font-size: 13px; color: var(--text-sub); line-height: 1.6;
@@ -197,44 +177,21 @@
         }
         .description-box.expanded { max-height: 2000px; }
 
-        /* コメント */
         .comments-section { margin-top: 20px; }
         .comments-section h3 { font-size: 16px; margin-bottom: 12px; }
         #comments { font-size: 13px; line-height: 1.5; }
-        #comments img {
-            width: 32px; height: 32px;
-            border-radius: 50%; flex-shrink: 0;
-            vertical-align: middle;
-        }
-        #comments .comment-item {
-            display: flex; gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-        }
-        #comments .comment-author {
-            font-weight: bold; font-size: 13px;
-            color: var(--text); margin-bottom: 4px;
-        }
-        #comments .comment-body {
-            font-size: 13px; color: var(--text-sub);
-            line-height: 1.5; word-break: break-word;
-        }
         #comments * {
             max-width: 100%;
             font-size: 13px !important;
             line-height: 1.5 !important;
         }
         #comments h1, #comments h2, #comments h3 {
-            font-size: 14px !important;
-            font-weight: bold;
+            font-size: 14px !important; font-weight: bold;
         }
         @media (max-width: 768px) {
             #comments * { font-size: 12px !important; }
-            #comments img { width: 28px; height: 28px; }
         }
 
-        /* 関連動画 */
         .recommendation { margin-bottom: 12px; }
         .recommendation a { text-decoration: none; color: var(--text); display: flex; gap: 8px; }
         .recommendation a:hover .rec-info h4 { color: var(--link); }
@@ -248,7 +205,6 @@
         .rec-info h4 { font-size: 13px; line-height: 1.4; margin-bottom: 4px; }
         .rec-info p { font-size: 12px; color: var(--text-sub); }
 
-        /* レスポンシブ */
         @media (max-width: 768px) {
             .video-container { flex-direction: column; }
             .video-left { flex: none; width: 100%; }
@@ -286,7 +242,7 @@
                     {% endif %}
                 </video>
                 <audio id="audioPlayer">
-                    {% if audio_url %}                    
+                    {% if audio_url %}
                     <source id="audiosrc" src="{{ audio_url }}" type="audio/mp4" data-original="{{ audio_url }}">
                     {% elif videourls %}
                     <source id="audiosrc" src="{{ videourls[0] }}" type="audio/mp4" data-original="{{ videourls[0] }}">
@@ -302,6 +258,7 @@
                 <span id="quality-display">{{ quality_streams[0].resolution if quality_streams else '自動' }}</span>
             </div>
 
+            <!-- 画質メニュー -->
             <div class="popup-menu" id="menu-quality">
                 <div class="menu-title">🎬 画質を選択</div>
                 {% for stream in quality_streams %}
@@ -325,16 +282,27 @@
                 {% endif %}
             </div>
 
+            <!-- 再生方法メニュー -->
             <div class="popup-menu" id="menu-playback">
                 <div class="menu-title">▶ 再生方法</div>
-                <div class="menu-item active" id="pb-normal" onclick="setPlayback('normal')">
-                    <span>✓ 通常再生</span>
+                <div class="menu-item active" id="pb-invidious" onclick="setProvider('invidious')">
+                    <span>✓ Invidious</span>
                 </div>
+                <div class="menu-item" id="pb-ytdlp" onclick="setProvider('ytdlp')">
+                    <span>yt-dlp</span>
+                </div>
+                <div class="menu-divider"></div>
                 <div class="menu-item" id="pb-embed" onclick="setPlayback('embed')">
                     <span>埋め込み再生</span>
                 </div>
+                {% if hlsUrl %}
+                <div class="menu-item" id="pb-hls" onclick="setPlayback('hls')">
+                    <span>🔴 HLS（ライブ）</span>
+                </div>
+                {% endif %}
             </div>
 
+            <!-- 設定メニュー -->
             <div class="popup-menu" id="menu-settings">
                 <div class="menu-title">⚙️ 設定</div>
                 <div class="menu-item" onclick="toggleLoop()">
@@ -364,7 +332,7 @@
             <div class="video-info">
                 <h1>{{ video_title }}</h1>
                 <div class="video-meta">
-                    <span>{{ view_count }}回視聴</span>
+                    <span>👁 {{ view_count }}回視聴</span>
                     <span>👍 {{ like_count }}</span>
                     <span>⏱ {{ length_text }}</span>
                 </div>
@@ -407,7 +375,7 @@
         </div>
     </div>
 </div>
-
+    
 <script>
 const video = document.getElementById('videoPlayer');
 const audio = document.getElementById('audioPlayer');
@@ -415,15 +383,18 @@ const loader = document.getElementById('loader');
 const videoid = "{{ videoid }}";
 let hlsInstance = null;
 let currentPlayback = 'normal';
+let currentProvider = 'invidious';
 let loopEnabled = false;
 let autoNextEnabled = false;
 let isDash = {{ 'true' if highstream_url else 'false' }};
 let activeMenuId = null;
 
+// ===== ローディング =====
 video.addEventListener('waiting', () => loader.style.display = 'block');
 video.addEventListener('playing', () => loader.style.display = 'none');
 video.addEventListener('canplay', () => loader.style.display = 'none');
 
+// ===== 音声同期 =====
 function syncAudio() {
     if (!isDash || currentPlayback !== 'normal' || video.paused) return;
     const diff = Math.abs(audio.currentTime - video.currentTime);
@@ -457,6 +428,7 @@ video.addEventListener('ended', () => {
     }
 });
 
+// ===== ポップアップメニュー =====
 function openMenu(name, btn) {
     const menuId = 'menu-' + name;
     const menu = document.getElementById(menuId);
@@ -490,6 +462,7 @@ document.addEventListener('click', e => {
     }
 });
 
+// ===== 画質変更 =====
 function changeQuality(url, label, type) {
     const currentTime = video.currentTime;
     const wasPlaying = !video.paused;
@@ -559,6 +532,64 @@ function changeQuality(url, label, type) {
     }
 }
 
+// ===== プロバイダー切り替え =====
+async function setProvider(provider) {
+    const btnInvidious = document.getElementById('pb-invidious');
+    const btnYtdlp = document.getElementById('pb-ytdlp');
+    btnInvidious.classList.remove('active');
+    btnYtdlp.classList.remove('active');
+    btnInvidious.querySelector('span').textContent = 'Invidious';
+    btnYtdlp.querySelector('span').textContent = 'yt-dlp';
+
+    if (provider === 'ytdlp') {
+        btnYtdlp.querySelector('span').textContent = '読み込み中...';
+        closeAllMenus();
+
+        const res = await fetch(`/api/ytdlp/${videoid}`);
+        const data = await res.json();
+
+        if (data.error) {
+            alert('yt-dlp取得失敗: ' + data.error);
+            btnYtdlp.querySelector('span').textContent = 'yt-dlp';
+            return;
+        }
+
+        // 画質メニューを更新
+        const qualityMenu = document.getElementById('menu-quality');
+        let html = '<div class="menu-title">🎬 画質を選択 (yt-dlp)</div>';
+        data.quality_streams.forEach((s, i) => {
+            html += `<div class="menu-item ${i === 0 ? 'active' : ''}"
+                onclick="changeQuality('${s.url}', '${s.resolution}', 'dash')">
+                <span>${i === 0 ? '✓ ' : ''}${s.resolution}</span>
+                ${i === 0 ? '<span style="font-size:11px;color:#aaa;">高画質</span>' : ''}
+            </div>`;
+        });
+        qualityMenu.innerHTML = html;
+
+        // 音声を更新
+        if (data.audio_url) {
+            document.getElementById('audiosrc').src = data.audio_url;
+            document.getElementById('audiosrc').dataset.original = data.audio_url;
+            audio.load();
+        }
+
+        // 一番高画質で再生
+        if (data.quality_streams.length > 0) {
+            changeQuality(data.quality_streams[0].url, data.quality_streams[0].resolution, 'dash');
+        }
+
+        btnYtdlp.querySelector('span').textContent = '✓ yt-dlp';
+        btnYtdlp.classList.add('active');
+        currentProvider = 'ytdlp';
+
+    } else {
+        // Invidiousに戻す
+        location.reload();
+    }
+    closeAllMenus();
+}
+
+// ===== 再生方法 =====
 function setPlayback(mode) {
     let embed = document.getElementById('embedPlayer');
     if (!embed) {
@@ -568,25 +599,41 @@ function setPlayback(mode) {
         embed.allowFullscreen = true;
         document.querySelector('.video-player-wrapper').appendChild(embed);
     }
+
     if (mode === 'embed') {
         video.pause(); audio.pause();
         video.style.display = 'none';
         embed.src = `https://www.youtube-nocookie.com/embed/${videoid}?autoplay=1`;
         embed.style.display = 'block';
-        document.getElementById('pb-normal').classList.remove('active');
         document.getElementById('pb-embed').classList.add('active');
         currentPlayback = 'embed';
+
+    } else if (mode === 'hls') {
+        embed.src = ''; embed.style.display = 'none';
+        video.style.display = 'block';
+        const hlsUrl = "{{ hlsUrl if hlsUrl else '' }}";
+        if (hlsUrl && typeof Hls !== 'undefined' && Hls.isSupported()) {
+            if (hlsInstance) hlsInstance.destroy();
+            hlsInstance = new Hls();
+            hlsInstance.loadSource(hlsUrl);
+            hlsInstance.attachMedia(video);
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+        } else if (hlsUrl) {
+            video.src = hlsUrl;
+            video.play();
+        }
+        currentPlayback = 'hls';
+
     } else {
         embed.src = ''; embed.style.display = 'none';
         video.style.display = 'block';
         video.play().catch(() => {});
-        document.getElementById('pb-embed').classList.remove('active');
-        document.getElementById('pb-normal').classList.add('active');
         currentPlayback = 'normal';
     }
     closeAllMenus();
 }
 
+// ===== テーマ =====
 let currentTheme = localStorage.getItem('theme') || 'system';
 
 function setTheme(theme) {
@@ -618,6 +665,7 @@ function updateLogo() {
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateLogo);
 setTheme(currentTheme);
 
+// ===== ループ =====
 function toggleLoop() {
     loopEnabled = !loopEnabled;
     video.loop = loopEnabled;
@@ -626,6 +674,7 @@ function toggleLoop() {
     label.style.color = loopEnabled ? '#3ea6ff' : '#aaa';
 }
 
+// ===== 自動次の動画 =====
 function toggleAutoNext() {
     autoNextEnabled = !autoNextEnabled;
     const label = document.getElementById('autonext-label');
@@ -633,6 +682,7 @@ function toggleAutoNext() {
     label.style.color = autoNextEnabled ? '#3ea6ff' : '#aaa';
 }
 
+// ===== 説明欄 =====
 function toggleDesc() {
     const box = document.getElementById('desc-box');
     const btn = document.getElementById('desc-toggle');
@@ -640,6 +690,7 @@ function toggleDesc() {
     btn.textContent = box.classList.contains('expanded') ? '閉じる' : 'もっと見る';
 }
 
+// ===== コメント =====
 $.get('/comments?v=' + videoid, function(data) {
     const div = document.createElement('div');
     div.innerHTML = data;
@@ -664,10 +715,12 @@ $.get('/comments?v=' + videoid, function(data) {
     $('#comments').html('<p style="color:var(--text-sub);">コメントを読み込めませんでした</p>');
 });
 
+// ===== 検索 =====
 function checkSearch() {
     return document.getElementById('searchbox').value.trim() !== '';
 }
 
+// ===== キーボード =====
 document.addEventListener('keydown', e => {
     if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
     if (e.code === 'Space' || e.key === 'k') {
@@ -679,11 +732,13 @@ document.addEventListener('keydown', e => {
     if (e.key === 'f') video.requestFullscreen?.() || video.webkitRequestFullscreen?.();
 });
 
+// ===== 検索サジェスト =====
 $('#searchbox').autocomplete({
     source: (req, res) => $.get('/suggest?keyword=' + req.term, data => res(data)),
     delay: 300
 });
 
+// ===== 履歴 =====
 const videoData = {
     video_id: "{{ videoid }}",
     thumbnail: "https://img.youtube.com/vi/{{ videoid }}/mqdefault.jpg",

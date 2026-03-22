@@ -286,7 +286,7 @@
                     {% endif %}
                 </video>
                 <audio id="audioPlayer">
-                    {% if audio_url %}
+                    {% if audio_url %}                    
                     <source id="audiosrc" src="{{ audio_url }}" type="audio/mp4" data-original="{{ audio_url }}">
                     {% elif videourls %}
                     <source id="audiosrc" src="{{ videourls[0] }}" type="audio/mp4" data-original="{{ videourls[0] }}">
@@ -364,7 +364,7 @@
             <div class="video-info">
                 <h1>{{ video_title }}</h1>
                 <div class="video-meta">
-                    <span>👁 {{ view_count }}回視聴</span>
+                    <span>{{ view_count }}回視聴</span>
                     <span>👍 {{ like_count }}</span>
                     <span>⏱ {{ length_text }}</span>
                 </div>

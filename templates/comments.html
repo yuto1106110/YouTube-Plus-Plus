@@ -1,14 +1,10 @@
 {% for comment in comments %}
-<div style="display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border, rgba(128,128,128,0.2));">
+<div style="display:flex; gap:10px; padding:10px 0; border-bottom:1px solid rgba(128,128,128,0.2);">
     <img src="{{ comment['authoricon'] }}" loading="lazy"
-         style="width:36px; height:36px; border-radius:50%; flex-shrink:0; object-fit:cover;">
+         style="width:36px; height:36px; border-radius:50%; flex-shrink:0; object-fit:cover; margin-top:2px;">
     <div style="flex:1; min-width:0;">
-        <p style="font-weight:bold; font-size:13px; margin-bottom:4px; color:var(--text, #0f0f0f);">
-            {{ comment['author'] }}
-        </p>
-        <p style="font-size:13px; line-height:1.5; color:var(--text-sub, #606060); white-space:pre-wrap; word-break:break-word;">
-            {{ comment['body'] | safe }}
-        </p>
+        <p style="font-weight:bold; font-size:13px; margin-bottom:4px;">{{ comment['author'] }}</p>
+        <p style="font-size:13px; line-height:1.5; color:var(--text-sub, #606060); white-space:pre-wrap; word-break:break-word;">{{ comment['body'] | safe }}</p>
     </div>
 </div>
 {% endfor %}

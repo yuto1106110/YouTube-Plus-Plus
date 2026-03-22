@@ -214,18 +214,23 @@ def getVideoData(videoid):
     highstream_url = None
     audio_url = None
 
-    # 高画質: container == 'webm' かつ resolution == '1080p' のストリーム
-    for stream in adaptiveFormats:
-        if stream.get("container") == "webm" and stream.get("resolution") == "1080p":
-            highstream_url = stream.get("url")
-            break
-    if not highstream_url:
-        for stream in adaptiveFormats:
-            if stream.get("container") == "webm" and stream.get("resolution") == "720p":
-                highstream_url = stream.get("url")
-                break
+ # 全画質のwebmストリームを取得
+quality_streams = []
+for stream in adaptiveFormats:
+    if stream.get("container") == "webm" and stream.get("resolution"):
+        quality_streams.append({
+            "url": stream.get("url"),
+            "resolution": stream.get("resolution"),
+        })
 
+# 高画質順に並べる（1080p → 720p → 480p ...）
+quality_streams.sort(
+    key=lambda x: int(x["resolution"].replace("p", "")) if x["resolution"].replace("p", "").isdigit() else 0,
+    reverse=True
+)
 
+# highstream_urlは後方互換のため一番高画質をセット
+highstream_url = quality_streams[0]["url"] if quality_streams else None
     # 音声: container == 'm4a' かつ audioQuality == 'AUDIO_QUALITY_MEDIUM' のストリーム
     for stream in adaptiveFormats:
         if stream.get("container") == "m4a" and stream.get("audioQuality") == "AUDIO_QUALITY_MEDIUM":
@@ -245,9 +250,9 @@ def getVideoData(videoid):
       {
         # 既存処理（ここでは formatStreams のURLを逆順にして上位2件を使用）
         'video_urls': list(reversed([i["url"] for i in t["formatStreams"]]))[:2],
-        # 追加：高画質動画と音声のURL
         'highstream_url': highstream_url,
         'audio_url': audio_url,
+        'quality_streams': quality_streams,
         'description_html': t["descriptionHtml"].replace("\n", "<br>"),
         'title': t["title"],
         'length_text': str(datetime.timedelta(seconds=t["lengthSeconds"])),
@@ -524,6 +529,7 @@ def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie
         "recommended_videos": video_data[1],
         "proxy":proxy
     })
+  
 @app.get('/ume', response_class=HTMLResponse)
 def ume_video(v: str, response: Response, request: Request, yuki: Union[str, None] = Cookie(None), proxy: Union[str, None] = Cookie(None)):
     if not checkCookie(yuki):

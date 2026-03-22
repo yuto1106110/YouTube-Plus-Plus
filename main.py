@@ -227,7 +227,7 @@ def getVideoData(videoid):
             "view_count_text": formatViewCount(t.get("viewCount", 0)),
             "published_text": formatPublished(t.get("published", 0)),
             "like_count": t.get("likeCount", 0),
-            "subscribers_count": t.get("subCountText", ""),
+            "subscribers_count": formatViewCount(t.get("subCount", 0)) + "人",
             "streamUrls": streamUrls
         },
         [

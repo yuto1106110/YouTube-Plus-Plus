@@ -137,6 +137,42 @@ def getInfo(request):
 
 failed = "Load Failed"
 
+def formatViewCount(count):
+    try:
+        count = int(count)
+        if count >= 100000000:
+            return f"{count // 100000000}億"
+        elif count >= 10000:
+            return f"{count // 10000}万"
+        elif count >= 1000:
+            return f"{count // 1000}千"
+        else:
+            return str(count)
+    except:
+        return str(count)
+
+def formatPublished(timestamp):
+    try:
+        import time
+        now = int(time.time())
+        diff = now - int(timestamp)
+        if diff < 60:
+            return "たった今"
+        elif diff < 3600:
+            return f"{diff // 60}分前"
+        elif diff < 86400:
+            return f"{diff // 3600}時間前"
+        elif diff < 86400 * 7:
+            return f"{diff // 86400}日前"
+        elif diff < 86400 * 30:
+            return f"{diff // (86400 * 7)}週間前"
+        elif diff < 86400 * 365:
+            return f"{diff // (86400 * 30)}ヶ月前"
+        else:
+            return f"{diff // (86400 * 365)}年前"
+    except:
+        return ""
+
 def getVideoData(videoid):
     t = json.loads(requestAPI(f"/videos/{urllib.parse.quote(videoid)}?hl=ja&gl=JP", invidious_api.video))
 
@@ -189,6 +225,8 @@ def getVideoData(videoid):
             "author": t["author"],
             "author_thumbnails_url": t["authorThumbnails"][-1]["url"],
             "view_count": t["viewCount"],
+            "view_count_text": formatViewCount(t.get("viewCount", 0)),
+            "published": t.get("published", 0),
             "like_count": t["likeCount"],
             "subscribers_count": t["subCountText"],
             "streamUrls": streamUrls

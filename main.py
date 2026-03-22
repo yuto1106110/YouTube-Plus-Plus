@@ -237,8 +237,8 @@ def getVideoData(videoid):
                 "author_id": i["authorId"],
                 "author": i["author"],
                 "length_text": str(datetime.timedelta(seconds=i["lengthSeconds"])),
-                "view_count_text": formatViewCount(i.get("viewCount", 0)),
-                "published_text": formatPublished(i.get("published", 0)),
+                "view_count_text": i.get("viewCountText", ""),
+                "published_text": i.get("publishedText", ""),
             } for i in recommended_videos
         ]
     ]

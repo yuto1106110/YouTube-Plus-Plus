@@ -503,7 +503,7 @@ def get_channel_videos(channel_id: str, yuki: Union[str, None] = Cookie(None)):
                 "length": str(datetime.timedelta(seconds=v["lengthSeconds"])),
                 "published": v.get("published", 0),
                 "published_text": v.get("publishedText", ""),
-                "view_count_text": v.get("viewCountText", ""),
+                "view_count_text": formatViewCount(v.get("viewCount", 0)),
             }
             for v in latest
         ]

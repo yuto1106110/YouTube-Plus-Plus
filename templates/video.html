@@ -7,7 +7,6 @@
     <title>{{ video_title }} - YouTube Plus⁺</title>
     <link rel="icon" href="/img/logo/favicon.ico">
     <link rel="stylesheet" href="/css/pure-min.css">
-    <link rel="stylesheet" href="/css/grids-responsive-min.css">
     <link rel="stylesheet" href="/css/default.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="/js/utils/utils.js"></script>
@@ -18,11 +17,9 @@
         :root {
             color-scheme: light dark;
             --bg: #f9f9f9;
-            --bg-sub: #ffffff;
             --bg-card: #f2f2f2;
             --text: #0f0f0f;
             --text-sub: #606060;
-            --border: rgba(0,0,0,0.1);
             --topbar-bg: #ffffff;
             --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
             --input-bg: #f2f2f2;
@@ -35,38 +32,49 @@
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #0f0f0f;
-                --bg-sub: #212121;
                 --bg-card: #272727;
                 --text: #ffffff;
                 --text-sub: #aaaaaa;
-                --border: rgba(255,255,255,0.1);
                 --topbar-bg: #212121;
                 --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
                 --input-bg: #121212;
                 --input-border: #444;
                 --desc-bg: #272727;
                 --menu-bg: rgba(28,28,28,0.97);
-                --menu-text: #fff;
                 --link: #3ea6ff;
             }
+        }
+        /* ライト強制 */
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc;
+            --desc-bg: #f2f2f2; --link: #065fd4;
+            color-scheme: light;
+        }
+        /* ダーク強制 */
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            --input-bg: #121212; --input-border: #444;
+            --desc-bg: #272727; --link: #3ea6ff;
+            color-scheme: dark;
         }
 
         body {
             font-family: Roboto, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            min-height: 100vh;
+            background: var(--bg); color: var(--text);
+            overflow-x: hidden; min-height: 100vh;
         }
 
         /* トップバー */
         #top-bar {
             display: flex; align-items: center; justify-content: space-between;
-            background: var(--topbar-bg);
-            height: 56px; padding: 0 15px;
+            background: var(--topbar-bg); height: 56px; padding: 0 15px;
             box-shadow: var(--topbar-shadow);
-            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-            gap: 12px;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000; gap: 12px;
         }
         #top-bar .left-section { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
         #top-bar img { height: 32px; }
@@ -76,28 +84,18 @@
             flex: 1; padding: 6px 14px;
             border-radius: 20px 0 0 20px;
             border: 1px solid var(--input-border);
-            background: var(--input-bg);
-            color: var(--text);
+            background: var(--input-bg); color: var(--text);
             font-size: 14px; outline: none; min-width: 0;
         }
         .search-container button {
-            padding: 6px 14px;
-            border-radius: 0 20px 20px 0;
+            padding: 6px 14px; border-radius: 0 20px 20px 0;
             border: 1px solid var(--input-border); border-left: none;
             background: var(--bg-card); color: var(--text);
             cursor: pointer; flex-shrink: 0;
         }
-        #theme-btn {
-            background: none; border: none; cursor: pointer;
-            font-size: 20px; padding: 4px; flex-shrink: 0;
-            color: var(--text);
-        }
 
         /* メインレイアウト */
-        .main-content {
-            margin-top: 56px; padding: 16px;
-            max-width: 100vw; overflow-x: hidden;
-        }
+        .main-content { margin-top: 56px; padding: 16px; max-width: 100vw; overflow-x: hidden; }
         .video-container { display: flex; gap: 16px; max-width: 100%; }
         .video-left { flex: 0 0 70%; min-width: 0; display: flex; flex-direction: column; }
         .video-right { flex: 1; min-width: 0; }
@@ -120,28 +118,17 @@
             border-radius: 50%; width: 60px; height: 60px;
             animation: spin 1s linear infinite;
             position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10; display: none;
+            transform: translate(-50%, -50%); z-index: 10; display: none;
         }
         @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* 歯車ボタン */
-        #settings-btn {
-            position: absolute; bottom: 50px; right: 12px;
-            background: rgba(0,0,0,0.7); border: none; border-radius: 50%;
-            width: 36px; height: 36px; cursor: pointer;
-            font-size: 18px; color: #fff; z-index: 10;
-            display: flex; align-items: center; justify-content: center;
-        }
-        #settings-btn:hover { background: rgba(0,0,0,0.9); }
-
-        /* 設定メニュー */
+        /* 設定メニュー（YouTubeスタイル） */
         #settings-menu {
             display: none; position: absolute;
-            bottom: 94px; right: 12px;
+            bottom: 8px; right: 8px;
             background: var(--menu-bg);
             border-radius: 8px; padding: 8px 0;
-            min-width: 210px; z-index: 20;
+            min-width: 220px; z-index: 20;
             box-shadow: 0 4px 16px rgba(0,0,0,0.6);
         }
         .menu-item {
@@ -155,8 +142,7 @@
         .menu-divider { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 4px 0; }
         .menu-back {
             padding: 10px 16px; color: #aaa; cursor: pointer;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.15);
+            font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.15);
             display: flex; align-items: center; gap: 8px;
         }
         .menu-back:hover { background: rgba(255,255,255,0.1); }
@@ -203,34 +189,29 @@
             .video-container { flex-direction: column; }
             .video-left { flex: none; width: 100%; }
             .video-right { width: 100%; }
-            .search-container input { font-size: 13px; }
             .rec-thumb img { width: 120px; height: 68px; }
         }
     </style>
 </head>
 <body>
 
-<!-- トップバー -->
 <header id="top-bar">
     <div class="left-section">
         <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
     </div>
     <div class="search-container">
-        <form action="/search" method="get">
+        <form action="/search" method="get" onsubmit="return checkSearch()">
             <input id="searchbox" name="q" type="search" placeholder="検索" autocomplete="on">
             <button type="submit">🔍</button>
         </form>
     </div>
     <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
-        <button id="theme-btn" onclick="cycleTheme()" title="テーマ切り替え">🌓</button>
         <a href="/others" style="color:var(--text-sub); font-size:13px; text-decoration:none;">メニュー</a>
     </div>
 </header>
 
 <div class="main-content">
     <div class="video-container">
-
-        <!-- 左カラム -->
         <div class="video-left">
             <div class="video-player-wrapper">
 
@@ -244,18 +225,16 @@
 
                 <audio id="audioPlayer">
                     {% if audio_url %}
-                    <source src="{{ audio_url }}" type="audio/mp4">
+                    <source id="audiosrc" src="{{ audio_url }}" type="audio/mp4">
                     {% elif videourls %}
-                    <source src="{{ videourls[0] }}" type="audio/mp4">
+                    <source id="audiosrc" src="{{ videourls[0] }}" type="audio/mp4">
                     {% endif %}
                 </audio>
 
                 <div id="loader"></div>
 
-                <button id="settings-btn" onclick="toggleSettings(event)">⚙️</button>
-
+                <!-- 設定メニュー（再生バー上に表示） -->
                 <div id="settings-menu">
-                    <!-- メインメニュー -->
                     <div id="menu-main">
                         <div class="menu-item" onclick="openSub('quality')">
                             <span>🎬 画質</span>
@@ -266,6 +245,10 @@
                         <div class="menu-item" onclick="openSub('playback')">
                             <span>▶ 再生方法</span>
                             <span id="playback-label" style="color:#aaa; font-size:12px;">通常 ›</span>
+                        </div>
+                        <div class="menu-item" onclick="openSub('theme')">
+                            <span>🎨 テーマ</span>
+                            <span id="theme-label" style="color:#aaa; font-size:12px;">システム ›</span>
                         </div>
                         <hr class="menu-divider">
                         <div class="menu-item" onclick="toggleLoop()">
@@ -285,11 +268,7 @@
                         <div class="menu-item {% if loop.first %}active{% endif %}"
                              id="q-{{ stream.resolution }}"
                              onclick="changeQuality('{{ stream.url }}', '{{ stream.resolution }}', 'dash')">
-                            <span>
-                                {% if loop.first %}✓ {% endif %}
-                                {{ stream.resolution }}
-                                {% if loop.first %}<span style="font-size:11px; color:#aaa;">（高画質）</span>{% endif %}
-                            </span>
+                            <span>{% if loop.first %}✓ {% endif %}{{ stream.resolution }}{% if loop.first %} <span style="font-size:11px;color:#aaa;">（高画質）</span>{% endif %}</span>
                         </div>
                         {% endfor %}
                         {% for url in videourls %}
@@ -309,12 +288,16 @@
                     <!-- 再生方法サブメニュー -->
                     <div id="menu-playback" style="display:none;">
                         <div class="menu-back" onclick="closeSub('playback')">‹ 再生方法</div>
-                        <div class="menu-item active" id="pb-normal" onclick="setPlayback('normal')">
-                            <span>✓ 通常再生</span>
-                        </div>
-                        <div class="menu-item" id="pb-embed" onclick="setPlayback('embed')">
-                            <span>埋め込み再生</span>
-                        </div>
+                        <div class="menu-item active" id="pb-normal" onclick="setPlayback('normal')"><span>✓ 通常再生</span></div>
+                        <div class="menu-item" id="pb-embed" onclick="setPlayback('embed')"><span>埋め込み再生</span></div>
+                    </div>
+
+                    <!-- テーマサブメニュー -->
+                    <div id="menu-theme" style="display:none;">
+                        <div class="menu-back" onclick="closeSub('theme')">‹ テーマ</div>
+                        <div class="menu-item" id="th-system" onclick="setTheme('system')"><span>✓ システム設定に合わせる</span></div>
+                        <div class="menu-item" id="th-dark" onclick="setTheme('dark')"><span>🌙 ダーク</span></div>
+                        <div class="menu-item" id="th-light" onclick="setTheme('light')"><span>☀️ ライト</span></div>
                     </div>
                 </div>
 
@@ -323,7 +306,6 @@
                     allowfullscreen></iframe>
             </div>
 
-            <!-- 動画情報 -->
             <div class="video-info">
                 <h1>{{ video_title }}</h1>
                 <div class="video-meta">
@@ -342,14 +324,12 @@
                 </div>
             </div>
 
-            <!-- コメント -->
             <div class="comments-section">
                 <h3>コメント</h3>
                 <div id="comments"><p style="color:var(--text-sub);">読み込み中...</p></div>
             </div>
         </div>
 
-        <!-- 右カラム（関連動画） -->
         <div class="video-right">
             <h3 style="margin-bottom:12px; font-size:15px;">関連動画</h3>
             {% for rec in recommended_videos %}
@@ -370,7 +350,6 @@
             </div>
             {% endfor %}
         </div>
-
     </div>
 </div>
 
@@ -384,21 +363,30 @@ let hlsInstance = null;
 let currentPlayback = 'normal';
 let loopEnabled = false;
 let autoNextEnabled = false;
+let isDash = {{ 'true' if highstream_url else 'false' }};
 
 // ===== ローディング =====
 video.addEventListener('waiting', () => loader.style.display = 'block');
 video.addEventListener('playing', () => loader.style.display = 'none');
 video.addEventListener('canplay', () => loader.style.display = 'none');
 
-// ===== 音声同期（DASH） =====
-video.addEventListener('play', () => {
-    if (currentPlayback === 'normal') {
+// ===== 音声同期（DASH） - ズレ修正 =====
+function syncAudio() {
+    if (!isDash || currentPlayback !== 'normal') return;
+    const diff = Math.abs(audio.currentTime - video.currentTime);
+    if (diff > 0.15) {
         audio.currentTime = video.currentTime;
-        audio.play().catch(() => {});
     }
+}
+
+video.addEventListener('play', () => {
+    if (!isDash || currentPlayback !== 'normal') return;
+    audio.currentTime = video.currentTime;
+    audio.play().catch(() => {});
 });
 video.addEventListener('pause', () => audio.pause());
 video.addEventListener('seeked', () => {
+    if (!isDash) return;
     audio.currentTime = video.currentTime;
     if (!video.paused) audio.play().catch(() => {});
 });
@@ -406,6 +394,9 @@ video.addEventListener('volumechange', () => {
     audio.volume = video.volume;
     audio.muted = video.muted;
 });
+// 定期的に同期チェック
+setInterval(syncAudio, 1000);
+
 video.addEventListener('ended', () => {
     audio.pause();
     if (autoNextEnabled) {
@@ -417,7 +408,43 @@ video.addEventListener('ended', () => {
     }
 });
 
-// ===== 歯車メニュー =====
+// ===== 設定メニュー（歯車を再生バー上に配置）=====
+// videoのcontrolsに歯車を追加する代わりに、
+// 動画をクリックしたときにメニューを出す
+video.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    toggleSettingsAt(e.clientX, e.clientY);
+});
+
+// 歯車はネイティブcontrolsの上に重ねて表示
+function toggleSettingsAt(x, y) {
+    const menu = document.getElementById('settings-menu');
+    const wrapper = document.querySelector('.video-player-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('menu-main').style.display = 'block';
+    document.getElementById('menu-quality').style.display = 'none';
+    document.getElementById('menu-playback').style.display = 'none';
+    document.getElementById('menu-theme').style.display = 'none';
+}
+
+// ネイティブcontrolsの歯車相当: settingsボタンをビデオの右下に配置
+// → video要素のcontrolslistにsettingsを追加（Chromiumのみ）
+// → 代替: 動画下部にボタン行を追加
+document.querySelector('.video-player-wrapper').insertAdjacentHTML('afterend', `
+    <div id="player-controls-bar" style="
+        display:flex; align-items:center; justify-content:flex-end;
+        padding:4px 8px; background:var(--bg-card); border-radius:0 0 8px 8px;
+        margin-top:-4px;
+    ">
+        <button onclick="toggleSettings(event)" style="
+            background:none; border:none; cursor:pointer;
+            font-size:20px; padding:4px 8px; color:var(--text);
+            display:flex; align-items:center; gap:4px; font-size:13px;
+        " title="設定">⚙️ 設定</button>
+    </div>
+`);
+
 function toggleSettings(e) {
     e.stopPropagation();
     const menu = document.getElementById('settings-menu');
@@ -425,14 +452,16 @@ function toggleSettings(e) {
     document.getElementById('menu-main').style.display = 'block';
     document.getElementById('menu-quality').style.display = 'none';
     document.getElementById('menu-playback').style.display = 'none';
+    document.getElementById('menu-theme').style.display = 'none';
 }
+
 document.addEventListener('click', e => {
     const menu = document.getElementById('settings-menu');
-    const btn = document.getElementById('settings-btn');
-    if (!menu.contains(e.target) && e.target !== btn) {
+    if (menu && !menu.contains(e.target) && !e.target.closest('#player-controls-bar')) {
         menu.style.display = 'none';
     }
 });
+
 function openSub(name) {
     document.getElementById('menu-main').style.display = 'none';
     document.getElementById('menu-' + name).style.display = 'block';
@@ -449,6 +478,10 @@ function changeQuality(url, label, type) {
 
     document.querySelectorAll('[id^="q-"]').forEach(el => el.classList.remove('active'));
 
+    // 音声を止めてリセット
+    audio.pause();
+    isDash = false;
+
     if (type === 'hls') {
         video.style.display = 'block';
         embedPlayer.style.display = 'none';
@@ -462,7 +495,6 @@ function changeQuality(url, label, type) {
             video.src = url;
             if (wasPlaying) video.play();
         }
-        audio.pause();
         currentPlayback = 'hls';
 
     } else if (type === 'dash') {
@@ -471,23 +503,31 @@ function changeQuality(url, label, type) {
         document.getElementById('videosrc').src = url;
         video.load();
         video.currentTime = currentTime;
-        if (wasPlaying) { video.play(); audio.play().catch(() => {}); }
+        isDash = true;
+        if (wasPlaying) {
+            video.play().then(() => {
+                audio.currentTime = currentTime;
+                audio.play().catch(() => {});
+            });
+        }
         currentPlayback = 'normal';
 
     } else {
+        // 通常画質：音声タグを完全に無効化
         video.style.display = 'block';
         embedPlayer.style.display = 'none';
-        audio.pause();
+        document.getElementById('audiosrc').src = '';
+        audio.load();
         document.getElementById('videosrc').src = url;
         video.load();
         video.currentTime = currentTime;
         if (wasPlaying) video.play();
         currentPlayback = 'normal';
+        isDash = false;
     }
 
     document.getElementById('quality-label').textContent = label + ' ›';
     document.getElementById('settings-menu').style.display = 'none';
-
     const activeEl = document.getElementById('q-' + label);
     if (activeEl) activeEl.classList.add('active');
 }
@@ -516,6 +556,33 @@ function setPlayback(mode) {
     document.getElementById('settings-menu').style.display = 'none';
 }
 
+// ===== テーマ =====
+const themeLabels = { system: 'システム ›', dark: 'ダーク ›', light: 'ライト ›' };
+let currentTheme = localStorage.getItem('theme') || 'system';
+
+function setTheme(theme) {
+    currentTheme = theme;
+    localStorage.setItem('theme', theme);
+    const html = document.documentElement;
+    if (theme === 'system') {
+        html.removeAttribute('data-theme');
+    } else {
+        html.setAttribute('data-theme', theme);
+    }
+    document.getElementById('theme-label').textContent = themeLabels[theme];
+    // チェックマーク更新
+    ['system','dark','light'].forEach(t => {
+        const el = document.getElementById('th-' + t);
+        if (el) el.querySelector('span').textContent =
+            (t === theme ? '✓ ' : '') +
+            (t === 'system' ? 'システム設定に合わせる' : t === 'dark' ? '🌙 ダーク' : '☀️ ライト');
+    });
+    document.getElementById('settings-menu').style.display = 'none';
+}
+
+// 起動時にテーマ適用
+setTheme(currentTheme);
+
 // ===== ループ =====
 function toggleLoop() {
     loopEnabled = !loopEnabled;
@@ -541,12 +608,42 @@ function toggleDesc() {
     btn.textContent = box.classList.contains('expanded') ? '閉じる' : 'もっと見る';
 }
 
-// ===== コメント =====
+// ===== コメント（チャンネルリンク削除・時間ジャンプ対応）=====
 $.get('/comments?v=' + videoid, function(data) {
-    $('#comments').html(data);
+    const div = document.createElement('div');
+    div.innerHTML = data;
+
+    // チャンネルへのリンクを削除（テキストだけ残す）
+    div.querySelectorAll('a[href^="/channel/"]').forEach(a => {
+        const span = document.createElement('span');
+        span.textContent = a.textContent;
+        span.style.fontWeight = 'bold';
+        a.replaceWith(span);
+    });
+
+    // 時間ジャンプリンクの処理（ページ遷移させずにシーク）
+    div.querySelectorAll('a[data-jump-time]').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const t = parseInt(a.getAttribute('data-jump-time'));
+            video.currentTime = t;
+            if (isDash) audio.currentTime = t;
+            video.play();
+        });
+    });
+
+    document.getElementById('comments').innerHTML = '';
+    document.getElementById('comments').appendChild(div);
 }).fail(function() {
     $('#comments').html('<p style="color:var(--text-sub);">コメントを読み込めませんでした</p>');
 });
+
+// ===== 検索（空の場合は飛ばない）=====
+function checkSearch() {
+    const q = document.getElementById('searchbox').value.trim();
+    if (!q) return false;
+    return true;
+}
 
 // ===== キーボード操作 =====
 document.addEventListener('keydown', e => {
@@ -555,8 +652,8 @@ document.addEventListener('keydown', e => {
         e.preventDefault();
         video.paused ? video.play() : video.pause();
     }
-    if (e.key === 'ArrowRight') video.currentTime += 10;
-    if (e.key === 'ArrowLeft') video.currentTime -= 10;
+    if (e.key === 'ArrowRight') { video.currentTime += 10; if(isDash) audio.currentTime = video.currentTime; }
+    if (e.key === 'ArrowLeft') { video.currentTime -= 10; if(isDash) audio.currentTime = video.currentTime; }
     if (e.key === 'f') video.requestFullscreen?.() || video.webkitRequestFullscreen?.();
 });
 
@@ -581,32 +678,6 @@ watchHistory = watchHistory.filter(i => i.video_id !== videoData.video_id);
 watchHistory.unshift(videoData);
 if (watchHistory.length > 50) watchHistory = watchHistory.slice(0, 50);
 localStorage.setItem('watchHistory', JSON.stringify(watchHistory));
-
-// ===== テーマ切り替え =====
-const themes = ['system', 'dark', 'light'];
-const themeIcons = { system: '🌓', dark: '🌙', light: '☀️' };
-let currentTheme = localStorage.getItem('theme') || 'system';
-
-function applyTheme(theme) {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-        root.style.setProperty('color-scheme', 'dark');
-    } else if (theme === 'light') {
-        root.style.setProperty('color-scheme', 'light');
-    } else {
-        root.style.removeProperty('color-scheme');
-    }
-    document.getElementById('theme-btn').textContent = themeIcons[theme];
-    localStorage.setItem('theme', theme);
-}
-
-function cycleTheme() {
-    const idx = themes.indexOf(currentTheme);
-    currentTheme = themes[(idx + 1) % themes.length];
-    applyTheme(currentTheme);
-}
-
-applyTheme(currentTheme);
 </script>
 
 </body>

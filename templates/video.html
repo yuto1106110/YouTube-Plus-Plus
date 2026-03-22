@@ -22,6 +22,7 @@
             --desc-bg: #f2f2f2; --menu-bg: rgba(30,30,30,0.98);
             --menu-text: #fff; --link: #065fd4;
             --controls-bg: #f2f2f2;
+            --border: rgba(0,0,0,0.1);
         }
         @media (prefers-color-scheme: dark) {
             :root {
@@ -31,6 +32,7 @@
                 --input-bg: #121212; --input-border: #444;
                 --desc-bg: #272727; --link: #3ea6ff;
                 --controls-bg: #181818;
+                --border: rgba(255,255,255,0.1);
             }
         }
         html[data-theme="light"] {
@@ -39,6 +41,7 @@
             --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
             --input-bg: #f2f2f2; --input-border: #ccc;
             --desc-bg: #f2f2f2; --link: #065fd4; --controls-bg: #f2f2f2;
+            --border: rgba(0,0,0,0.1);
             color-scheme: light;
         }
         html[data-theme="dark"] {
@@ -47,6 +50,7 @@
             --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
             --input-bg: #121212; --input-border: #444;
             --desc-bg: #272727; --link: #3ea6ff; --controls-bg: #181818;
+            --border: rgba(255,255,255,0.1);
             color-scheme: dark;
         }
 
@@ -196,6 +200,39 @@
         /* コメント */
         .comments-section { margin-top: 20px; }
         .comments-section h3 { font-size: 16px; margin-bottom: 12px; }
+        #comments { font-size: 13px; line-height: 1.5; }
+        #comments img {
+            width: 32px; height: 32px;
+            border-radius: 50%; flex-shrink: 0;
+            vertical-align: middle;
+        }
+        #comments .comment-item {
+            display: flex; gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        #comments .comment-author {
+            font-weight: bold; font-size: 13px;
+            color: var(--text); margin-bottom: 4px;
+        }
+        #comments .comment-body {
+            font-size: 13px; color: var(--text-sub);
+            line-height: 1.5; word-break: break-word;
+        }
+        #comments * {
+            max-width: 100%;
+            font-size: 13px !important;
+            line-height: 1.5 !important;
+        }
+        #comments h1, #comments h2, #comments h3 {
+            font-size: 14px !important;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            #comments * { font-size: 12px !important; }
+            #comments img { width: 28px; height: 28px; }
+        }
 
         /* 関連動画 */
         .recommendation { margin-bottom: 12px; }
@@ -258,7 +295,6 @@
                 <div id="loader"></div>
             </div>
 
-            <!-- コントロールバー -->
             <div id="player-controls-bar">
                 <button class="ctrl-btn" onclick="openMenu('quality', this)">🎬 画質</button>
                 <button class="ctrl-btn" onclick="openMenu('playback', this)">▶ 再生方法</button>
@@ -266,7 +302,6 @@
                 <span id="quality-display">{{ quality_streams[0].resolution if quality_streams else '自動' }}</span>
             </div>
 
-            <!-- 画質メニュー -->
             <div class="popup-menu" id="menu-quality">
                 <div class="menu-title">🎬 画質を選択</div>
                 {% for stream in quality_streams %}
@@ -290,7 +325,6 @@
                 {% endif %}
             </div>
 
-            <!-- 再生方法メニュー -->
             <div class="popup-menu" id="menu-playback">
                 <div class="menu-title">▶ 再生方法</div>
                 <div class="menu-item active" id="pb-normal" onclick="setPlayback('normal')">
@@ -301,7 +335,6 @@
                 </div>
             </div>
 
-            <!-- 設定メニュー -->
             <div class="popup-menu" id="menu-settings">
                 <div class="menu-title">⚙️ 設定</div>
                 <div class="menu-item" onclick="toggleLoop()">
@@ -328,7 +361,6 @@
                 </div>
             </div>
 
-            <!-- 動画情報 -->
             <div class="video-info">
                 <h1>{{ video_title }}</h1>
                 <div class="video-meta">
@@ -388,12 +420,10 @@ let autoNextEnabled = false;
 let isDash = {{ 'true' if highstream_url else 'false' }};
 let activeMenuId = null;
 
-// ===== ローディング =====
 video.addEventListener('waiting', () => loader.style.display = 'block');
 video.addEventListener('playing', () => loader.style.display = 'none');
 video.addEventListener('canplay', () => loader.style.display = 'none');
 
-// ===== 音声同期 =====
 function syncAudio() {
     if (!isDash || currentPlayback !== 'normal' || video.paused) return;
     const diff = Math.abs(audio.currentTime - video.currentTime);
@@ -427,7 +457,6 @@ video.addEventListener('ended', () => {
     }
 });
 
-// ===== ポップアップメニュー =====
 function openMenu(name, btn) {
     const menuId = 'menu-' + name;
     const menu = document.getElementById(menuId);
@@ -461,7 +490,6 @@ document.addEventListener('click', e => {
     }
 });
 
-// ===== 画質変更 =====
 function changeQuality(url, label, type) {
     const currentTime = video.currentTime;
     const wasPlaying = !video.paused;
@@ -492,7 +520,6 @@ function changeQuality(url, label, type) {
         currentPlayback = 'hls';
 
     } else if (type === 'dash') {
-        // 音声ソースをオリジナルから復元
         const audioSrc = document.getElementById('audiosrc').dataset.original;
         if (audioSrc) {
             document.getElementById('audiosrc').src = audioSrc;
@@ -511,7 +538,6 @@ function changeQuality(url, label, type) {
         currentPlayback = 'normal';
 
     } else {
-        // 通常画質：音声を無効化
         document.getElementById('audiosrc').src = '';
         audio.load();
         document.getElementById('videosrc').src = url;
@@ -533,7 +559,6 @@ function changeQuality(url, label, type) {
     }
 }
 
-// ===== 再生方法 =====
 function setPlayback(mode) {
     let embed = document.getElementById('embedPlayer');
     if (!embed) {
@@ -562,7 +587,6 @@ function setPlayback(mode) {
     closeAllMenus();
 }
 
-// ===== テーマ =====
 let currentTheme = localStorage.getItem('theme') || 'system';
 
 function setTheme(theme) {
@@ -594,7 +618,6 @@ function updateLogo() {
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateLogo);
 setTheme(currentTheme);
 
-// ===== ループ =====
 function toggleLoop() {
     loopEnabled = !loopEnabled;
     video.loop = loopEnabled;
@@ -603,7 +626,6 @@ function toggleLoop() {
     label.style.color = loopEnabled ? '#3ea6ff' : '#aaa';
 }
 
-// ===== 自動次の動画 =====
 function toggleAutoNext() {
     autoNextEnabled = !autoNextEnabled;
     const label = document.getElementById('autonext-label');
@@ -611,7 +633,6 @@ function toggleAutoNext() {
     label.style.color = autoNextEnabled ? '#3ea6ff' : '#aaa';
 }
 
-// ===== 説明欄 =====
 function toggleDesc() {
     const box = document.getElementById('desc-box');
     const btn = document.getElementById('desc-toggle');
@@ -619,7 +640,6 @@ function toggleDesc() {
     btn.textContent = box.classList.contains('expanded') ? '閉じる' : 'もっと見る';
 }
 
-// ===== コメント =====
 $.get('/comments?v=' + videoid, function(data) {
     const div = document.createElement('div');
     div.innerHTML = data;
@@ -644,12 +664,10 @@ $.get('/comments?v=' + videoid, function(data) {
     $('#comments').html('<p style="color:var(--text-sub);">コメントを読み込めませんでした</p>');
 });
 
-// ===== 検索（空入力防止）=====
 function checkSearch() {
     return document.getElementById('searchbox').value.trim() !== '';
 }
 
-// ===== キーボード =====
 document.addEventListener('keydown', e => {
     if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
     if (e.code === 'Space' || e.key === 'k') {
@@ -661,13 +679,11 @@ document.addEventListener('keydown', e => {
     if (e.key === 'f') video.requestFullscreen?.() || video.webkitRequestFullscreen?.();
 });
 
-// ===== 検索サジェスト =====
 $('#searchbox').autocomplete({
     source: (req, res) => $.get('/suggest?keyword=' + req.term, data => res(data)),
     delay: 300
 });
 
-// ===== 履歴 =====
 const videoData = {
     video_id: "{{ videoid }}",
     thumbnail: "https://img.youtube.com/vi/{{ videoid }}/mqdefault.jpg",

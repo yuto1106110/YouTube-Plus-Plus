@@ -356,26 +356,29 @@
             </div>
         </div>
 
-        <div class="video-right">
-            <h3 style="margin-bottom:12px; font-size:15px;">関連動画</h3>
-            {% for rec in recommended_videos %}
-            <div class="recommendation">
-                <a href="/watch?v={{ rec['video_id'] }}">
-                    <div class="rec-thumb">
-                        <img loading="lazy"
-                             src="{% if proxy == 'True' %}/thumbnail?v={{ rec['video_id'] }}{% else %}https://img.youtube.com/vi/{{ rec['video_id'] }}/mqdefault.jpg{% endif %}"
-                             alt="{{ rec['title'] }}">
-                        <span class="rec-length">{{ rec['length_text'] }}</span>
-                    </div>
-                    <div class="rec-info">
-                        <h4>{{ rec['title'] }}</h4>
-                        <p>{{ rec['author'] }}</p>
-                        <p>{{ rec['view_count_text'] }}</p>
-                    </div>
-                </a>
+<div class="video-right">
+    <h3 style="margin-bottom:12px; font-size:15px;">関連動画</h3>
+    {% for rec in recommended_videos %}
+    <div class="recommendation">
+        <a href="/watch?v={{ rec['video_id'] }}">
+            <div class="rec-thumb">
+                <img loading="lazy"
+                     src="{% if proxy == 'True' %}/thumbnail?v={{ rec['video_id'] }}{% else %}https://img.youtube.com/vi/{{ rec['video_id'] }}/mqdefault.jpg{% endif %}"
+                     alt="{{ rec['title'] }}">
+                <span class="rec-length">{{ rec['length_text'] }}</span>
             </div>
-            {% endfor %}
-        </div>
+            <div class="rec-info">
+                <h4>{{ rec['title'] }}</h4>
+                <p>{{ rec['author'] }}</p>
+                <p>
+                    {% if rec['view_count_text'] %}{{ rec['view_count_text'] }}回視聴{% endif %}
+                    {% if rec['published_text'] %} · {{ rec['published_text'] }}{% endif %}
+                </p>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
     </div>
 </div>
     

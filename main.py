@@ -181,6 +181,7 @@ def getVideoData(videoid):
             "highstream_url": highstream_url,
             "audio_url": audio_url,
             "quality_streams": quality_streams,
+            "hlsUrl": t.get("hlsUrl"),
             "description_html": t["descriptionHtml"].replace("\n", "<br>"),
             "title": t["title"],
             "length_text": str(datetime.timedelta(seconds=t["lengthSeconds"])),

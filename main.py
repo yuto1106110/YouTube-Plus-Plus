@@ -412,6 +412,8 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
         "like_count": video_data[0]['like_count'],
         "subscribers_count": video_data[0]['subscribers_count'],
         "recommended_videos": video_data[1],
+        "view_count_text": video_data[0]['view_count_text'],
+        "published_text": video_data[0]['published_text'],
         "proxy": proxy
     })
 

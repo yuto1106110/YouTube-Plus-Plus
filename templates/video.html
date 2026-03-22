@@ -261,6 +261,7 @@
             <div id="player-controls-bar">
                 <button class="ctrl-btn" onclick="openMenu('quality', this)">🎬 画質</button>
                 <button class="ctrl-btn" onclick="openMenu('playback', this)">▶ 再生方法</button>
+                <button class="ctrl-btn" onclick="openMenu('share', this)">↗ 共有</button>
                 <button class="ctrl-btn" onclick="openMenu('settings', this)">⚙️ 設定</button>
                 <span id="quality-display">{{ quality_streams[0].resolution if quality_streams else '自動' }}</span>
             </div>
@@ -308,6 +309,27 @@
                 </div>
                 {% endif %}
             </div>
+
+            <!-- 共有メニュー -->
+<div class="popup-menu" id="menu-share">
+    <div class="menu-title">↗ 共有</div>
+    <div class="menu-item" onclick="copyToClipboard(location.href, this)">
+        <span>🔗 このページのURL</span>
+        <span class="copy-check" style="color:#3ea6ff; display:none;">コピー済！</span>
+    </div>
+    <div class="menu-item" onclick="copyToClipboard('https://www.youtube.com/watch?v={{ videoid }}', this)">
+        <span>▶ YouTubeのURL</span>
+        <span class="copy-check" style="color:#3ea6ff; display:none;">コピー済！</span>
+    </div>
+    <div class="menu-item" onclick="copyToClipboard('{{ videoid }}', this)">
+        <span>🆔 ビデオID</span>
+        <span class="copy-check" style="color:#3ea6ff; display:none;">コピー済！</span>
+    </div>
+    <div class="menu-divider"></div>
+    <div class="menu-item" onclick="shareNative()">
+        <span>📤 共有する</span>
+    </div>
+</div>
 
             <!-- 設定メニュー -->
             <div class="popup-menu" id="menu-settings">
@@ -652,6 +674,43 @@ function setPlayback(mode) {
     closeAllMenus();
 }
 
+// ===== 共有 =====
+function copyToClipboard(text, el) {
+    navigator.clipboard.writeText(text).then(() => {
+        // コピー済み表示
+        const check = el.querySelector('.copy-check');
+        if (check) {
+            check.style.display = 'inline';
+            setTimeout(() => { check.style.display = 'none'; }, 2000);
+        }
+    }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        const check = el.querySelector('.copy-check');
+        if (check) {
+            check.style.display = 'inline';
+            setTimeout(() => { check.style.display = 'none'; }, 2000);
+        }
+    });
+}
+
+function shareNative() {
+    if (navigator.share) {
+        navigator.share({
+            title: "{{ video_title }}",
+            url: location.href
+        });
+    } else {
+        copyToClipboard(location.href, document.querySelector('#menu-share .menu-item'));
+    }
+    closeAllMenus();
+}
+    
 // ===== テーマ =====
 let currentTheme = localStorage.getItem('theme') || 'system';
 

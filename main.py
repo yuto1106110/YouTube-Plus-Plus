@@ -583,6 +583,11 @@ def thumbnail(v:str):
 def suggest(keyword:str):
     return [i[0] for i in json.loads(requests.get("http://www.google.com/complete/search?client=youtube&hl=ja&ds=yt&q=" + urllib.parse.quote(keyword), headers=getRandomUserAgent()).text[19:-1])[1]]
 
+@app.get("/subscriptions", response_class=HTMLResponse)
+def subscriptions(request: Request, yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return redirect("/")
+    return template("subscriptions.html", {"request": request})
 
 @cache(seconds=120)
 def getSource(name):
@@ -728,23 +733,6 @@ def toggleVideoCheck():
     global invidious_api
     invidious_api.check_video = not invidious_api.check_video
     return f'{not invidious_api.check_video} to {invidious_api.check_video}'
-  
-@app.get("/proxy", response_class=HTMLResponse)
-def list_page(response: Response, request: Request):
-    return template("proxy.html", {"request": request})
-      
-@app.get("/rammer", response_class=HTMLResponse)
-def list_page(response: Response, request: Request):
-    return template("rammerhead.html", {"request": request})
-  
-@app.get("/shadow", response_class=HTMLResponse)
-def list_page(response: Response, request: Request):
-    return template("shadow.html", {"request": request})
-
-@app.get("/inbox", response_class=HTMLResponse)
-def list_page(response: Response, request: Request):
-    return template("inbox.html", {"request": request})
-  
 @app.get("/help", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("help.html", {"request": request})

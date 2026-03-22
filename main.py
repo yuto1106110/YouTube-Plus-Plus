@@ -185,6 +185,7 @@ def getVideoData(videoid):
             "authorId": failed, "author": failed,
             "lengthSeconds": 0, "viewCountText": "Load Failed"
         }]
+    print("subCount:", t.get("subCount"), "subCountText:", t.get("subCountText"))
 
     adaptiveFormats = t.get("adaptiveFormats", [])
     highstream_url = None

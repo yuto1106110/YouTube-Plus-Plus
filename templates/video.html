@@ -194,7 +194,8 @@
 
         .recommendation { margin-bottom: 12px; }
         .recommendation a { text-decoration: none; color: var(--text); display: flex; gap: 8px; }
-        .recommendation a:hover .rec-info h4 { color: var(--link); }
+        .recommendation a:hover 
+        .rec-info h4 { color: var(--link); }
         .rec-thumb { position: relative; flex-shrink: 0; }
         .rec-thumb img { width: 168px; height: 94px; object-fit: cover; border-radius: 4px; display: block; }
         .rec-length {
@@ -202,8 +203,14 @@
             background: rgba(0,0,0,0.8); color: #fff;
             padding: 1px 4px; border-radius: 3px; font-size: 11px;
         }
-        .rec-info h4 { font-size: 13px; line-height: 1.4; margin-bottom: 4px; }
-        .rec-info p { font-size: 12px; color: var(--text-sub); }
+        .rec-info h4 {
+    font-size: 13px; line-height: 1.4; margin-bottom: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;      /* 2行で切る */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.rec-info p { font-size: 12px; color: var(--text-sub); }
 
         @media (max-width: 768px) {
             .video-container { flex-direction: column; }
@@ -371,7 +378,7 @@
                 <h4>{{ rec['title'] }}</h4>
                 <p>{{ rec['author'] }}</p>
                 <p>
-                    {% if rec['view_count_text'] %}{{ rec['view_count_text'] }}回視聴{% endif %}
+                    {% if rec['view_count_text'] %}{{ rec['view_count_text'] }}{% endif %}
                     {% if rec['published_text'] %} · {{ rec['published_text'] }}{% endif %}
                 </p>
             </div>

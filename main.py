@@ -492,4 +492,338 @@ def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie
         "length_text": video_data[0]['length_text'],
         "view_count": video_data[0]['view_count'],
         "like_count": video_data[0]['like_count'],
-        "subscribers_count": video_data[0]['subscribers_
+        "subscribers_count": video_data[0]['subscribers_count'],
+        "recommended_videos": video_data[1],
+        "proxy":proxy
+    })
+
+@app.get("/search", response_class=HTMLResponse)
+def search(q:str, response: Response, request: Request, page:Union[int, None]=1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+    return template("search.html", {"request": request, "results":getSearchData(q, page), "word":q, "next":f"/search?q={q}&page={page + 1}", "proxy":proxy})
+
+@app.get("/hashtag/{tag}")
+def search(tag:str, response: Response, request: Request, page:Union[int, None]=1, yuki: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    return redirect(f"/search?q={tag}")
+
+@app.get("/channel/{channelid}", response_class=HTMLResponse)
+def channel(channelid:str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+    t = getChannelData(channelid)
+    return template("channel.html", {"request": request, "results": t[0], "channel_name": t[1]["channel_name"], "channel_icon": t[1]["channel_icon"], "channel_profile": t[1]["channel_profile"], "cover_img_url": t[1]["author_banner"], "subscribers_count": t[1]["subscribers_count"], "proxy": proxy})
+
+@app.get("/playlist", response_class=HTMLResponse)
+def playlist(list:str, response: Response, request: Request, page:Union[int, None]=1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+    return template("search.html", {"request": request, "results": getPlaylistData(list, str(page)), "word": "", "next": f"/playlist?list={list}", "proxy": proxy})
+
+@app.get("/comments")
+def comments(request: Request, v:str):
+    return template("comments.html", {"request": request, "comments": getCommentsData(v)})
+
+@app.get("/thumbnail")
+def thumbnail(v:str):
+    return Response(content = requests.get(f"https://img.youtube.com/vi/{v}/0.jpg").content, media_type=r"image/jpeg")
+
+@app.get("/suggest")
+def suggest(keyword:str):
+    return [i[0] for i in json.loads(requests.get("http://www.google.com/complete/search?client=youtube&hl=ja&ds=yt&q=" + urllib.parse.quote(keyword), headers=getRandomUserAgent()).text[19:-1])[1]]
+
+
+@cache(seconds=120)
+def getSource(name):
+    return requests.get(f'https://raw.githubusercontent.com/LunaKamituki/yuki-source/refs/heads/main/{name}.html', headers=getRandomUserAgent()).text
+
+@app.get("/bbs", response_class=HTMLResponse)
+def bbs(request: Request, name: Union[str, None] = "", seed:Union[str, None]="", channel:Union[str, None]="main", verify:Union[str, None]="false", yuki: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    res = HTMLResponse(no_robot_meta_tag + requests.get(f"{url}bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}", cookies={"yuki":"True"}).text.replace('AutoLink(xhr.responseText);', 'urlConvertToLink(xhr.responseText);') + getSource('bbs'))
+    return res
+
+@cache(seconds=5)
+def getCachedBBSAPI(verify, channel):
+    return requests.get(f"{url}bbs/api?t={urllib.parse.quote(str(int(time.time()*1000)))}&verify={urllib.parse.quote(verify)}&channel={urllib.parse.quote(channel)}", cookies={"yuki":"True"}).text
+
+@app.get("/bbs/api", response_class=HTMLResponse)
+def bbsAPI(request: Request, t: str, channel:Union[str, None]="main", verify: Union[str, None] = "false"):
+    return getCachedBBSAPI(verify, channel)
+
+@app.get("/bbs/result")
+def write_bbs(request: Request, name: str = "", message: str = "", seed:Union[str, None] = "", channel:Union[str, None]="main", verify:Union[str, None]="false", yuki: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    if 'Google-Apps-Script' in str(request.scope["headers"][1][1]):
+        raise UnallowedBot("GASのBotは許可されていません")
+      
+    params = {
+      'name': urllib.parse.quote(name),
+      'message': urllib.parse.quote(message),
+      'seed': urllib.parse.quote(seed),
+      'channel': urllib.parse.quote(channel),
+      'verify': urllib.parse.quote(verify),
+      'info': urllib.parse.quote(getInfo(request)),
+      'serververify': getVerifyCode()
+    }
+  
+    url_querys = ''
+    for key, value in params.items():
+      url_querys += f'{key}={value}&'
+
+    if url_querys != '':
+      url_querys = '?' + url_querys[:-1]
+      
+    t = requests.get(f"{url}bbs/result" + url_querys, cookies={"yuki": "True"}, allow_redirects=False)
+    if t.status_code != 307:
+        return HTMLResponse(no_robot_meta_tag + t.text.replace('AutoLink(xhr.responseText);', 'urlConvertToLink(xhr.responseText);') + getSource('bbs'))
+        
+    return redirect(f"/bbs?name={urllib.parse.quote(name)}&seed={urllib.parse.quote(seed)}&channel={urllib.parse.quote(channel)}&verify={urllib.parse.quote(verify)}")
+
+@cache(seconds=120)
+def getCachedBBSHow():
+    return requests.get(f"{url}bbs/how").text
+
+@app.get("/bbs/how", response_class=PlainTextResponse)
+def view_commonds(request: Request, yuki: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    return getCachedBBSHow()
+
+
+
+@app.get("/info", response_class=HTMLResponse)
+def viewlist(response: Response, request: Request, yuki: Union[str] = Cookie(None)):
+    if not(checkCookie(yuki)):
+        return redirect("/")
+    response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+    
+    return template("info.html", {"request": request, "Youtube_API": invidious_api.video[0], "Channel_API": invidious_api.channel[0], "comments": invidious_api.comments[0]})
+
+@app.get("/reset", response_class=PlainTextResponse)
+def home():
+    global url, invidious_api
+    url = requests.get('https://raw.githubusercontent.com/yuto1106110/yuto-yuki-youtube-1/main/APItati', headers=getRandomUserAgent()).text.rstrip()
+    invidious_api = InvidiousAPI()
+    return 'Success'
+
+@app.get("/version", response_class=PlainTextResponse)
+def displayVersion():
+    return str({'version': version, 'new_instance_version': new_instance_version})
+
+@app.get("/api/update", response_class=PlainTextResponse)
+def updateAllAPI():
+  global invidious_api
+  return str((invidious_api := InvidiousAPI()).info())
+
+@app.get("/api/{api_name}", response_class=PlainTextResponse)
+def displayAPI(api_name: str):
+  
+  match api_name:
+    case 'all':
+      api_value = invidious_api.info()
+        
+    case 'video':
+      api_value = invidious_api.video
+  
+    case 'search':
+      api_value = invidious_api.search
+  
+    case 'channel':
+      api_value = invidious_api.channel
+  
+    case 'comments':
+      api_value = invidious_api.comments
+
+    case 'playlist':
+      api_value = invidious_api.playlist
+      
+    case _:
+      api_value = f'API Name Error: {api_name}'
+        
+  return str(api_value)
+    
+@app.get("/api/{api_name}/next", response_class=PlainTextResponse)
+def rotateAPI(api_name: str):
+  match api_name:
+    case 'video':
+      updateList(invidious_api.video, invidious_api.video[0])
+  
+    case 'search':
+      updateList(invidious_api.search, invidious_api.search[0])
+  
+    case 'channel':
+      updateList(invidious_api.channel, invidious_api.channel[0])
+  
+    case 'comments':
+      updateList(invidious_api.comments, invidious_api.comments[0])
+
+    case 'playlist':
+      updateList(invidious_api.playlist, invidious_api.playlist[0])
+
+    case _:
+      return f'API Name Error: {api_name}'
+        
+  return 'Finish'
+    
+@app.get("/api/video/check", response_class=PlainTextResponse)
+def displayCheckVideo():
+    return str(invidious_api.check_video)
+
+@app.get("/api/video/check/toggle", response_class=PlainTextResponse)
+def toggleVideoCheck():
+    global invidious_api
+    invidious_api.check_video = not invidious_api.check_video
+    return f'{not invidious_api.check_video} to {invidious_api.check_video}'
+  
+@app.get("/proxy", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("proxy.html", {"request": request})
+      
+@app.get("/rammer", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("rammerhead.html", {"request": request})
+  
+@app.get("/shadow", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("shadow.html", {"request": request})
+
+@app.get("/inbox", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("inbox.html", {"request": request})
+  
+@app.get("/help", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("help.html", {"request": request})
+  
+@app.get("/proxypage", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("proxy.html", {"request": request})
+
+@app.get("/url", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("url.html", {"request": request})
+
+@app.get("/light", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("light.html", {"request": request})
+@app.get("/sitsumon", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("otoiawase.html", {"request": request})
+@app.get("/news", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("news.html", {"request": request})
+@app.get("/space", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("space.html", {"request": request})
+@app.get("/update", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("update.html", {"request": request})
+@app.get("/others", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("others.html", {"request": request})
+@app.get("/qanda", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("Q&A.html", {"request": request})
+@app.get("/1v1lol", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("1v1-lol.html", {"request": request})
+@app.get("/drive", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("drive.html", {"request": request})
+@app.get("/paper", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("paper.html", {"request": request})
+@app.get("/snow", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("snow.html", {"request": request})
+@app.get("/2048", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("block.html", {"request": request})
+@app.get("/ose", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("ose.html", {"request": request})
+@app.get("/game", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("game.html", {"request": request})
+@app.get("/and", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("android.html", {"request": request})
+@app.get("/cone", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("cone.html", {"request": request})
+@app.get("/usa", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("usa.html", {"request": request})
+@app.get("/chat", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("chat.html", {"request": request})
+@app.get("/ball", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("ball.html", {"request": request})
+@app.get("/history", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("history.html", {"request": request})
+@app.get("/bj", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("bj.html", {"request": request})
+@app.get("/tools", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("tools.html", {"request": request})
+@app.get("/news", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("news.html", {"request": request})
+@app.get("/re", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("re.html", {"request": request})
+@app.get("/setting", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("settings.html", {"request": request})
+@app.get("/among", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("among.html", {"request": request})
+@app.get("/among-1", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("among-1.html", {"request": request})
+@app.get("/among-2", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("among-2.html", {"request": request})
+@app.get("/interland", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("interland.html", {"request": request})
+@app.get("/denki", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("denki.html", {"request": request})
+@app.get("/dog", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("dog.html", {"request": request})
+@app.get("/dash", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("dash.html", {"request": request})
+@app.get("/dairan", response_class=HTMLResponse)
+def list_page(response: Response, request: Request):
+    return template("dairan.html", {"request": request})
+
+@app.exception_handler(500)
+def error500(request: Request, __):
+    return template("error.html", {"request": request, "context": '500 Internal Server Error'}, status_code=500)
+  
+@app.exception_handler(404)
+def error404(request: Request, __):
+    return template("error.html", {"request": request, "context": '404 Error、あれれ'}, status_code=404)
+
+
+@app.exception_handler(APITimeoutError)
+def apiWait(request: Request, exception: APITimeoutError):
+    return template("apiTimeout.html", {"request": request}, status_code=504)
+
+@app.exception_handler(UnallowedBot)
+def returnToUnallowedBot(request: Request, exception: UnallowedBot):
+    return template("error.html", {"request": request, "context": '403 Forbidden'}, status_code=403)

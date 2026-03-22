@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>チャンネル登録 - YouTube Plus⁺</title>
+    <link rel="icon" href="/img/logo/favicon.ico">
+    <link rel="stylesheet" href="/css/pure-min.css">
+    <link rel="stylesheet" href="/css/default.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc; --link: #065fd4;
+            --border: rgba(0,0,0,0.1);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+                --text-sub: #aaaaaa; --topbar-bg: #212121;
+                --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                --input-bg: #121212; --input-border: #444; --link: #3ea6ff;
+                --border: rgba(255,255,255,0.1);
+            }
+        }
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff; --link: #065fd4;
+            --border: rgba(0,0,0,0.1); color-scheme: light;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121; --link: #3ea6ff;
+            --border: rgba(255,255,255,0.1); color-scheme: dark;
+        }
+        body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        #top-bar {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--topbar-bg); height: 56px; padding: 0 12px;
+            box-shadow: var(--topbar-shadow);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+        }
+        #top-bar img { height: 28px; }
+        .main { margin-top: 56px; padding: 16px; max-width: 800px; }
+        h2 { font-size: 20px; margin-bottom: 16px; }
+        .channel-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; border-radius: 8px; margin-bottom: 8px;
+            background: var(--bg-card);
+        }
+        .channel-item img { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; }
+        .channel-item a { color: var(--text); text-decoration: none; font-weight: 500; font-size: 15px; }
+        .channel-item a:hover { color: var(--link); }
+        .unsub-btn {
+            margin-left: auto; padding: 6px 14px;
+            border-radius: 20px; border: 1px solid var(--border);
+            background: none; color: var(--text-sub);
+            cursor: pointer; font-size: 13px;
+        }
+        .unsub-btn:hover { background: rgba(128,128,128,0.15); }
+        .empty { text-align: center; padding: 60px; color: var(--text-sub); }
+        .action-bar {
+            display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .action-btn {
+            padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text);
+            cursor: pointer; font-size: 13px;
+        }
+        .action-btn:hover { background: rgba(128,128,128,0.15); }
+    </style>
+</head>
+<body>
+<header id="top-bar">
+    <a href="/"><img src="/img/logo/th.png" alt="Logo" id="logo-img"></a>
+    <span style="font-size:16px; font-weight:bold;">チャンネル登録</span>
+</header>
+
+<div class="main">
+    <h2>登録チャンネル</h2>
+    <div class="action-bar">
+        <button class="action-btn" onclick="exportSubs()">📤 エクスポート</button>
+        <button class="action-btn" onclick="document.getElementById('import-file').click()">📥 インポート</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importSubs(event)">
+    </div>
+    <div id="channel-list"></div>
+</div>
+
+<script>
+let currentTheme = localStorage.getItem('theme') || 'system';
+function setTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'system') html.removeAttribute('data-theme');
+    else html.setAttribute('data-theme', theme);
+    const logo = document.getElementById('logo-img');
+    if (logo) {
+        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        logo.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    }
+}
+setTheme(currentTheme);
+
+function getSubscriptions() {
+    return JSON.parse(localStorage.getItem('subscriptions') || '[]');
+}
+function saveSubscriptions(subs) {
+    localStorage.setItem('subscriptions', JSON.stringify(subs));
+}
+
+function render() {
+    const subs = getSubscriptions();
+    const list = document.getElementById('channel-list');
+    if (subs.length === 0) {
+        list.innerHTML = '<div class="empty">登録チャンネルはありません</div>';
+        return;
+    }
+    list.innerHTML = subs.map(s => `
+        <div class="channel-item" id="ch-${s.id}">
+            <img src="${s.icon}" onerror="this.src='/img/logo/th.png'">
+            <a href="/channel/${s.id}">${s.name}</a>
+            <button class="unsub-btn" onclick="unsubscribe('${s.id}')">登録解除</button>
+        </div>
+    `).join('');
+}
+
+function unsubscribe(channelId) {
+    const subs = getSubscriptions().filter(s => s.id !== channelId);
+    saveSubscriptions(subs);
+    render();
+}
+
+function exportSubs() {
+    const subs = getSubscriptions();
+    const blob = new Blob([JSON.stringify(subs, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'subscriptions.json';
+    a.click();
+}
+
+function importSubs(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (Array.isArray(data)) {
+                // 既存と合体（重複除去）
+                const existing = getSubscriptions();
+                const merged = [...existing];
+                data.forEach(s => {
+                    if (!merged.some(m => m.id === s.id)) merged.push(s);
+                });
+                saveSubscriptions(merged);
+                render();
+                alert(`${data.length}件インポートしました！`);
+            }
+        } catch {
+            alert('ファイルが正しくありません');
+        }
+    };
+    reader.readAsText(file);
+}
+
+render();
+</script>
+</body>
+</html>

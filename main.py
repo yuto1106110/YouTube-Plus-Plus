@@ -432,7 +432,17 @@ app.mount("/genesis", StaticFiles(directory="./blog", html=True), name="static")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 from fastapi.templating import Jinja2Templates
-template = Jinja2Templates(directory='templates').TemplateResponse
+_templates = Jinja2Templates(directory='templates')
+
+def template(name, context, status_code=200):
+    request = context.get("request")
+    ctx = {k: v for k, v in context.items() if k != "request"}
+    return _templates.TemplateResponse(
+        request=request,
+        name=name,
+        context=ctx,
+        status_code=status_code
+    )
 
 no_robot_meta_tag = '<meta name="robots" content="noindex,nofollow">'
 

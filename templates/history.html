@@ -41,6 +41,45 @@
             box-shadow: var(--topbar-shadow);
             position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
         }
+        /* ハンバーガーメニュー */
+#hamburger-btn {
+    flex-shrink: 0; background: none; border: none;
+    cursor: pointer; padding: 6px; color: var(--text);
+    font-size: 20px; border-radius: 6px;
+}
+#hamburger-btn:hover { background: rgba(128,128,128,0.15); }
+
+#side-menu {
+    position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+    background: var(--topbar-bg); z-index: 2000;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.3);
+    transition: left 0.25s ease;
+    display: flex; flex-direction: column;
+}
+#side-menu.open { left: 0; }
+
+#menu-overlay {
+    display: none; position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.4); z-index: 1999;
+}
+#menu-overlay.open { display: block; }
+
+.side-menu-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; height: 56px;
+    border-bottom: 1px solid var(--border);
+}
+.side-menu-header img { height: 28px; }
+
+.side-menu-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 20px; color: var(--text);
+    text-decoration: none; font-size: 14px;
+    transition: background 0.15s;
+}
+.side-menu-item:hover { background: rgba(128,128,128,0.1); }
+.side-menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
         #top-bar img { height: 28px; }
         .search-container { flex: 1; max-width: 480px; }
         .search-container form { display: flex; width: 100%; }
@@ -132,7 +171,7 @@
 <body>
 
 <header id="top-bar">
-    <a href="/"><img src="/img/logo/th.png" alt="Logo" id="logo-img"></a>
+    <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
     <div class="search-container">
         <form action="/search" method="get" onsubmit="return document.getElementById('sq').value.trim() !== ''">
             <input id="sq" name="q" type="search" placeholder="検索" autocomplete="on">
@@ -153,6 +192,32 @@
     <div id="history-list"></div>
 </div>
 
+<!-- オーバーレイ -->
+<div id="menu-overlay" onclick="closeMenu()"></div>
+
+<!-- サイドメニュー -->
+<div id="side-menu">
+    <div class="side-menu-header">
+        <button onclick="closeMenu()" style="background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;">☰</button>
+        <a href="/"><img src="/img/logo/th.png" alt="Logo" id="side-logo-img"></a>
+    </div>
+    <a class="side-menu-item" href="/">
+        <span class="icon">🏠</span><span>ホーム</span>
+    </a>
+    <a class="side-menu-item" href="/trending">
+        <span class="icon">🔥</span><span>トレンド</span>
+    </a>
+    <a class="side-menu-item" href="/history">
+        <span class="icon">🕐</span><span>視聴履歴</span>
+    </a>
+    <a class="side-menu-item" href="/subscriptions">
+        <span class="icon">📺</span><span>チャンネル登録</span>
+    </a>
+    <a class="side-menu-item" href="/settings">
+        <span class="icon">⚙️</span><span>設定</span>
+    </a>
+</div>
+    
 <script>
 // ===== テーマ =====
 let currentTheme = localStorage.getItem('theme') || 'system';
@@ -261,6 +326,25 @@ function clearHistory() {
 }
 
 renderHistory();
+
+// ===== サイドメニュー =====
+function toggleMenu() {
+    document.getElementById('side-menu').classList.toggle('open');
+    document.getElementById('menu-overlay').classList.toggle('open');
+}
+function closeMenu() {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('menu-overlay').classList.remove('open');
+}
+// サイドメニューのロゴもテーマ適用
+function updateAllLogos() {
+    const isDark = currentTheme === 'dark' ||
+        (currentTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    ['logo-img', 'side-logo-img'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    });
+}    
 </script>
 </body>
 </html>

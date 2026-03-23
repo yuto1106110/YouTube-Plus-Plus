@@ -1,116 +1,266 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <!-- モバイル対応のための viewport 指定 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>視聴履歴 - YouTube Plus⁺</title>
-         <link rel="icon" href="/img/logo/favicon.ico">
-        <link rel="stylesheet" href="/css/pure-min.css">
-        <link rel="stylesheet" href="/css/grids-responsive-min.css">
-        <link rel="stylesheet" href="/css/ionicons.min.css">
-        <link rel="stylesheet" href="/css/default.css">
-        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
-        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <style>
-    /* 必要に応じてレイアウトや余白の調整 */
-    .history-container {
-      padding: 20px;
-    }
-    .history-grid {
-      display: flex;
-      flex-wrap: wrap;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>視聴履歴 - YouTube Plus⁺</title>
+    <link rel="icon" href="/img/logo/favicon.ico">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc; --link: #065fd4;
+            --border: rgba(0,0,0,0.1);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+                --text-sub: #aaaaaa; --topbar-bg: #212121;
+                --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                --input-bg: #121212; --input-border: #444; --link: #3ea6ff;
+                --border: rgba(255,255,255,0.1);
+            }
+        }
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff; --link: #065fd4;
+            --border: rgba(0,0,0,0.1); color-scheme: light;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121; --link: #3ea6ff;
+            --border: rgba(255,255,255,0.1); color-scheme: dark;
+        }
+        body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    	        #topButton {
-            position: fixed;
-            left: 20px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+        #top-bar {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--topbar-bg); height: 56px; padding: 0 12px;
+            box-shadow: var(--topbar-shadow);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
         }
-        #topButton:hover {
-            background-color: #0056b3;
+        #top-bar img { height: 28px; }
+        .search-container { flex: 1; max-width: 480px; }
+        .search-container form { display: flex; width: 100%; }
+        .search-container input {
+            flex: 1; padding: 6px 12px; min-width: 0;
+            border-radius: 20px 0 0 20px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 14px; outline: none;
         }
-	    #topButton:active {
-    transform: scale(0.95);
-    background-color: #ff6347;
-}
-  </style>
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6582374172224860"
-     crossorigin="anonymous"></script>
+        .search-container button {
+            padding: 6px 12px; border-radius: 0 20px 20px 0;
+            border: 1px solid var(--input-border); border-left: none;
+            background: var(--bg-card); color: var(--text);
+            cursor: pointer; font-size: 14px;
+        }
+
+        .main { margin-top: 56px; padding: 12px; max-width: 900px; }
+
+        .action-bar {
+            display: flex; gap: 8px; margin-bottom: 16px;
+            align-items: center; flex-wrap: wrap;
+        }
+        .action-btn {
+            padding: 7px 14px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text);
+            cursor: pointer; font-size: 13px;
+        }
+        .action-btn:hover { background: rgba(128,128,128,0.15); }
+        .action-btn.danger { color: #ff4444; border-color: #ff4444; }
+        .action-btn.danger:hover { background: rgba(255,68,68,0.1); }
+
+        .search-bar {
+            flex: 1; min-width: 200px;
+            padding: 7px 14px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 13px; outline: none;
+        }
+
+        .history-count {
+            font-size: 13px; color: var(--text-sub); margin-bottom: 12px;
+        }
+
+        .history-item {
+            display: flex; gap: 12px; padding: 10px;
+            border-radius: 8px; margin-bottom: 8px;
+            background: var(--bg-card);
+            transition: background 0.15s;
+        }
+        .history-item:hover { filter: brightness(1.05); }
+        .history-thumb { position: relative; flex-shrink: 0; }
+        .history-thumb img {
+            width: 168px; height: 94px; object-fit: cover;
+            border-radius: 6px; display: block;
+        }
+        .thumb-length {
+            position: absolute; bottom: 4px; right: 4px;
+            background: rgba(0,0,0,0.8); color: #fff;
+            padding: 1px 5px; border-radius: 3px; font-size: 11px;
+        }
+        .history-info { flex: 1; min-width: 0; }
+        .history-info a { text-decoration: none; color: var(--text); }
+        .history-info h4 {
+            font-size: 14px; line-height: 1.4; margin-bottom: 4px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .history-info h4:hover { color: var(--link); }
+        .history-info .ch { font-size: 12px; color: var(--text-sub); margin-bottom: 2px; }
+        .history-info .meta { font-size: 12px; color: var(--text-sub); }
+        .del-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--text-sub); font-size: 20px;
+            padding: 4px 8px; flex-shrink: 0; align-self: flex-start;
+            border-radius: 4px;
+        }
+        .del-btn:hover { color: #ff4444; background: rgba(255,68,68,0.1); }
+
+        .empty { text-align: center; padding: 80px 20px; color: var(--text-sub); }
+        .empty p { font-size: 15px; margin-bottom: 8px; }
+
+        @media (max-width: 600px) {
+            .history-thumb img { width: 120px; height: 68px; }
+        }
+    </style>
 </head>
 <body>
-  <!-- ヘッダー（既存ページと同じヘッダーを利用） -->
-  <header id="top-bar">
-    <div class="navbar-logo">
-      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+
+<header id="top-bar">
+    <a href="/"><img src="/img/logo/th.png" alt="Logo" id="logo-img"></a>
+    <div class="search-container">
+        <form action="/search" method="get" onsubmit="return document.getElementById('sq').value.trim() !== ''">
+            <input id="sq" name="q" type="search" placeholder="検索" autocomplete="on">
+            <button type="submit">🔍</button>
+        </form>
     </div>
-    <nav id="top-nav">
-      <a href="/chat">Plus⁺ Chat</a>
-      <a href="/others">メニュー</a>
-      <a href="/qanda">ヘルプ</a>
-      <a href="/help">お問い合わせ</a>
-    </nav>
-  </header>
-  <div class="no-theme">
-  <div class="history-container">
-    <h1>視聴履歴</h1>
-    <div class="pure-g history-grid" id="historyContainer">
-      <!-- JavaScriptで履歴アイテムがここに挿入されます -->
+</header>
+
+<div class="main">
+    <h2 style="font-size:20px; margin-bottom:16px;">🕐 視聴履歴</h2>
+
+    <div class="action-bar">
+        <input class="search-bar" type="search" placeholder="履歴を検索..." oninput="filterHistory(this.value)">
+        <button class="action-btn danger" onclick="clearHistory()">🗑️ 全削除</button>
     </div>
-  </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function(){
-      // localStorage から視聴履歴を取得
-      let history = localStorage.getItem('watchHistory');
-      history = history ? JSON.parse(history) : [];
+    <div class="history-count" id="history-count"></div>
+    <div id="history-list"></div>
+</div>
 
-      const container = document.getElementById('historyContainer');
+<script>
+// ===== テーマ =====
+let currentTheme = localStorage.getItem('theme') || 'system';
+function applyTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'system') html.removeAttribute('data-theme');
+    else html.setAttribute('data-theme', theme);
+    const logo = document.getElementById('logo-img');
+    if (logo) {
+        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        logo.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    }
+}
+applyTheme(currentTheme);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(currentTheme));
 
-      if(history.length === 0) {
-        container.innerHTML = "<p>paa</p>";
+function escHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ===== 履歴管理 =====
+function getHistory() {
+    return JSON.parse(localStorage.getItem('watchHistory') || '[]');
+}
+
+function saveHistory(history) {
+    localStorage.setItem('watchHistory', JSON.stringify(history));
+}
+
+let currentFilter = '';
+
+function renderHistory(filter = '') {
+    const history = getHistory();
+    const container = document.getElementById('history-list');
+    const countEl = document.getElementById('history-count');
+
+    let filtered = history;
+    if (filter) {
+        const q = filter.toLowerCase();
+        filtered = history.filter(v =>
+            (v.title || '').toLowerCase().includes(q) ||
+            (v.channel || '').toLowerCase().includes(q)
+        );
+    }
+
+    countEl.textContent = filter
+        ? `${filtered.length} 件見つかりました（全${history.length}件）`
+        : `全${history.length}件`;
+
+    if (filtered.length === 0) {
+        container.innerHTML = history.length === 0
+            ? '<div class="empty"><p>視聴履歴はありません</p><p style="font-size:13px;">動画を見ると履歴が記録されます</p></div>'
+            : '<div class="empty"><p>検索結果がありません</p></div>';
         return;
-      }
+    }
 
-      // 各動画の情報をカード形式で生成
-      history.forEach(video => {
-        // 例示していただいた構造に沿ったHTMLを生成
-        const cardDiv = document.createElement('div');
-        // pure-u-1:全幅、pure-u-md-1-4:中画面以上では1/4幅のグリッド
-        cardDiv.className = "pure-u-1 pure-u-md-1-4";
-        cardDiv.innerHTML = `
-          <div class="h-box">
-            <a id="dynamic-link" href="/watch?v=${video.video_id}" style="width:100%">
-              <div class="thumbnail">
-                <img class="thumbnail" loading="lazy" src="${video.thumbnail}" onerror="document.cookie = 'proxy=True;max-age=2592000;';">
-                <p class="length">${video.length}</p>
-              </div>
-              <p dir="auto">${video.title}</p>
+    container.innerHTML = filtered.map(v => `
+        <div class="history-item" id="h-${v.video_id}">
+            <a href="/watch?v=${v.video_id}" style="display:flex; gap:12px; flex:1; text-decoration:none; color:inherit; min-width:0;">
+                <div class="history-thumb">
+                    <img src="${v.thumbnail || `https://img.youtube.com/vi/${v.video_id}/mqdefault.jpg`}"
+                         loading="lazy" alt="${escHtml(v.title || '')}">
+                    <span class="thumb-length">${v.length || ''}</span>
+                </div>
+                <div class="history-info">
+                    <h4>${escHtml(v.title || '不明なタイトル')}</h4>
+                    <p class="ch">${escHtml(v.channel || '')}</p>
+                    <p class="meta">
+                        ${v.view_count ? formatCount(v.view_count) + '回視聴' : ''}
+                    </p>
+                </div>
             </a>
-            <div class="video-card-row flexible">
-              <a href="/channel/${video.channel_id}">${video.channel}</a>
-            </div>
-            <div class="video-card-row flexible">
-              <div class="flex-left">
-                <p class="video-data" dir="auto">${video.view_count}回視聴</p>
-                <p class="video-data" dir="auto">${video.published}</p>
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(cardDiv);
-      });
-    });
-  </script>
-  </div>
-  <button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
-<script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
+            <button class="del-btn" onclick="deleteOne('${v.video_id}')" title="削除">×</button>
+        </div>
+    `).join('');
+}
+
+function formatCount(count) {
+    try {
+        count = parseInt(count);
+        if (count >= 100000000) return (count / 100000000).toFixed(0) + '億';
+        if (count >= 10000) return (count / 10000).toFixed(0) + '万';
+        if (count >= 1000) return (count / 1000).toFixed(0) + '千';
+        return String(count);
+    } catch { return ''; }
+}
+
+function filterHistory(val) {
+    currentFilter = val;
+    renderHistory(val);
+}
+
+function deleteOne(videoId) {
+    saveHistory(getHistory().filter(v => v.video_id !== videoId));
+    document.getElementById('h-' + videoId)?.remove();
+    renderHistory(currentFilter);
+}
+
+function clearHistory() {
+    if (confirm('視聴履歴を全て削除しますか？')) {
+        localStorage.removeItem('watchHistory');
+        renderHistory();
+    }
+}
+
+renderHistory();
+</script>
 </body>
 </html>

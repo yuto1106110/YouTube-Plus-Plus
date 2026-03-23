@@ -746,6 +746,12 @@ def subscriptions_page(request: Request, yuki: Union[str, None] = Cookie(None)):
         return redirect("/")
     return template("subscriptions.html", {"request": request})
 
+@app.get("/settings", response_class=HTMLResponse)
+def subscriptions_page(request: Request, yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return redirect("/")
+    return template("settings.html", {"request": request})
+
 @app.get('/w', response_class=HTMLResponse)
 def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
     # v: video_id
@@ -840,12 +846,6 @@ def thumbnail(v:str):
 @app.get("/suggest")
 def suggest(keyword:str):
     return [i[0] for i in json.loads(requests.get("http://www.google.com/complete/search?client=youtube&hl=ja&ds=yt&q=" + urllib.parse.quote(keyword), headers=getRandomUserAgent()).text[19:-1])[1]]
-
-@app.get("/subscriptions", response_class=HTMLResponse)
-def subscriptions(request: Request, yuki: Union[str, None] = Cookie(None)):
-    if not checkCookie(yuki):
-        return redirect("/")
-    return template("subscriptions.html", {"request": request})
 
 @cache(seconds=120)
 def getSource(name):
@@ -1072,9 +1072,6 @@ def list_page(response: Response, request: Request):
 @app.get("/re", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("re.html", {"request": request})
-@app.get("/setting", response_class=HTMLResponse)
-def list_page(response: Response, request: Request):
-    return template("settings.html", {"request": request})
 @app.get("/among", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("among.html", {"request": request})

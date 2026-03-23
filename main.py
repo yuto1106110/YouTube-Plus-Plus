@@ -460,6 +460,30 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
         return redirect("/")
     response.set_cookie("yuki", "True", max_age=7*24*60*60)
     video_data = getVideoData(v)
+  # サイトトレンドに記録
+if trend_collection is not None:
+    try:
+        now = int(time.time())
+        trend_collection.update_one(
+            {"video_id": v},
+            {
+                "$inc": {"count": 1},
+                "$set": {
+                    "title": video_data[0]["title"],
+                    "author": video_data[0]["author"],
+                    "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
+                    "length": video_data[0]["length_text"],
+                    "last_watched": now,
+                },
+                "$setOnInsert": {"first_watched": now}
+            },
+            upsert=True
+        )
+        if random.randint(1, 100) == 1:
+            cleanup_old_trends()
+    except Exception as e:
+        print(f"trend error: {e}")
+      
     return template('video.html', {
         "request": request,
         "videoid": v,
@@ -481,31 +505,6 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
         "published_text": video_data[0]['published_text'],
         "proxy": proxy
     })
-
-# サイトトレンドに記録
-if trend_collection is not None:
-    try:
-        now = int(time.time())
-        trend_collection.update_one(
-            {"video_id": v},
-            {
-                "$inc": {"count": 1},
-                "$set": {
-                    "title": video_data[0]["title"],
-                    "author": video_data[0]["author"],
-                    "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
-                    "length": video_data[0]["length_text"],
-                    "last_watched": now,
-                },
-                "$setOnInsert": {"first_watched": now}
-            },
-            upsert=True
-        )
-        # 古いデータを定期的に削除（100回に1回）
-        if random.randint(1, 100) == 1:
-            cleanup_old_trends()
-    except:
-        pass
 
 @app.get('/api/ytdlp/{video_id}')
 def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie(None)):

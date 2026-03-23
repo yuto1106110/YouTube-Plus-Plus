@@ -497,6 +497,67 @@ let autoNextEnabled = false;
 let isDash = {{ 'true' if highstream_url else 'false' }};
 let activeMenuId = null;
 
+//educationのパラメーターを複数のところから取得
+const EDUCATION_KEYS = [
+    'https://raw.githubusercontent.com/toka-kun/Education/refs/heads/main/keys/key1.json',
+    'https://raw.githubusercontent.com/toka-kun/Education/refs/heads/main/keys/key2.json',
+    'https://raw.githubusercontent.com/toka-kun/Education/refs/heads/main/keys/key3.json',
+];
+
+async function getEducationParams() {
+    for (const url of EDUCATION_KEYS) {
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 3000);
+            const res = await fetch(url, { signal: controller.signal });
+            clearTimeout(timer);
+            if (!res.ok) continue;
+            const data = await res.json();
+            if (data.result) return data.result.replace(/&amp;/g, '&');
+        } catch {
+            continue;
+        }
+    }
+    return null;
+}    
+
+async function applyDefaultPlayback() {
+    const defaultPlayback = localStorage.getItem('defaultPlayback') || 'dash';
+
+    if (defaultPlayback === 'embed') {
+        setPlayback('embed');
+    } else if (defaultPlayback === 'education') {
+        const params = await getEducationParams();
+        if (!params) {
+            console.error('全てのEducationキーが使えませんでした');
+            return;
+        }
+        const embedUrl = `https://www.youtubeeducation.com/embed/${videoid}${params}`;
+        let embed = document.getElementById('embedPlayer');
+        if (!embed) {
+            embed = document.createElement('iframe');
+            embed.id = 'embedPlayer';
+            embed.style.cssText = 'width:100%; aspect-ratio:16/9; border:none;';
+            embed.allowFullscreen = true;
+            document.querySelector('.video-player-wrapper').appendChild(embed);
+        }
+        video.style.display = 'none';
+        embed.src = embedUrl;
+        embed.style.display = 'block';
+        currentPlayback = 'education';
+    } else if (defaultPlayback === 'normal') {
+        isDash = false;
+        document.getElementById('audiosrc').src = '';
+        audio.load();
+        video.load();
+        video.play().catch(() => {});
+    }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    applyDefaultPlayback();
+});
+    
 // ===== ローディング =====
 video.addEventListener('waiting', () => loader.style.display = 'block');
 video.addEventListener('playing', () => loader.style.display = 'none');

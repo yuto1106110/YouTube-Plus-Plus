@@ -873,26 +873,6 @@ $('#searchbox').autocomplete({
     delay: 300
 });
 
-// ===== 履歴 =====
-const videoData = {
-    video_id: "{{ videoid }}",
-    thumbnail: "https://img.youtube.com/vi/{{ videoid }}/mqdefault.jpg",
-    title: "{{ video_title }}",
-    channel: "{{ author }}",
-    channel_id: "{{ author_id }}",
-    view_count: "{{ view_count }}",
-    length: "{{ length_text }}"
-};
-try {
-    let watchHistory = JSON.parse(localStorage.getItem('watchHistory') || '[]');
-    watchHistory = watchHistory.filter(i => i.video_id !== videoData.video_id);
-    watchHistory.unshift(videoData);
-    if (watchHistory.length > 50) watchHistory = watchHistory.slice(0, 50);
-    localStorage.setItem('watchHistory', JSON.stringify(watchHistory));
-    console.log('履歴保存:', videoData.title);
-} catch(e) {
-    console.error('履歴保存エラー:', e);
-}
 </script>
 <script>
 console.log('video.html読み込み完了');

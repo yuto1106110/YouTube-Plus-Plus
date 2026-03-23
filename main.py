@@ -33,6 +33,20 @@ user_agents = [
   'Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1'
 ]
 
+# MongoDB接続
+from pymongo import MongoClient
+import os
+
+MONGODB_URI = os.environ.get("MONGODB_URI")
+if MONGODB_URI:
+    mongo_client = MongoClient(MONGODB_URI)
+    db = mongo_client["ytplusplus"]
+    trend_collection = db["trends"]
+else:
+    mongo_client = None
+    db = None
+    trend_collection = None
+
 def getRandomUserAgent():
   user_agent = user_agents[random.randint(0, len(user_agents) - 1)]
   print(user_agent)
@@ -257,6 +271,22 @@ def getVideoData(videoid):
             } for i in recommended_videos
         ]
     ]
+
+# サイトトレンドに記録
+if trend_collection is not None:
+    try:
+        trend_collection.update_one(
+            {"video_id": v},
+            {"$inc": {"count": 1}, "$set": {
+                "title": video_data[0]["title"],
+                "author": video_data[0]["author"],
+                "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
+                "length": video_data[0]["length_text"],
+            }},
+            upsert=True
+        )
+    except:
+        pass
   
 def getSearchData(q, page):
 
@@ -522,6 +552,20 @@ def get_channel_videos(channel_id: str, yuki: Union[str, None] = Cookie(None)):
             }
             for v in latest
         ]
+        return {"videos": videos}
+    except Exception as e:
+        return {"error": str(e), "videos": []}
+
+@app.get("/api/site_trending")
+def get_site_trending(yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return {"error": "unauthorized"}
+    if trend_collection is None:
+        return {"videos": []}
+    try:
+        videos = list(trend_collection.find(
+            {}, {"_id": 0}
+        ).sort("count", -1).limit(50))
         return {"videos": videos}
     except Exception as e:
         return {"error": str(e), "videos": []}

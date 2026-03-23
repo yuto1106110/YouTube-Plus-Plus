@@ -1,44 +1,465 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>設定</title>
-<style>
-	        #topButton {
-            position: fixed;
-            left: 20px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 - YouTube Plus⁺</title>
+    <link rel="icon" href="/img/logo/favicon.ico">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc; --link: #065fd4;
+            --border: rgba(0,0,0,0.1);
         }
-        #topButton:hover {
-            background-color: #0056b3;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+                --text-sub: #aaaaaa; --topbar-bg: #212121;
+                --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                --input-bg: #121212; --input-border: #444; --link: #3ea6ff;
+                --border: rgba(255,255,255,0.1);
+            }
         }
-	    #topButton:active {
-    transform: scale(0.95);
-    background-color: #ff6347;
-}
-</style>
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6582374172224860"
-     crossorigin="anonymous"></script>
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff; --link: #065fd4;
+            --border: rgba(0,0,0,0.1); color-scheme: light;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121; --link: #3ea6ff;
+            --border: rgba(255,255,255,0.1); color-scheme: dark;
+        }
+        body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        #top-bar {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--topbar-bg); height: 56px; padding: 0 12px;
+            box-shadow: var(--topbar-shadow);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+        }
+        #hamburger-btn {
+            flex-shrink: 0; background: none; border: none;
+            cursor: pointer; padding: 6px; color: var(--text);
+            font-size: 20px; border-radius: 6px;
+        }
+        #hamburger-btn:hover { background: rgba(128,128,128,0.15); }
+        #side-menu {
+            position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+            background: var(--topbar-bg); z-index: 2000;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.3);
+            transition: left 0.25s ease;
+        }
+        #side-menu.open { left: 0; }
+        #menu-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); z-index: 1999;
+        }
+        #menu-overlay.open { display: block; }
+        .side-menu-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; height: 56px;
+            border-bottom: 1px solid var(--border);
+        }
+        .side-menu-header img { height: 28px; }
+        .side-menu-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 20px; color: var(--text);
+            text-decoration: none; font-size: 14px;
+            transition: background 0.15s;
+        }
+        .side-menu-item:hover { background: rgba(128,128,128,0.1); }
+        .side-menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
+
+        .main { margin-top: 56px; padding: 16px; max-width: 600px; }
+        h2 { font-size: 20px; margin-bottom: 20px; }
+
+        .setting-section {
+            background: var(--bg-card); border-radius: 10px;
+            padding: 16px; margin-bottom: 16px;
+        }
+        .setting-section h3 {
+            font-size: 13px; color: var(--text-sub);
+            margin-bottom: 12px; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .setting-item {
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+        }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-label { font-size: 14px; }
+        .setting-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+        .option-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .option-chip {
+            padding: 6px 14px; border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg); color: var(--text);
+            cursor: pointer; font-size: 13px;
+            transition: all 0.15s;
+        }
+        .option-chip.active {
+            background: var(--text); color: var(--bg);
+            border-color: var(--text);
+        }
+
+        .sub-section {
+            margin-top: 12px; padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .sub-section-title {
+            font-size: 13px; color: var(--text-sub); margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%; padding: 8px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 12px; min-height: 80px;
+            resize: vertical; outline: none; font-family: monospace;
+        }
+
+        .action-btn {
+            padding: 7px 14px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg); color: var(--text);
+            cursor: pointer; font-size: 13px;
+            white-space: nowrap;
+        }
+        .action-btn:hover { background: rgba(128,128,128,0.15); }
+        .action-btn.danger { color: #ff4444; border-color: #ff4444; }
+        .action-btn.danger:hover { background: rgba(255,68,68,0.1); }
+
+        .test-row { display: flex; gap: 8px; width: 100%; }
+        .test-input {
+            flex: 1; padding: 8px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 13px; outline: none;
+        }
+        .test-btn {
+            padding: 8px 16px; border-radius: 8px; border: none;
+            background: var(--text); color: var(--bg);
+            cursor: pointer; font-size: 13px; font-weight: bold;
+            white-space: nowrap;
+        }
+
+        #preview-area { width: 100%; margin-top: 8px; }
+        #preview-iframe {
+            width: 100%; aspect-ratio: 16/9;
+            border: none; border-radius: 8px; display: block;
+        }
+        #preview-error { color: #ff4444; font-size: 13px; margin-top: 4px; }
+
+        .saved-toast {
+            position: fixed; bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #333; color: #fff;
+            padding: 10px 20px; border-radius: 20px;
+            font-size: 13px; transition: transform 0.3s;
+            z-index: 9999;
+        }
+        .saved-toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
 </head>
 <body>
-    <button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
-    <h1>設定</h1>
-    <p>現在の埋め込み再生設定：{{ "オン" if ume_toggle == "true" else "オフ" }}</p>
-    <form method="post" action="/setting">
-        {% if ume_toggle == "true" %}
-            <input type="hidden" name="embed" value="off">
-            <button type="submit">埋め込み再生をオフにする</button>
-        {% else %}
-            <input type="hidden" name="embed" value="on">
-            <button type="submit">埋め込み再生をオンにする</button>
-        {% endif %}
-    </form>
-	    <script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
+
+<header id="top-bar">
+    <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
+    <span style="font-size:16px; font-weight:bold;">設定</span>
+</header>
+
+<div id="menu-overlay" onclick="closeMenu()"></div>
+<div id="side-menu">
+    <div class="side-menu-header">
+        <button onclick="closeMenu()" style="background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;">☰</button>
+        <a href="/"><img src="/img/logo/th.png" alt="Logo" id="side-logo-img"></a>
+    </div>
+    <a class="side-menu-item" href="/"><span class="icon">🏠</span><span>ホーム</span></a>
+    <a class="side-menu-item" href="/trending"><span class="icon">🔥</span><span>トレンド</span></a>
+    <a class="side-menu-item" href="/history"><span class="icon">🕐</span><span>視聴履歴</span></a>
+    <a class="side-menu-item" href="/subscriptions"><span class="icon">📺</span><span>登録チャンネル</span></a>
+    <a class="side-menu-item" href="/settings"><span class="icon">⚙️</span><span>設定</span></a>
+</div>
+
+<div class="main">
+    <h2>⚙️ 設定</h2>
+
+    <!-- テーマ -->
+    <div class="setting-section">
+        <h3>🎨 テーマ</h3>
+        <div class="setting-item">
+            <div><div class="setting-label">カラーモード</div></div>
+            <div class="option-group" id="theme-options">
+                <span class="option-chip" id="th-system" onclick="setTheme('system')">システム</span>
+                <span class="option-chip" id="th-dark" onclick="setTheme('dark')">🌙 ダーク</span>
+                <span class="option-chip" id="th-light" onclick="setTheme('light')">☀️ ライト</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 再生設定 -->
+    <div class="setting-section">
+        <h3>▶ 再生設定</h3>
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">デフォルト再生方法</div>
+                <div class="setting-desc">動画ページを開いた時の再生方法</div>
+            </div>
+        </div>
+        <div class="option-group" style="padding:8px 0;" id="playback-options">
+            <span class="option-chip" id="pb-dash" onclick="setPlaybackDefault('dash')">📺 高画質(DASH)</span>
+            <span class="option-chip" id="pb-normal" onclick="setPlaybackDefault('normal')">🎬 通常画質</span>
+            <span class="option-chip" id="pb-nocookie" onclick="setPlaybackDefault('nocookie')">▶ nocookie</span>
+            <span class="option-chip" id="pb-education" onclick="setPlaybackDefault('education')">🎓 Education</span>
+        </div>
+
+        <!-- Education設定 -->
+        <div id="education-settings" style="display:none;">
+            <div class="sub-section">
+                <div class="sub-section-title">パラメーターソース</div>
+                <div class="option-group" id="key-options">
+                    <span class="option-chip" id="key-auto" onclick="setKeyMode('auto')">🔄 自動</span>
+                    <span class="option-chip" id="key-1" onclick="setKeyMode('1')">Key 1</span>
+                    <span class="option-chip" id="key-2" onclick="setKeyMode('2')">Key 2</span>
+                    <span class="option-chip" id="key-3" onclick="setKeyMode('3')">Key 3</span>
+                </div>
+            </div>
+            <div class="sub-section">
+                <div class="sub-section-title">カスタムパラメーター（空欄の場合は上のキーを使用）</div>
+                <textarea id="custom-params" placeholder="?autoplay=1&controls=1..."></textarea>
+                <button class="action-btn" style="margin-top:8px;" onclick="saveCustomParams()">💾 保存</button>
+            </div>
+            <div class="sub-section">
+                <div class="sub-section-title">試し再生</div>
+                <div class="test-row">
+                    <input class="test-input" id="test-videoid" type="text" placeholder="動画IDを入力 (例: dQw4w9WgXcQ)">
+                    <button class="test-btn" onclick="testPlayback()">▶ 試す</button>
+                </div>
+                <div id="preview-error"></div>
+                <div id="preview-area" style="display:none;">
+                    <iframe id="preview-iframe"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- 試し再生（Education以外） -->
+        <div id="normal-test" class="sub-section">
+            <div class="sub-section-title">試し再生</div>
+            <div class="test-row">
+                <input class="test-input" id="test-videoid2" type="text" placeholder="動画IDを入力 (例: dQw4w9WgXcQ)">
+                <button class="test-btn" onclick="testPlaybackNormal()">▶ 試す</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- データ管理 -->
+    <div class="setting-section">
+        <h3>🗂 データ管理</h3>
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">視聴履歴を削除</div>
+                <div class="setting-desc">ローカルに保存された視聴履歴を全削除</div>
+            </div>
+            <button class="action-btn danger" onclick="clearHistory()">🗑️ 削除</button>
+        </div>
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">登録チャンネルをエクスポート</div>
+                <div class="setting-desc">登録チャンネルをJSONで保存</div>
+            </div>
+            <button class="action-btn" onclick="exportSubs()">📤 保存</button>
+        </div>
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">登録チャンネルをインポート</div>
+                <div class="setting-desc">JSONファイルから読み込む</div>
+            </div>
+            <button class="action-btn" onclick="document.getElementById('import-file').click()">📥 読込</button>
+            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importSubs(event)">
+        </div>
+    </div>
+</div>
+
+<div class="saved-toast" id="saved-toast">保存しました</div>
+
+<script>
+const EDUCATION_KEYS = [
+    'https://raw.githubusercontent.com/toka-kun/Education/refs/heads/main/keys/key1.json',
+    'https://raw.githubusercontent.com/toka-kun/Education/refs/heads/main/keys/key2.json',
+    'https://raw.githubusercontent.com/toka-kun/Education/refs/heads/main/keys/key3.json',
+];
+
+// ===== テーマ =====
+let currentTheme = localStorage.getItem('theme') || 'system';
+function applyTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'system') html.removeAttribute('data-theme');
+    else html.setAttribute('data-theme', theme);
+    const logo = document.getElementById('side-logo-img');
+    if (logo) {
+        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        logo.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    }
+}
+function setTheme(theme) {
+    currentTheme = theme;
+    localStorage.setItem('theme', theme);
+    applyTheme(theme);
+    document.querySelectorAll('#theme-options .option-chip').forEach(el => el.classList.remove('active'));
+    document.getElementById('th-' + theme)?.classList.add('active');
+    showToast();
+}
+applyTheme(currentTheme);
+document.getElementById('th-' + currentTheme)?.classList.add('active');
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(currentTheme));
+
+// ===== 再生方法デフォルト =====
+let currentPlaybackDefault = localStorage.getItem('defaultPlayback') || 'dash';
+function setPlaybackDefault(mode) {
+    currentPlaybackDefault = mode;
+    localStorage.setItem('defaultPlayback', mode);
+    document.querySelectorAll('#playback-options .option-chip').forEach(el => el.classList.remove('active'));
+    document.getElementById('pb-' + mode)?.classList.add('active');
+    updateEducationSettings();
+    showToast();
+}
+document.getElementById('pb-' + currentPlaybackDefault)?.classList.add('active');
+
+function updateEducationSettings() {
+    const isEducation = currentPlaybackDefault === 'education';
+    document.getElementById('education-settings').style.display = isEducation ? 'block' : 'none';
+    document.getElementById('normal-test').style.display = isEducation ? 'none' : 'block';
+}
+updateEducationSettings();
+
+// ===== Educationキーモード =====
+let currentKeyMode = localStorage.getItem('educationKeyMode') || 'auto';
+function setKeyMode(mode) {
+    currentKeyMode = mode;
+    localStorage.setItem('educationKeyMode', mode);
+    document.querySelectorAll('#key-options .option-chip').forEach(el => el.classList.remove('active'));
+    document.getElementById('key-' + mode)?.classList.add('active');
+    showToast();
+}
+document.getElementById('key-' + currentKeyMode)?.classList.add('active');
+
+// カスタムパラメーター
+document.getElementById('custom-params').value = localStorage.getItem('educationCustomParams') || '';
+function saveCustomParams() {
+    localStorage.setItem('educationCustomParams', document.getElementById('custom-params').value.trim());
+    showToast();
+}
+
+// パラメーター取得
+async function getEducationParamsForSettings() {
+    const custom = localStorage.getItem('educationCustomParams') || '';
+    if (custom.trim()) return custom.trim();
+    const mode = localStorage.getItem('educationKeyMode') || 'auto';
+    const keys = mode === 'auto' ? EDUCATION_KEYS : [EDUCATION_KEYS[parseInt(mode) - 1]];
+    for (const url of keys) {
+        try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 3000);
+            const res = await fetch(url, { signal: controller.signal });
+            clearTimeout(timer);
+            if (!res.ok) continue;
+            const data = await res.json();
+            if (data.result) return data.result.replace(/&amp;/g, '&');
+        } catch { continue; }
+    }
+    return null;
+}
+
+// ===== 試し再生 =====
+async function testPlayback() {
+    const videoId = document.getElementById('test-videoid').value.trim();
+    const previewArea = document.getElementById('preview-area');
+    const previewIframe = document.getElementById('preview-iframe');
+    const previewError = document.getElementById('preview-error');
+    previewError.textContent = '';
+
+    if (!videoId) {
+        previewError.textContent = '動画IDを入力してください';
+        return;
+    }
+    const params = await getEducationParamsForSettings();
+    if (!params) {
+        previewError.textContent = 'パラメーターを取得できませんでした';
+        return;
+    }
+    previewArea.style.display = 'block';
+    previewIframe.src = `https://www.youtubeeducation.com/embed/${videoId}${params}`;
+}
+
+function testPlaybackNormal() {
+    const videoId = document.getElementById('test-videoid2').value.trim();
+    if (!videoId) return;
+    const mode = currentPlaybackDefault;
+    if (mode === 'nocookie') {
+        window.open(`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`, '_blank');
+    } else {
+        window.open(`/watch?v=${videoId}`, '_blank');
+    }
+}
+
+// ===== サイドメニュー =====
+function toggleMenu() {
+    document.getElementById('side-menu').classList.toggle('open');
+    document.getElementById('menu-overlay').classList.toggle('open');
+}
+function closeMenu() {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('menu-overlay').classList.remove('open');
+}
+
+// ===== トースト =====
+function showToast() {
+    const toast = document.getElementById('saved-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ===== データ管理 =====
+function clearHistory() {
+    if (confirm('視聴履歴を全て削除しますか？')) {
+        localStorage.removeItem('watchHistory');
+        showToast();
+    }
+}
+function exportSubs() {
+    const subs = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+    const blob = new Blob([JSON.stringify(subs, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'subscriptions.json';
+    a.click();
+}
+function importSubs(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (Array.isArray(data)) {
+                const existing = JSON.parse(localStorage.getItem('subscriptions') || '[]');
+                const merged = [...existing];
+                data.forEach(s => { if (!merged.some(m => m.id === s.id)) merged.push(s); });
+                localStorage.setItem('subscriptions', JSON.stringify(merged));
+                showToast();
+            }
+        } catch { alert('ファイルが正しくありません'); }
+    };
+    reader.readAsText(file);
+}
+</script>
 </body>
 </html>

@@ -665,6 +665,12 @@ def get_site_trending(
     except Exception as e:
         return {"error": str(e), "videos": []}
 
+@app.get("/trending", response_class=HTMLResponse)
+def trending_page(request: Request, yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return redirect("/")
+    return template("trending.html", {"request": request})
+
 @app.get('/w', response_class=HTMLResponse)
 def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
     # v: video_id

@@ -304,48 +304,44 @@
             </div>
 
             <!-- 画質メニュー -->
-            <div class="popup-menu" id="menu-quality">
-                <div class="menu-title">🎬 画質を選択</div>
-                {% for stream in quality_streams %}
-                <div class="menu-item {% if loop.first %}active{% endif %}"
-                     id="q-{{ stream.resolution }}"
-                     onclick="changeQuality('{{ stream.url }}', '{{ stream.resolution }}', 'dash')">
-                    <span>{% if loop.first %}✓ {% endif %}{{ stream.resolution }}</span>
-                    {% if loop.first %}<span style="font-size:11px;color:#aaa;">高画質</span>{% endif %}
-                </div>
-                {% endfor %}
-                {% for url in videourls %}
-                <div class="menu-item" id="q-normal{{ loop.index }}"
-                     onclick="changeQuality('{{ url }}', '通常{{ loop.index }}', 'normal')">
-                    <span>通常画質 {{ loop.index }}</span>
-                </div>
-                {% endfor %}
-                {% if hlsUrl %}
-                <div class="menu-item" onclick="changeQuality('{{ hlsUrl }}', 'ライブ', 'hls')">
-                    <span>🔴 ライブ / HLS</span>
-                </div>
-                {% endif %}
-            </div>
+<div class="popup-menu" id="menu-quality">
+    <div class="menu-title">🎬 画質を選択</div>
+    {% for stream in quality_streams %}
+    <div class="menu-item {% if loop.first %}active{% endif %}"
+         id="q-{{ stream.resolution }}"
+         onclick="changeQuality('{{ stream.url }}', '{{ stream.resolution }}', 'dash')">
+        <span>{% if loop.first %}✓ {% endif %}{{ stream.resolution }}</span>
+        {% if loop.first %}<span style="font-size:11px;color:#aaa;">高画質</span>{% endif %}
+    </div>
+    {% endfor %}
+    {% for url in videourls %}
+    <div class="menu-item" id="q-normal{{ loop.index }}"
+         onclick="changeQuality('{{ url }}', '通常 (360p)', 'normal')">
+        <span>通常 (360p)</span>
+    </div>
+    {% endfor %}
+</div>
 
             <!-- 再生方法メニュー -->
-            <div class="popup-menu" id="menu-playback">
-                <div class="menu-title">▶ 再生方法</div>
-                <div class="menu-item active" id="pb-invidious" onclick="setProvider('invidious')">
-                    <span>✓ Invidious</span>
-                </div>
-                <div class="menu-item" id="pb-ytdlp" onclick="setProvider('ytdlp')">
-                    <span>yt-dlp</span>
-                </div>
-                <div class="menu-divider"></div>
-                <div class="menu-item" id="pb-embed" onclick="setPlayback('embed')">
-                    <span>埋め込み再生</span>
-                </div>
-                {% if hlsUrl %}
-                <div class="menu-item" id="pb-hls" onclick="setPlayback('hls')">
-                    <span>🔴 HLS（ライブ）</span>
-                </div>
-                {% endif %}
-            </div>
+<div class="popup-menu" id="menu-playback">
+    <div class="menu-title">▶ 再生方法</div>
+    <div class="menu-item active" id="pb-invidious" onclick="setProvider('invidious')">
+        <span>Invidious</span>
+    </div>
+    <div class="menu-item" id="pb-ytdlp" onclick="setProvider('ytdlp')">
+        <span>yt-dlp</span>
+    </div>
+    <div class="menu-divider"></div>
+    <div class="menu-item" id="pb-hls" onclick="setPlayback('hls')">
+        <span>HLS</span>
+    </div>
+    <div class="menu-item" id="pb-nocookie" onclick="setPlayback('nocookie')">
+        <span>NoCookie</span>
+    </div>
+    <div class="menu-item" id="pb-education" onclick="setPlayback('education')">
+        <span>Education</span>
+    </div>
+</div>
 
             <!-- 共有メニュー -->
 <div class="popup-menu" id="menu-share">
@@ -770,18 +766,38 @@ function setPlayback(mode) {
     if (!embed) {
         embed = document.createElement('iframe');
         embed.id = 'embedPlayer';
-        embed.style.cssText = 'display:none; width:100%; aspect-ratio:16/9; border:none;';
+        embed.style.cssText = 'display:none; width:100%; aspect-ratio:16/9; border:none; border-radius:8px;';
         embed.allowFullscreen = true;
         document.querySelector('.video-player-wrapper').appendChild(embed);
     }
 
-    if (mode === 'embed') {
+    // 全ボタンのアクティブ解除
+    document.querySelectorAll('#menu-playback .menu-item').forEach(el => el.classList.remove('active'));
+
+    if (mode === 'nocookie') {
         video.pause(); audio.pause();
         video.style.display = 'none';
         embed.src = `https://www.youtube-nocookie.com/embed/${videoid}?autoplay=1`;
         embed.style.display = 'block';
-        document.getElementById('pb-embed').classList.add('active');
-        currentPlayback = 'embed';
+        document.getElementById('pb-nocookie').classList.add('active');
+        currentPlayback = 'nocookie';
+
+    } else if (mode === 'education') {
+        video.pause(); audio.pause();
+        video.style.display = 'none';
+        embed.style.display = 'none';
+        embed.src = '';
+        document.getElementById('pb-education').classList.add('active');
+        currentPlayback = 'education';
+        // パラメーター取得して埋め込み
+        getEducationParams().then(params => {
+            if (!params) {
+                alert('Educationパラメーターを取得できませんでした');
+                return;
+            }
+            embed.src = `https://www.youtubeeducation.com/embed/${videoid}${params}`;
+            embed.style.display = 'block';
+        });
 
     } else if (mode === 'hls') {
         embed.src = ''; embed.style.display = 'none';
@@ -797,12 +813,14 @@ function setPlayback(mode) {
             video.src = hlsUrl;
             video.play();
         }
+        document.getElementById('pb-hls').classList.add('active');
         currentPlayback = 'hls';
 
     } else {
         embed.src = ''; embed.style.display = 'none';
         video.style.display = 'block';
         video.play().catch(() => {});
+        document.getElementById('pb-invidious').classList.add('active');
         currentPlayback = 'normal';
     }
     closeAllMenus();

@@ -671,6 +671,18 @@ def trending_page(request: Request, yuki: Union[str, None] = Cookie(None)):
         return redirect("/")
     return template("trending.html", {"request": request})
 
+@app.get("/history", response_class=HTMLResponse)
+def history_page(request: Request, yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return redirect("/")
+    return template("history.html", {"request": request})
+
+@app.get("/subscriptions", response_class=HTMLResponse)
+def subscriptions_page(request: Request, yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return redirect("/")
+    return template("subscriptions.html", {"request": request})
+
 @app.get('/w', response_class=HTMLResponse)
 def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
     # v: video_id
@@ -985,9 +997,6 @@ def list_page(response: Response, request: Request):
 @app.get("/ball", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("ball.html", {"request": request})
-@app.get("/history", response_class=HTMLResponse)
-def list_page(response: Response, request: Request):
-    return template("history.html", {"request": request})
 @app.get("/bj", response_class=HTMLResponse)
 def list_page(response: Response, request: Request):
     return template("bj.html", {"request": request})

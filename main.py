@@ -47,6 +47,16 @@ else:
     db = None
     trend_collection = None
 
+def cleanup_old_trends():
+    """30日以上前のデータを削除"""
+    if trend_collection is None:
+        return
+    try:
+        cutoff = int(time.time()) - (30 * 24 * 60 * 60)
+        trend_collection.delete_many({"last_watched": {"$lt": cutoff}})
+    except:
+        pass
+
 def getRandomUserAgent():
   user_agent = user_agents[random.randint(0, len(user_agents) - 1)]
   print(user_agent)
@@ -556,15 +566,65 @@ def get_channel_videos(channel_id: str, yuki: Union[str, None] = Cookie(None)):
     except Exception as e:
         return {"error": str(e), "videos": []}
 
+@app.get("/api/trending")
+def get_trending(
+    category: str = "default",
+    yuki: Union[str, None] = Cookie(None)
+):
+    if not checkCookie(yuki):
+        return {"error": "unauthorized"}
+    try:
+        # カテゴリマッピング
+        category_map = {
+            "default": "default",
+            "gaming": "gaming",
+            "music": "music",
+            "movies": "movies",
+            "news": "news",
+        }
+        cat = category_map.get(category, "default")
+        data = json.loads(requestAPI(
+            f"/trending?region=JP&type={cat}&hl=ja&gl=JP",
+            invidious_api.search
+        ))
+        videos = [
+            {
+                "id": v["videoId"],
+                "title": v["title"],
+                "author": v.get("author", ""),
+                "author_id": v.get("authorId", ""),
+                "length": str(datetime.timedelta(seconds=v.get("lengthSeconds", 0))),
+                "published_text": v.get("publishedText", ""),
+                "view_count_text": formatViewCount(v.get("viewCount", 0)),
+                "thumbnail": f"https://img.youtube.com/vi/{v['videoId']}/mqdefault.jpg",
+            }
+            for v in data
+        ]
+        return {"videos": videos}
+    except Exception as e:
+        return {"error": str(e), "videos": []}
+
 @app.get("/api/site_trending")
-def get_site_trending(yuki: Union[str, None] = Cookie(None)):
+def get_site_trending(
+    period: str = "7days",
+    yuki: Union[str, None] = Cookie(None)
+):
     if not checkCookie(yuki):
         return {"error": "unauthorized"}
     if trend_collection is None:
         return {"videos": []}
     try:
+        # 期間フィルター
+        period_map = {
+            "24h": int(time.time()) - 86400,
+            "7days": int(time.time()) - (7 * 86400),
+            "30days": int(time.time()) - (30 * 86400),
+        }
+        cutoff = period_map.get(period, period_map["7days"])
+
         videos = list(trend_collection.find(
-            {}, {"_id": 0}
+            {"last_watched": {"$gte": cutoff}},
+            {"_id": 0}
         ).sort("count", -1).limit(50))
         return {"videos": videos}
     except Exception as e:

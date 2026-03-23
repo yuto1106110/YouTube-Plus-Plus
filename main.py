@@ -33,29 +33,6 @@ user_agents = [
   'Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1'
 ]
 
-# MongoDB接続
-from pymongo import MongoClient
-import os
-
-MONGODB_URI = os.environ.get("MONGODB_URI")
-if MONGODB_URI:
-    mongo_client = MongoClient(MONGODB_URI)
-    db = mongo_client["ytplusplus"]
-    trend_collection = db["trends"]
-else:
-    mongo_client = None
-    db = None
-    trend_collection = None
-
-def cleanup_old_trends():
-    """30日以上前のデータを削除"""
-    if trend_collection is None:
-        return
-    try:
-        cutoff = int(time.time()) - (30 * 24 * 60 * 60)
-        trend_collection.delete_many({"last_watched": {"$lt": cutoff}})
-    except:
-        pass
 
 def getRandomUserAgent():
   user_agent = user_agents[random.randint(0, len(user_agents) - 1)]
@@ -223,7 +200,6 @@ def getVideoData(videoid):
             "authorId": failed, "author": failed,
             "lengthSeconds": 0, "viewCountText": "Load Failed"
         }]
-    print("subCount:", t.get("subCount"), "subCountText:", t.get("subCountText"))
 
     adaptiveFormats = t.get("adaptiveFormats", [])
     highstream_url = None
@@ -281,22 +257,6 @@ def getVideoData(videoid):
             } for i in recommended_videos
         ]
     ]
-
-# サイトトレンドに記録
-if trend_collection is not None:
-    try:
-        trend_collection.update_one(
-            {"video_id": v},
-            {"$inc": {"count": 1}, "$set": {
-                "title": video_data[0]["title"],
-                "author": video_data[0]["author"],
-                "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
-                "length": video_data[0]["length_text"],
-            }},
-            upsert=True
-        )
-    except:
-        pass
   
 def getSearchData(q, page):
 
@@ -425,6 +385,81 @@ from typing import Union
 from fastapi import Form
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+
+# MongoDB接続
+from pymongo import MongoClient
+from pydantic import BaseModel
+
+MONGODB_URI = os.environ.get("MONGODB_URI")
+SELF_URL = "https://youtube-plus-plus.onrender.com"
+
+if MONGODB_URI:
+    mongo_client = MongoClient(MONGODB_URI)
+    db = mongo_client["ytplusplus"]
+    trend_collection = db["trends"]
+else:
+    mongo_client = None
+    db = None
+    trend_collection = None
+
+def cleanup_old_trends():
+    if trend_collection is None:
+        return
+    try:
+        cutoff = int(time.time()) - (30 * 24 * 60 * 60)
+        trend_collection.delete_many({"last_watched": {"$lt": cutoff}})
+    except:
+        pass
+
+def formatViewCount(count):
+    try:
+        count = int(count)
+        if count >= 100000000:
+            return f"{count // 100000000}億"
+        elif count >= 10000:
+            return f"{count // 10000}万"
+        elif count >= 1000:
+            return f"{count // 1000}千"
+        else:
+            return str(count)
+    except:
+        return str(count)
+
+def formatPublished(timestamp):
+    try:
+        now = int(time.time())
+        diff = now - int(timestamp)
+        if diff < 60:
+            return "たった今"
+        elif diff < 3600:
+            return f"{diff // 60}分前"
+        elif diff < 86400:
+            return f"{diff // 3600}時間前"
+        elif diff < 86400 * 7:
+            return f"{diff // 86400}日前"
+        elif diff < 86400 * 30:
+            return f"{diff // (86400 * 7)}週間前"
+        elif diff < 86400 * 365:
+            return f"{diff // (86400 * 30)}ヶ月前"
+        else:
+            return f"{diff // (86400 * 365)}年前"
+    except:
+        return ""
+
+def convertSubCount(text):
+    try:
+        text = str(text).upper().replace(',', '')
+        if 'K' in text:
+            return formatViewCount(int(float(text.replace('K', '')) * 1000)) + "人"
+        elif 'M' in text:
+            return formatViewCount(int(float(text.replace('M', '')) * 1000000)) + "人"
+        elif 'B' in text:
+            return formatViewCount(int(float(text.replace('B', '')) * 1000000000)) + "人"
+        else:
+            return formatViewCount(int(text)) + "人"
+    except:
+        return text
+
 app.mount("/js", StaticFiles(directory="./statics/js"), name="static")
 app.mount("/css", StaticFiles(directory="./statics/css"), name="static")
 app.mount("/img", StaticFiles(directory="./statics/img"), name="static")
@@ -462,36 +497,29 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
     video_data = getVideoData(v)
 
     # サイトトレンドに記録
-    if trend_collection is not None:
-        try:
-            now = int(time.time())
-            trend_collection.update_one(
-                {"video_id": v},
-                {
-                    "$inc": {"count": 1},
-                    "$set": {
-                        "title": video_data[0]["title"],
-                        "author": video_data[0]["author"],
-                        "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
-                        "length": video_data[0]["length_text"],
-                        "last_watched": now,
-                    },
-                    "$setOnInsert": {"first_watched": now}
-                },
-                upsert=True
-            )
-            if random.randint(1, 100) == 1:
-                cleanup_old_trends()
-        except Exception as e:
-            print(f"trend error: {e}")
+    try:
+        requests.post(
+            f"{SELF_URL}/trend",
+            json={
+                "video_id": v,
+                "title": video_data[0]["title"],
+                "author": video_data[0]["author"],
+                "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
+                "length": video_data[0]["length_text"],
+            },
+            timeout=(1.0, 2.0)
+        )
+    except:
+        pass
 
     return template('video.html', {
         "request": request,
         "videoid": v,
         "videourls": video_data[0]['video_urls'],
-        "highstream_url": video_data[0]['highstream_url'],
-        "audio_url": video_data[0]['audio_url'],
-        "quality_streams": video_data[0]['quality_streams'],
+        "highstream_url": video_data[0].get('highstream_url'),
+        "audio_url": video_data[0].get('audio_url'),
+        "quality_streams": video_data[0].get('quality_streams', []),
+        "hlsUrl": video_data[0].get('hlsUrl'),
         "description": video_data[0]['description_html'],
         "video_title": video_data[0]['title'],
         "author_id": video_data[0]['author_id'],
@@ -499,11 +527,11 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
         "author": video_data[0]['author'],
         "length_text": video_data[0]['length_text'],
         "view_count": video_data[0]['view_count'],
+        "view_count_text": video_data[0].get('view_count_text', ''),
+        "published_text": video_data[0].get('published_text', ''),
         "like_count": video_data[0]['like_count'],
         "subscribers_count": video_data[0]['subscribers_count'],
         "recommended_videos": video_data[1],
-        "view_count_text": video_data[0]['view_count_text'],
-        "published_text": video_data[0]['published_text'],
         "proxy": proxy
     })
 
@@ -600,6 +628,41 @@ def get_channel_videos(channel_id: str, yuki: Union[str, None] = Cookie(None)):
         return {"videos": videos}
     except Exception as e:
         return {"error": str(e), "videos": []}
+
+# ===== トレンドAPI（書き込み・メインサイト用） =====
+class TrendData(BaseModel):
+    video_id: str
+    title: str
+    author: str
+    thumbnail: str
+    length: str
+
+@app.post("/trend")
+def record_trend(data: TrendData):
+    if trend_collection is None:
+        return {"ok": False, "reason": "no db"}
+    try:
+        now = int(time.time())
+        trend_collection.update_one(
+            {"video_id": data.video_id},
+            {
+                "$inc": {"count": 1},
+                "$set": {
+                    "title": data.title,
+                    "author": data.author,
+                    "thumbnail": data.thumbnail,
+                    "length": data.length,
+                    "last_watched": now,
+                },
+                "$setOnInsert": {"first_watched": now}
+            },
+            upsert=True
+        )
+        if random.randint(1, 100) == 1:
+            cleanup_old_trends()
+        return {"ok": True}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 @app.get("/api/trending")
 def get_trending(
@@ -1038,18 +1101,17 @@ def list_page(response: Response, request: Request):
     return template("dairan.html", {"request": request})
 
 @app.exception_handler(500)
-def error500(request: Request, __):
+async def error500(request: Request, exc):
     return template("error.html", {"request": request, "context": '500 Internal Server Error'}, status_code=500)
-  
+
 @app.exception_handler(404)
-def error404(request: Request, __):
+async def error404(request: Request, exc):
     return template("error.html", {"request": request, "context": '404 Error、あれれ'}, status_code=404)
 
-
 @app.exception_handler(APITimeoutError)
-def apiWait(request: Request, exception: APITimeoutError):
+async def apiWait(request: Request, exception: APITimeoutError):
     return template("apiTimeout.html", {"request": request}, status_code=504)
 
 @app.exception_handler(UnallowedBot)
-def returnToUnallowedBot(request: Request, exception: UnallowedBot):
+async def returnToUnallowedBot(request: Request, exception: UnallowedBot):
     return template("error.html", {"request": request, "context": '403 Forbidden'}, status_code=403)

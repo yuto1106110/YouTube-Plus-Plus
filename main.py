@@ -664,6 +664,40 @@ def record_trend(data: TrendData):
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
+@app.get("/api/trending")
+def get_yt_trending(category: str = "default", yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return {"error": "unauthorized"}
+    try:
+        category_map = {
+            "default": "default",
+            "gaming": "gaming",
+            "music": "music",
+            "movies": "movies",
+            "news": "news",
+        }
+        cat = category_map.get(category, "default")
+        data = json.loads(requestAPI(
+            f"/trending?region=JP&type={cat}&hl=ja&gl=JP",
+            invidious_api.search
+        ))
+        videos = [
+            {
+                "id": v["videoId"],
+                "title": v["title"],
+                "author": v.get("author", ""),
+                "author_id": v.get("authorId", ""),
+                "length": str(datetime.timedelta(seconds=v.get("lengthSeconds", 0))),
+                "published_text": v.get("publishedText", ""),
+                "view_count_text": formatViewCount(v.get("viewCount", 0)),
+                "thumbnail": f"https://img.youtube.com/vi/{v['videoId']}/mqdefault.jpg",
+            }
+            for v in data
+        ]
+        return {"videos": videos}
+    except Exception as e:
+        return {"error": str(e), "videos": []}
+
 @app.get("/api/site_trending")
 def get_site_trending(period: str = "7days", yuki: Union[str, None] = Cookie(None)):
     if not checkCookie(yuki):

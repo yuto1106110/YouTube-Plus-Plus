@@ -305,7 +305,7 @@ async function loadYoutubeTrend() {
     const container = document.getElementById('youtube-list');
     container.innerHTML = '<div class="loading">読み込み中...</div>';
     try {
-        const res = await fetch(`/api/trending?category=${currentCategory}`);
+        const res = await fetch(`https://plus-trend-api.vercel.app/trending?period=${currentPeriod}`);
         const data = await res.json();
         if (!data.videos || data.videos.length === 0) {
             container.innerHTML = '<div class="empty">取得できませんでした</div>';

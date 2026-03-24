@@ -279,7 +279,7 @@
             <h1>{{ channel_name }}</h1>
             <div class="sub-count">
                 登録者数 {{ subscribers_count }}
-                {% if total_videos %} · 動画 {{ total_videos }}本{% endif %}
+                {% endif %}
             </div>
             <button class="subscribe-btn" id="subscribe-btn"
                 onclick="toggleSubscribe('{{ channel_id }}', '{{ channel_name }}', '{{ channel_icon }}')">
@@ -298,6 +298,7 @@
         <button class="tab-btn active" onclick="switchTab('videos', this)">動画</button>
         <button class="tab-btn" onclick="switchTab('shorts', this)">ショート</button>
         <button class="tab-btn" onclick="switchTab('playlists', this)">再生リスト</button>
+        <button class="tab-btn" onclick="switchTab('community', this)">投稿</button>
         <button class="tab-btn" onclick="switchTab('about', this)">概要</button>
     </div>
 
@@ -395,6 +396,26 @@
         </div>
     </div>
 
+    <!-- 投稿タブ -->
+<div id="tab-community" style="display:none; padding:16px;">
+    {% for post in community %}
+    <div style="background:var(--bg-card); border-radius:8px; padding:16px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <img src="{{ post.author_icon }}" style="width:36px;height:36px;border-radius:50%;">
+            <div>
+                <div style="font-size:14px; font-weight:bold;">{{ post.author }}</div>
+                <div style="font-size:12px; color:var(--text-sub);">{{ post.published_text }}</div>
+            </div>
+        </div>
+        <div style="font-size:14px; line-height:1.6;">{{ post.content | safe }}</div>
+        <div style="margin-top:8px; font-size:12px; color:var(--text-sub);">👍 {{ post.likes }}</div>
+    </div>
+    {% endfor %}
+    {% if not community %}
+    <div class="empty">投稿がありません</div>
+    {% endif %}
+</div>
+    
     <!-- 概要タブ -->
     <div id="tab-about" style="display:none;">
         <div class="about-box">
@@ -441,13 +462,13 @@ function closeMenu() {
 
 // ===== タブ =====
 function switchTab(name, btn) {
-    ['videos', 'shorts', 'playlists', 'about'].forEach(t => {
+    ['videos', 'shorts', 'playlists', 'community', 'about'].forEach(t => {
         document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
-
+    
 // ===== ソート（動画） =====
 function setSort(sort, el) {
     document.querySelectorAll('#tab-videos .filter-chip').forEach(c => c.classList.remove('active'));

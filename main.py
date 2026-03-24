@@ -406,8 +406,24 @@ def getChannelData(channelid, sort_by="newest"):
     ]
 
 def getPlaylistData(listid, page):
-    t = json.loads(requestAPI(f"/playlists/{urllib.parse.quote(listid)}?page={urllib.parse.quote(page)}", invidious_api.playlist))["videos"]
-    return [{"title": i["title"], "id": i["videoId"], "authorId": i["authorId"], "author": i["author"], "type": "video"} for i in t]
+    try:
+        t = json.loads(requestAPI(f"/playlists/{urllib.parse.quote(listid)}?page={urllib.parse.quote(str(page))}", invidious_api.playlist))
+        videos = t.get("videos", [])
+        return [
+            {
+                "title": i["title"],
+                "id": i["videoId"],
+                "authorId": i["authorId"],
+                "author": i["author"],
+                "type": "video",
+                "length": str(datetime.timedelta(seconds=i.get("lengthSeconds", 0))),
+                "view_count_text": formatViewCount(i.get("viewCount", 0)),
+                "published": formatPublished(i.get("published", 0)),
+            }
+            for i in videos
+        ], len(videos) > 0
+    except:
+        return [], False
 
 def getCommentsData(videoid):
     t = json.loads(requestAPI(f"/comments/{urllib.parse.quote(videoid)}?hl=jp", invidious_api.comments))["comments"]
@@ -851,11 +867,20 @@ def video(v:str, response: Response, request: Request, yuki: Union[str] = Cookie
     })
 
 @app.get("/search", response_class=HTMLResponse)
-def search(q:str, response: Response, request: Request, page:Union[int, None]=1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
-    if not(checkCookie(yuki)):
+def search(q: str, response: Response, request: Request, page: Union[int, None] = 1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not checkCookie(yuki):
         return redirect("/")
     response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
-    return template("search.html", {"request": request, "results":getSearchData(q, page), "word":q, "next":f"/search?q={q}&page={page + 1}", "proxy":proxy})
+    results = getSearchData(q, page)
+    return template("search.html", {
+        "request": request,
+        "results": results,
+        "word": q,
+        "page": page,
+        "next": f"/search?q={q}&page={page + 1}",
+        "prev": f"/search?q={q}&page={page - 1}" if page > 1 else None,
+        "proxy": proxy
+    })
 
 @app.get("/hashtag/{tag}")
 def search(tag:str, response: Response, request: Request, page:Union[int, None]=1, yuki: Union[str] = Cookie(None)):
@@ -890,11 +915,20 @@ def channel(channelid: str, response: Response, request: Request,
     })
 
 @app.get("/playlist", response_class=HTMLResponse)
-def playlist(list:str, response: Response, request: Request, page:Union[int, None]=1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
-    if not(checkCookie(yuki)):
+def playlist(list: str, response: Response, request: Request, page: Union[int, None] = 1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not checkCookie(yuki):
         return redirect("/")
     response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
-    return template("search.html", {"request": request, "results": getPlaylistData(list, str(page)), "word": "", "next": f"/playlist?list={list}", "proxy": proxy})
+    results, has_next = getPlaylistData(list, str(page))
+    return template("search.html", {
+        "request": request,
+        "results": results,
+        "word": "",
+        "page": page,
+        "next": f"/playlist?list={list}&page={page + 1}" if has_next else None,
+        "prev": f"/playlist?list={list}&page={page - 1}" if page > 1 else None,
+        "proxy": proxy
+    })
 
 @app.get("/comments")
 def comments(request: Request, v:str):

@@ -305,11 +305,6 @@ def getSearchData(q, page):
 def getChannelData(channelid, sort_by="newest"):
     t = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}?hl=ja&gl=JP", invidious_api.channel))
 
-    print("channel keys:", list(t.keys()))
-    print("totalVideos:", t.get("totalVideos"))
-    print("videoCount:", t.get("videoCount"))
-    print("videoCountText:", t.get("videoCountText"))
-  
     # 動画一覧を別エンドポイントから取得（ソート対応）
     try:
         videos_data = json.loads(requestAPI(
@@ -369,6 +364,25 @@ def getChannelData(channelid, sort_by="newest"):
     except:
         pass
 
+    # コミュニティ投稿取得
+    community = []
+    try:
+        comm_data = json.loads(requestAPI(
+          f"/channels/{urllib.parse.quote(channelid)}/community?hl=ja&gl=JP",
+          invidious_api.channel
+        ))
+        for post in comm_data.get("comments", []):
+            community.append({
+               "id": post.get("commentId", ""),
+                "content": post.get("contentHtml", "").replace("\n", "<br>"),
+                "published_text": post.get("publishedText", ""),
+                "likes": formatViewCount(post.get("likeCount", 0)),
+                "author": t["author"],
+                "author_icon": t["authorThumbnails"][-1]["url"],
+            })
+    except:
+        pass
+  
     # 登録者数
     sub_count = t.get("subCount", 0)
     if sub_count:
@@ -380,6 +394,7 @@ def getChannelData(channelid, sort_by="newest"):
         videos,
         shorts,
         playlists,
+        community,
         {
             "channel_name": t["author"],
             "channel_icon": t["authorThumbnails"][-1]["url"],
@@ -863,12 +878,13 @@ def channel(channelid: str, response: Response, request: Request,
         "shorts": t[1],
         "playlists": t[2],
         "channel_id": channelid,
-        "channel_name": t[3]["channel_name"],
+        "community": t[3],
+        "channel_name": t[4]["channel_name"],
         "channel_icon": t[3]["channel_icon"],
         "channel_profile": t[3]["channel_profile"],
         "cover_img_url": t[3]["author_banner"],
         "subscribers_count": t[3]["subscribers_count"],
-        "total_videos": t[3]["total_videos"],
+        "total_videos": t[4]["total_videos"],
         "sort_by": sort_by,
         "proxy": proxy
     })

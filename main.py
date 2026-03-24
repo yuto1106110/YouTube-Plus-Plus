@@ -302,20 +302,30 @@ def getSearchData(q, page):
     datas_dict = json.loads(requestAPI(f"/search?q={urllib.parse.quote(q)}&page={page}&hl=jp", invidious_api.search))
     return [formatSearchData(data_dict) for data_dict in datas_dict]
 
-def getChannelData(channelid):
+def getChannelData(channelid, sort_by="newest"):
     t = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}?hl=ja&gl=JP", invidious_api.channel))
 
-    if 'latestvideo' in t:
-        latest_videos = t['latestvideo']
-    elif 'latestVideos' in t:
-        latest_videos = t['latestVideos']
-    else:
-        latest_videos = []
+    # 動画一覧を別エンドポイントから取得（ソート対応）
+    try:
+        videos_data = json.loads(requestAPI(
+            f"/channels/{urllib.parse.quote(channelid)}/videos?sort_by={sort_by}&hl=ja&gl=JP",
+            invidious_api.channel
+        ))
+        latest_videos = videos_data.get("videos", [])
+    except:
+        # フォールバック
+        if 'latestvideo' in t:
+            latest_videos = t['latestvideo']
+        elif 'latestVideos' in t:
+            latest_videos = t['latestVideos']
+        else:
+            latest_videos = []
 
     videos = []
     shorts = []
     for i in latest_videos:
         length = i.get("lengthSeconds", 0)
+        is_short = i.get("isShort", False) or (length > 0 and length <= 60)
         item = {
             "type": "video",
             "title": i["title"],
@@ -327,9 +337,9 @@ def getChannelData(channelid):
             "view_count": i.get("viewCount", 0),
             "view_count_text": formatViewCount(i.get("viewCount", 0)),
             "length_str": str(datetime.timedelta(seconds=length)),
-            "is_short": length <= 60
+            "is_short": is_short
         }
-        if length <= 60:
+        if is_short:
             shorts.append(item)
         else:
             videos.append(item)
@@ -337,16 +347,29 @@ def getChannelData(channelid):
     # プレイリスト取得
     playlists = []
     try:
-        pl_data = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}/playlists?hl=ja&gl=JP", invidious_api.channel))
+        pl_data = json.loads(requestAPI(
+            f"/channels/{urllib.parse.quote(channelid)}/playlists?hl=ja&gl=JP",
+            invidious_api.channel
+        ))
         for pl in pl_data.get("playlists", []):
+            thumb = pl.get("playlistThumbnail", "")
+            if thumb and not thumb.startswith("http"):
+                thumb = f"https://img.youtube.com/vi/{thumb}/mqdefault.jpg"
             playlists.append({
                 "id": pl.get("playlistId", ""),
                 "title": pl.get("title", ""),
                 "video_count": pl.get("videoCount", 0),
-                "thumbnail": pl.get("playlistThumbnail", ""),
+                "thumbnail": thumb,
             })
     except:
         pass
+
+    # 登録者数
+    sub_count = t.get("subCount", 0)
+    if sub_count:
+        subscribers = formatViewCount(sub_count) + "人"
+    else:
+        subscribers = convertSubCount(t.get("subCountText", ""))
 
     return [
         videos,
@@ -357,9 +380,8 @@ def getChannelData(channelid):
             "channel_icon": t["authorThumbnails"][-1]["url"],
             "channel_profile": t.get("descriptionHtml", ""),
             "author_banner": urllib.parse.quote(t["authorBanners"][0]["url"], safe="-_.~/:") if t.get("authorBanners") else "",
-            "subscribers_count": convertSubCount(t.get("subCountText", "")),
-            "video_count": formatViewCount(t.get("totalViews", 0)),
-            "total_videos": t.get("totalVideos", ""),
+            "subscribers_count": subscribers,
+            "total_videos": str(t.get("totalVideos", "")),
         }
     ]
 
@@ -822,11 +844,14 @@ def search(tag:str, response: Response, request: Request, page:Union[int, None]=
     return redirect(f"/search?q={tag}")
 
 @app.get("/channel/{channelid}", response_class=HTMLResponse)
-def channel(channelid: str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+def channel(channelid: str, response: Response, request: Request,
+            sort_by: str = "newest",
+            yuki: Union[str] = Cookie(None),
+            proxy: Union[str] = Cookie(None)):
     if not checkCookie(yuki):
         return redirect("/")
     response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
-    t = getChannelData(channelid)
+    t = getChannelData(channelid, sort_by=sort_by)
     return template("channel.html", {
         "request": request,
         "results": t[0],
@@ -839,6 +864,7 @@ def channel(channelid: str, response: Response, request: Request, yuki: Union[st
         "cover_img_url": t[3]["author_banner"],
         "subscribers_count": t[3]["subscribers_count"],
         "total_videos": t[3]["total_videos"],
+        "sort_by": sort_by,
         "proxy": proxy
     })
 

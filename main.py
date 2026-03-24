@@ -391,7 +391,7 @@ from pymongo import MongoClient
 from pydantic import BaseModel
 
 MONGODB_URI = os.environ.get("MONGODB_URI")
-SELF_URL = "https://youtube-plus-plus.onrender.com"
+TREND_API_URL = "https://plus-trend-api.vercel.app"
 
 if MONGODB_URI:
     mongo_client = MongoClient(MONGODB_URI)
@@ -498,19 +498,19 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
 
     # サイトトレンドに記録
     try:
-        requests.post(
-            f"{SELF_URL}/trend",
-            json={
-                "video_id": v,
-                "title": video_data[0]["title"],
-                "author": video_data[0]["author"],
-                "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
-                "length": video_data[0]["length_text"],
-            },
-            timeout=(1.0, 2.0)
-        )
-    except:
-        pass
+    requests.post(
+        f"{TREND_API_URL}/trend",
+        json={
+            "video_id": v,
+            "title": video_data[0]["title"],
+            "author": video_data[0]["author"],
+            "thumbnail": f"https://img.youtube.com/vi/{v}/mqdefault.jpg",
+            "length": video_data[0]["length_text"],
+        },
+        timeout=(1.0, 2.0)
+    )
+except:
+    pass
 
     return template('video.html', {
         "request": request,

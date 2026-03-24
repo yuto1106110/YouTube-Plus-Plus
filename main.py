@@ -664,33 +664,6 @@ def record_trend(data: TrendData):
     except Exception as e:
         return {"ok": False, "error": str(e)}
 
-@app.post("/trend")
-def record_trend(data: TrendData):
-    if trend_collection is None:
-        return {"ok": False, "reason": "no db"}
-    try:
-        now = int(time.time())
-        trend_collection.update_one(
-            {"video_id": data.video_id},
-            {
-                "$inc": {"count": 1},
-                "$set": {
-                    "title": data.title,
-                    "author": data.author,
-                    "thumbnail": data.thumbnail,
-                    "length": data.length,
-                    "last_watched": now,
-                },
-                "$setOnInsert": {"first_watched": now}
-            },
-            upsert=True
-        )
-        if random.randint(1, 100) == 1:
-            cleanup_old_trends()
-        return {"ok": True}
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
-
 @app.get("/api/site_trending")
 def get_site_trending(period: str = "7days"):
     # cookieチェックなし（外部からも取得可能）

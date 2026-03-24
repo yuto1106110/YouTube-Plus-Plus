@@ -386,7 +386,7 @@ def getChannelData(channelid, sort_by="newest"):
             "channel_profile": t.get("descriptionHtml", ""),
             "author_banner": urllib.parse.quote(t["authorBanners"][0]["url"], safe="-_.~/:") if t.get("authorBanners") else "",
             "subscribers_count": subscribers,
-            "total_videos": str(t.get("totalVideos", "")),
+            "total_videos": str(len(videos) + len(shorts)) if (videos or shorts) else "",
         }
     ]
 

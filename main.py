@@ -268,7 +268,7 @@ def getSearchData(q, page):
             "id": data_dict["videoId"] if 'videoId' in data_dict else failed,
             "authorId": data_dict["authorId"] if 'authorId' in data_dict else failed,
             "author": data_dict["author"] if 'author' in data_dict else failed,
-            "published": formatPublished(data_dict.get("published", 0)) if data_dict.get("published") else data_dict.get("publishedText", ""),
+            "published": data_dict.get("publishedText", "") or formatPublished(data_dict.get("published", 0)),
             "length": str(datetime.timedelta(seconds=data_dict.get("lengthSeconds", 0))),
             "view_count_text": formatViewCount(data_dict.get("viewCount", 0)),
           }

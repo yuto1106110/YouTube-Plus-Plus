@@ -304,9 +304,12 @@
     <!-- 動画タブ -->
     <div id="tab-videos">
         <div class="filter-bar">
-            <span class="filter-chip active" id="sort-latest" onclick="setSort('latest', this)">🕐 最新</span>
-            <span class="filter-chip" id="sort-popular" onclick="setSort('popular', this)">🔥 人気</span>
-            <span class="filter-chip" id="sort-oldest" onclick="setSort('oldest', this)">📅 古い順</span>
+    <a class="filter-chip {% if sort_by == 'newest' %}active{% endif %}"
+       href="/channel/{{ channel_id }}?sort_by=newest">🕐 最新</a>
+    <a class="filter-chip {% if sort_by == 'popular' %}active{% endif %}"
+       href="/channel/{{ channel_id }}?sort_by=popular">🔥 人気</a>
+    <a class="filter-chip {% if sort_by == 'oldest' %}active{% endif %}"
+       href="/channel/{{ channel_id }}?sort_by=oldest">📅 古い順</a>
         </div>
         <div class="videos-grid" id="videos-grid">
             {% for v in results %}
@@ -336,9 +339,12 @@
     <!-- ショートタブ -->
     <div id="tab-shorts" style="display:none;">
         <div class="filter-bar">
-            <span class="filter-chip active" id="short-sort-latest" onclick="setShortSort('latest', this)">🕐 最新</span>
-            <span class="filter-chip" id="short-sort-popular" onclick="setShortSort('popular', this)">🔥 人気</span>
-            <span class="filter-chip" id="short-sort-oldest" onclick="setShortSort('oldest', this)">📅 古い順</span>
+    <a class="filter-chip {% if sort_by == 'newest' %}active{% endif %}"
+       href="/channel/{{ channel_id }}?sort_by=newest">🕐 最新</a>
+    <a class="filter-chip {% if sort_by == 'popular' %}active{% endif %}"
+       href="/channel/{{ channel_id }}?sort_by=popular">🔥 人気</a>
+    <a class="filter-chip {% if sort_by == 'oldest' %}active{% endif %}"
+       href="/channel/{{ channel_id }}?sort_by=oldest">📅 古い順</a>
         </div>
         <div class="shorts-grid" id="shorts-grid">
             {% for v in shorts %}

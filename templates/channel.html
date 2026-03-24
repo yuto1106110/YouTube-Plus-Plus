@@ -36,7 +36,6 @@
         }
         body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-        /* トップバー */
         #top-bar {
             display: flex; align-items: center; gap: 8px;
             background: var(--topbar-bg); height: 56px; padding: 0 12px;
@@ -65,7 +64,6 @@
             cursor: pointer; font-size: 14px;
         }
 
-        /* サイドメニュー */
         #side-menu {
             position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
             background: var(--topbar-bg); z-index: 2000;
@@ -94,26 +92,19 @@
         .side-menu-item:hover { background: rgba(128,128,128,0.1); }
         .side-menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
 
-        /* メイン */
         .main { margin-top: 56px; }
 
-        /* バナー */
         .channel-banner {
             width: 100%; height: 180px; object-fit: cover;
             display: block; background: var(--bg-card);
         }
         @media (max-width: 600px) { .channel-banner { height: 100px; } }
 
-        /* チャンネル情報 */
         .channel-info {
             padding: 16px; display: flex;
-            align-items: flex-start; gap: 16px;
-            flex-wrap: wrap;
+            align-items: flex-start; gap: 16px; flex-wrap: wrap;
         }
-        .channel-icon {
-            width: 80px; height: 80px; border-radius: 50%;
-            object-fit: cover; flex-shrink: 0;
-        }
+        .channel-icon { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         @media (max-width: 600px) { .channel-icon { width: 56px; height: 56px; } }
         .channel-meta { flex: 1; min-width: 0; }
         .channel-meta h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
@@ -126,11 +117,8 @@
             transition: opacity 0.2s; white-space: nowrap;
         }
         .subscribe-btn:hover { opacity: 0.8; }
-        .subscribe-btn.subscribed {
-            background: rgba(128,128,128,0.3); color: var(--text);
-        }
+        .subscribe-btn.subscribed { background: rgba(128,128,128,0.3); color: var(--text); }
 
-        /* 説明 */
         .channel-desc {
             padding: 0 16px 16px;
             font-size: 13px; color: var(--text-sub); line-height: 1.6;
@@ -139,10 +127,10 @@
         }
         .channel-desc.expanded { max-height: 500px; }
 
-        /* タブ */
         .channel-tabs {
             display: flex; border-bottom: 1px solid var(--border);
-            overflow-x: auto; padding: 0 16px;
+            overflow-x: auto; padding: 0 16px; position: sticky;
+            top: 56px; background: var(--bg); z-index: 100;
         }
         .channel-tabs::-webkit-scrollbar { display: none; }
         .tab-btn {
@@ -153,7 +141,6 @@
         }
         .tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
 
-        /* フィルターバー */
         .filter-bar {
             display: flex; gap: 8px; padding: 12px 16px;
             overflow-x: auto; flex-wrap: nowrap;
@@ -168,7 +155,6 @@
         }
         .filter-chip.active { background: var(--text); color: var(--bg); border-color: var(--text); }
 
-        /* 動画グリッド */
         .videos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -177,21 +163,40 @@
         @media (max-width: 600px) {
             .videos-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
         }
+
+        /* ショートは縦グリッド */
+        .shorts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px; padding: 8px 16px 16px;
+        }
+        @media (max-width: 600px) {
+            .shorts-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px; }
+        }
+
         .video-card { border-radius: 8px; overflow: hidden; cursor: pointer; }
         .video-card a { text-decoration: none; color: var(--text); display: block; }
         .video-card:hover { opacity: 0.85; }
+        .short-card { border-radius: 8px; overflow: hidden; cursor: pointer; }
+        .short-card a { text-decoration: none; color: var(--text); display: block; }
+        .short-card:hover { opacity: 0.85; }
+
         .thumb-wrap { position: relative; }
         .thumb-wrap img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; border-radius: 8px; }
+        .short-thumb { position: relative; }
+        .short-thumb img { width: 100%; aspect-ratio: 9/16; object-fit: cover; display: block; border-radius: 8px; }
+
         .thumb-length {
             position: absolute; bottom: 6px; right: 6px;
             background: rgba(0,0,0,0.8); color: #fff;
             padding: 2px 6px; border-radius: 3px; font-size: 12px;
         }
-        .thumb-short {
+        .thumb-short-badge {
             position: absolute; top: 6px; left: 6px;
             background: #ff0000; color: #fff;
             padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold;
         }
+
         .card-info { padding: 8px 4px; }
         .card-info h4 {
             font-size: 14px; line-height: 1.4; margin-bottom: 4px;
@@ -201,8 +206,39 @@
         @media (max-width: 600px) { .card-info h4 { font-size: 12px; } }
         .card-info .meta { font-size: 12px; color: var(--text-sub); }
 
+        /* プレイリスト */
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px; padding: 8px 16px 16px;
+        }
+        @media (max-width: 600px) {
+            .playlist-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+        }
+        .playlist-card { border-radius: 8px; overflow: hidden; }
+        .playlist-card a { text-decoration: none; color: var(--text); display: block; }
+        .playlist-card:hover { opacity: 0.85; }
+        .playlist-thumb { position: relative; }
+        .playlist-thumb img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; display: block; }
+        .playlist-count {
+            position: absolute; bottom: 0; right: 0;
+            background: rgba(0,0,0,0.8); color: #fff;
+            padding: 4px 8px; border-radius: 0 0 8px 0; font-size: 12px;
+        }
+
         .empty { text-align: center; padding: 60px; color: var(--text-sub); }
         .loading { text-align: center; padding: 40px; color: var(--text-sub); }
+
+        /* 概要 */
+        .about-box {
+            padding: 16px; max-width: 720px;
+        }
+        .about-section {
+            background: var(--bg-card); border-radius: 8px;
+            padding: 16px; margin-bottom: 12px;
+        }
+        .about-section h3 { font-size: 14px; color: var(--text-sub); margin-bottom: 8px; }
+        .about-section p { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
     </style>
 </head>
 <body>
@@ -231,19 +267,20 @@
 </div>
 
 <div class="main">
-    <!-- バナー -->
     {% if cover_img_url %}
     <img class="channel-banner" src="{{ cover_img_url }}" alt="バナー" onerror="this.style.display='none'">
     {% else %}
     <div class="channel-banner"></div>
     {% endif %}
 
-    <!-- チャンネル情報 -->
     <div class="channel-info">
         <img class="channel-icon" src="{{ channel_icon }}" alt="{{ channel_name }}">
         <div class="channel-meta">
             <h1>{{ channel_name }}</h1>
-            <div class="sub-count">登録者 {{ subscribers_count }}人</div>
+            <div class="sub-count">
+                登録者 {{ subscribers_count }}
+                {% if total_videos %} · 動画 {{ total_videos }}本{% endif %}
+            </div>
             <button class="subscribe-btn" id="subscribe-btn"
                 onclick="toggleSubscribe('{{ channel_id }}', '{{ channel_name }}', '{{ channel_icon }}')">
                 読み込み中...
@@ -251,82 +288,121 @@
         </div>
     </div>
 
-    <!-- 説明 -->
     {% if channel_profile %}
     <div class="channel-desc" id="channel-desc" onclick="toggleDesc()">
         {{ channel_profile | safe }}
     </div>
     {% endif %}
 
-    <!-- タブ -->
     <div class="channel-tabs">
         <button class="tab-btn active" onclick="switchTab('videos', this)">動画</button>
         <button class="tab-btn" onclick="switchTab('shorts', this)">ショート</button>
+        <button class="tab-btn" onclick="switchTab('playlists', this)">再生リスト</button>
         <button class="tab-btn" onclick="switchTab('about', this)">概要</button>
     </div>
 
     <!-- 動画タブ -->
     <div id="tab-videos">
         <div class="filter-bar">
-            <span class="filter-chip active" onclick="setSort('latest', this)">🕐 最新</span>
-            <span class="filter-chip" onclick="setSort('popular', this)">🔥 人気</span>
-            <span class="filter-chip" onclick="setSort('oldest', this)">📅 古い順</span>
+            <span class="filter-chip active" id="sort-latest" onclick="setSort('latest', this)">🕐 最新</span>
+            <span class="filter-chip" id="sort-popular" onclick="setSort('popular', this)">🔥 人気</span>
+            <span class="filter-chip" id="sort-oldest" onclick="setSort('oldest', this)">📅 古い順</span>
         </div>
         <div class="videos-grid" id="videos-grid">
-            {% for result in results %}
-            {% if result["type"] == "video" %}
-            <div class="video-card" id="v-{{ result['id'] }}" data-views="{{ result.get('view_count', 0) }}" data-published="{{ result.get('published', 0) }}">
-                <a href="/watch?v={{ result['id'] }}">
+            {% for v in results %}
+            <div class="video-card"
+                 data-views="{{ v.get('view_count', 0) }}"
+                 data-published="{{ v.get('published', 0) }}">
+                <a href="/watch?v={{ v['id'] }}">
                     <div class="thumb-wrap">
                         <img loading="lazy"
-                             src="{% if proxy == 'True' %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/mqdefault.jpg{% endif %}"
-                             alt="{{ result['title'] }}">
-                        <span class="thumb-length">{{ result['length_str'] }}</span>
+                             src="{% if proxy == 'True' %}/thumbnail?v={{ v['id'] }}{% else %}https://img.youtube.com/vi/{{ v['id'] }}/mqdefault.jpg{% endif %}"
+                             alt="{{ v['title'] }}">
+                        <span class="thumb-length">{{ v['length_str'] }}</span>
                     </div>
                     <div class="card-info">
-                        <h4>{{ result['title'] }}</h4>
-                        <p class="meta">{{ result['view_count_text'] }} · {{ result['published'] }}</p>
+                        <h4>{{ v['title'] }}</h4>
+                        <p class="meta">{{ v['view_count_text'] }}回視聴 · {{ v['published_text'] }}</p>
                     </div>
                 </a>
             </div>
-            {% endif %}
             {% endfor %}
+            {% if not results %}
+            <div class="empty" style="grid-column:1/-1;">動画がありません</div>
+            {% endif %}
         </div>
     </div>
 
     <!-- ショートタブ -->
     <div id="tab-shorts" style="display:none;">
-        <div class="videos-grid" id="shorts-grid">
-            {% for result in results %}
-            {% if result["type"] == "video" %}
-            <div class="video-card">
-                <a href="/watch?v={{ result['id'] }}">
-                    <div class="thumb-wrap">
+        <div class="filter-bar">
+            <span class="filter-chip active" id="short-sort-latest" onclick="setShortSort('latest', this)">🕐 最新</span>
+            <span class="filter-chip" id="short-sort-popular" onclick="setShortSort('popular', this)">🔥 人気</span>
+            <span class="filter-chip" id="short-sort-oldest" onclick="setShortSort('oldest', this)">📅 古い順</span>
+        </div>
+        <div class="shorts-grid" id="shorts-grid">
+            {% for v in shorts %}
+            <div class="short-card"
+                 data-views="{{ v.get('view_count', 0) }}"
+                 data-published="{{ v.get('published', 0) }}">
+                <a href="/watch?v={{ v['id'] }}">
+                    <div class="short-thumb">
                         <img loading="lazy"
-                             src="{% if proxy == 'True' %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/mqdefault.jpg{% endif %}"
-                             alt="{{ result['title'] }}">
-                        <span class="thumb-short">SHORT</span>
+                             src="{% if proxy == 'True' %}/thumbnail?v={{ v['id'] }}{% else %}https://img.youtube.com/vi/{{ v['id'] }}/mqdefault.jpg{% endif %}"
+                             alt="{{ v['title'] }}">
+                        <span class="thumb-short-badge">SHORT</span>
                     </div>
                     <div class="card-info">
-                        <h4>{{ result['title'] }}</h4>
+                        <h4>{{ v['title'] }}</h4>
+                        <p class="meta">{{ v['view_count_text'] }}回視聴</p>
                     </div>
                 </a>
             </div>
-            {% endif %}
             {% endfor %}
+            {% if not shorts %}
+            <div class="empty" style="grid-column:1/-1;">ショートがありません</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 再生リストタブ -->
+    <div id="tab-playlists" style="display:none;">
+        <div class="playlist-grid">
+            {% for pl in playlists %}
+            <div class="playlist-card">
+                <a href="/playlist?list={{ pl['id'] }}">
+                    <div class="playlist-thumb">
+                        <img loading="lazy"
+                             src="{% if pl['thumbnail'] %}https://img.youtube.com/vi/{{ pl['thumbnail'] }}/mqdefault.jpg{% else %}https://img.youtube.com/vi/default/mqdefault.jpg{% endif %}"
+                             alt="{{ pl['title'] }}">
+                        <div class="playlist-count">📋 {{ pl['video_count'] }}本</div>
+                    </div>
+                    <div class="card-info">
+                        <h4>{{ pl['title'] }}</h4>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+            {% if not playlists %}
+            <div class="empty" style="grid-column:1/-1;">再生リストがありません</div>
+            {% endif %}
         </div>
     </div>
 
     <!-- 概要タブ -->
-    <div id="tab-about" style="display:none; padding:16px;">
-        <div style="background:var(--bg-card); border-radius:8px; padding:16px;">
-            <h3 style="margin-bottom:12px; font-size:15px;">チャンネル概要</h3>
-            <div style="font-size:13px; color:var(--text-sub); line-height:1.6; white-space:pre-wrap;">
-                {{ channel_profile | safe }}
+    <div id="tab-about" style="display:none;">
+        <div class="about-box">
+            <div class="about-section">
+                <h3>チャンネル情報</h3>
+                <p>登録者数: {{ subscribers_count }}</p>
+                {% if total_videos %}<p>動画本数: {{ total_videos }}本</p>{% endif %}
             </div>
-            <div style="margin-top:16px; font-size:13px; color:var(--text-sub);">
-                <p>登録者数: {{ subscribers_count }}人</p>
+            {% if channel_profile %}
+            <div class="about-section">
+                <h3>説明</h3>
+                <p>{{ channel_profile | safe }}</p>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -359,31 +435,38 @@ function closeMenu() {
 
 // ===== タブ =====
 function switchTab(name, btn) {
-    ['videos', 'shorts', 'about'].forEach(t => {
+    ['videos', 'shorts', 'playlists', 'about'].forEach(t => {
         document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
     });
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
 }
 
-// ===== ソート =====
-let currentSort = 'latest';
+// ===== ソート（動画） =====
 function setSort(sort, el) {
-    currentSort = sort;
-    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('#tab-videos .filter-chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
-
     const grid = document.getElementById('videos-grid');
     const cards = Array.from(grid.querySelectorAll('.video-card'));
-
     cards.sort((a, b) => {
-        if (sort === 'latest') {
-            return parseInt(b.dataset.published || 0) - parseInt(a.dataset.published || 0);
-        } else if (sort === 'oldest') {
-            return parseInt(a.dataset.published || 0) - parseInt(b.dataset.published || 0);
-        } else if (sort === 'popular') {
-            return parseInt(b.dataset.views || 0) - parseInt(a.dataset.views || 0);
-        }
+        if (sort === 'latest') return parseInt(b.dataset.published||0) - parseInt(a.dataset.published||0);
+        if (sort === 'oldest') return parseInt(a.dataset.published||0) - parseInt(b.dataset.published||0);
+        if (sort === 'popular') return parseInt(b.dataset.views||0) - parseInt(a.dataset.views||0);
+        return 0;
+    });
+    cards.forEach(card => grid.appendChild(card));
+}
+
+// ===== ソート（ショート） =====
+function setShortSort(sort, el) {
+    document.querySelectorAll('#tab-shorts .filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const grid = document.getElementById('shorts-grid');
+    const cards = Array.from(grid.querySelectorAll('.short-card'));
+    cards.sort((a, b) => {
+        if (sort === 'latest') return parseInt(b.dataset.published||0) - parseInt(a.dataset.published||0);
+        if (sort === 'oldest') return parseInt(a.dataset.published||0) - parseInt(b.dataset.published||0);
+        if (sort === 'popular') return parseInt(b.dataset.views||0) - parseInt(a.dataset.views||0);
         return 0;
     });
     cards.forEach(card => grid.appendChild(card));

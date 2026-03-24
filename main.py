@@ -262,6 +262,7 @@ def getSearchData(q, page):
 
     def formatSearchData(data_dict):
         if data_dict["type"] == "video":
+          print("published:", data_dict.get("published"), "publishedText:", data_dict.get("publishedText"))
           return {
             "type": "video",
             "title": data_dict["title"] if 'title' in data_dict else failed,

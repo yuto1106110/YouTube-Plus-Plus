@@ -278,7 +278,7 @@
         <div class="channel-meta">
             <h1>{{ channel_name }}</h1>
             <div class="sub-count">
-                登録者 {{ subscribers_count }}
+                登録者数 {{ subscribers_count }}
                 {% if total_videos %} · 動画 {{ total_videos }}本{% endif %}
             </div>
             <button class="subscribe-btn" id="subscribe-btn"
@@ -305,11 +305,11 @@
     <div id="tab-videos">
         <div class="filter-bar">
     <a class="filter-chip {% if sort_by == 'newest' %}active{% endif %}"
-       href="/channel/{{ channel_id }}?sort_by=newest">🕐 最新</a>
+       href="/channel/{{ channel_id }}?sort_by=newest">最新順</a>
     <a class="filter-chip {% if sort_by == 'popular' %}active{% endif %}"
-       href="/channel/{{ channel_id }}?sort_by=popular">🔥 人気</a>
+       href="/channel/{{ channel_id }}?sort_by=popular">人気順</a>
     <a class="filter-chip {% if sort_by == 'oldest' %}active{% endif %}"
-       href="/channel/{{ channel_id }}?sort_by=oldest">📅 古い順</a>
+       href="/channel/{{ channel_id }}?sort_by=oldest">古い順</a>
         </div>
         <div class="videos-grid" id="videos-grid">
             {% for v in results %}
@@ -340,11 +340,11 @@
     <div id="tab-shorts" style="display:none;">
         <div class="filter-bar">
     <a class="filter-chip {% if sort_by == 'newest' %}active{% endif %}"
-       href="/channel/{{ channel_id }}?sort_by=newest">🕐 最新</a>
+       href="/channel/{{ channel_id }}?sort_by=newest">最新順</a>
     <a class="filter-chip {% if sort_by == 'popular' %}active{% endif %}"
-       href="/channel/{{ channel_id }}?sort_by=popular">🔥 人気</a>
+       href="/channel/{{ channel_id }}?sort_by=popular">人気順</a>
     <a class="filter-chip {% if sort_by == 'oldest' %}active{% endif %}"
-       href="/channel/{{ channel_id }}?sort_by=oldest">📅 古い順</a>
+       href="/channel/{{ channel_id }}?sort_by=oldest">古い順</a>
         </div>
         <div class="shorts-grid" id="shorts-grid">
             {% for v in shorts %}

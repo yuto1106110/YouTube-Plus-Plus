@@ -379,17 +379,15 @@ async function getEducationParamsForSettings() {
 }
 
 // ===== 試し再生 =====
+const DEFAULT_TEST_VIDEO = 'JGwWNGJdvx8'; // デフォルト動画ID
+
 async function testPlayback() {
-    const videoId = document.getElementById('test-videoid').value.trim();
+    const videoId = document.getElementById('test-videoid').value.trim() || DEFAULT_TEST_VIDEO;
     const previewArea = document.getElementById('preview-area');
     const previewIframe = document.getElementById('preview-iframe');
     const previewError = document.getElementById('preview-error');
     previewError.textContent = '';
 
-    if (!videoId) {
-        previewError.textContent = '動画IDを入力してください';
-        return;
-    }
     const params = await getEducationParamsForSettings();
     if (!params) {
         previewError.textContent = 'パラメーターを取得できませんでした';
@@ -400,8 +398,7 @@ async function testPlayback() {
 }
 
 function testPlaybackNormal() {
-    const videoId = document.getElementById('test-videoid2').value.trim();
-    if (!videoId) return;
+    const videoId = document.getElementById('test-videoid2').value.trim() || DEFAULT_TEST_VIDEO;
     const mode = currentPlaybackDefault;
     if (mode === 'nocookie') {
         window.open(`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`, '_blank');

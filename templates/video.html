@@ -520,8 +520,8 @@ async function getEducationParams() {
 async function applyDefaultPlayback() {
     const defaultPlayback = localStorage.getItem('defaultPlayback') || 'dash';
 
-    if (defaultPlayback === 'embed') {
-        setPlayback('embed');
+    if (defaultPlayback === 'nocookie') {
+        setPlayback('nocookie');
     } else if (defaultPlayback === 'education') {
         const params = await getEducationParams();
         if (!params) {
@@ -543,11 +543,12 @@ async function applyDefaultPlayback() {
         currentPlayback = 'education';
     } else if (defaultPlayback === 'normal') {
         isDash = false;
-        document.getElementById('audiosrc').src = '';
-        audio.load();
+        const audiosrc = document.getElementById('audiosrc');
+        if (audiosrc) { audiosrc.src = ''; audio.load(); }
         video.load();
         video.play().catch(() => {});
     }
+    // dashはデフォルトのままなので何もしない
 }
 
 document.addEventListener('DOMContentLoaded', applyDefaultPlayback);

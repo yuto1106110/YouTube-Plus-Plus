@@ -1,231 +1,302 @@
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="robots" content="noindex,nofollow">
-        <title>[検索] {{ word }} - YouTube Plus⁺</title>
-        <link rel="icon" href="/img/logo/favicon.ico">
-        <link rel="stylesheet" href="/css/pure-min.css">
-        <link rel="stylesheet" href="/css/grids-responsive-min.css">
-        <link rel="stylesheet" href="/css/ionicons.min.css">
-        <link rel="stylesheet" href="/css/default.css">
-        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
-        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-              <style>        
-                 .contents #searchbox {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            text-align: right;
-            z-index: 20;
-	　　 color: #fffff;
-			     }
-	        #topButton {
-            position: fixed;
-            left: 20px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if word %}{{ word }} - {% endif %}検索 - YouTube Plus⁺</title>
+    <link rel="icon" href="/img/logo/favicon.ico">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc; --link: #065fd4;
+            --border: rgba(0,0,0,0.1);
         }
-        #topButton:hover {
-            background-color: #0056b3;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+                --text-sub: #aaaaaa; --topbar-bg: #212121;
+                --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                --input-bg: #121212; --input-border: #444; --link: #3ea6ff;
+                --border: rgba(255,255,255,0.1);
+            }
         }
-	    #topButton:active {
-    transform: scale(0.95);
-    background-color: #ff6347;
-}
-        #toButton {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff; --link: #065fd4;
+            --border: rgba(0,0,0,0.1); color-scheme: light;
         }
-        #toButton:hover {
-            background-color: #0056b3;
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121; --link: #3ea6ff;
+            --border: rgba(255,255,255,0.1); color-scheme: dark;
         }
-	    #toButton:active {
-    transform: scale(0.95);
-    background-color: #ff6347;
-}
-		      </style>
-		        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script>
-    $(document).ready(function() {
-      // モバイル時：ハンバーガーメニューのトグル
-      $("#hamburger").click(function() {
-        $("#top-nav").toggleClass("show");
-      });
-      
-      // スクロールによるトップバーの縮小効果
-      $(window).on("scroll", function() {
-        if($(window).scrollTop() > 50) {
-          $("#top-bar").addClass("scrolled");
-        } else {
-          $("#top-bar").removeClass("scrolled");
+        body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        #top-bar {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--topbar-bg); height: 56px; padding: 0 12px;
+            box-shadow: var(--topbar-shadow);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
         }
-      });
-    });
-  </script>
+        #hamburger-btn {
+            flex-shrink: 0; background: none; border: none;
+            cursor: pointer; padding: 6px; color: var(--text);
+            font-size: 20px; border-radius: 6px;
+        }
+        #hamburger-btn:hover { background: rgba(128,128,128,0.15); }
+        .search-container { flex: 1; max-width: 600px; }
+        .search-container form { display: flex; width: 100%; }
+        .search-container input {
+            flex: 1; padding: 6px 12px; min-width: 0;
+            border-radius: 20px 0 0 20px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 14px; outline: none;
+        }
+        .search-container button {
+            padding: 6px 12px; border-radius: 0 20px 20px 0;
+            border: 1px solid var(--input-border); border-left: none;
+            background: var(--bg-card); color: var(--text);
+            cursor: pointer; font-size: 14px;
+        }
+
+        #side-menu {
+            position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+            background: var(--topbar-bg); z-index: 2000;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.3);
+            transition: left 0.25s ease;
+        }
+        #side-menu.open { left: 0; }
+        #menu-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); z-index: 1999;
+        }
+        #menu-overlay.open { display: block; }
+        .side-menu-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; height: 56px;
+            border-bottom: 1px solid var(--border);
+        }
+        .side-menu-header img { height: 28px; }
+        .side-menu-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 20px; color: var(--text);
+            text-decoration: none; font-size: 14px;
+            transition: background 0.15s;
+        }
+        .side-menu-item:hover { background: rgba(128,128,128,0.1); }
+        .side-menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
+
+        .main { margin-top: 56px; padding: 12px 16px; max-width: 900px; }
+
+        /* 動画リスト */
+        .result-item {
+            display: flex; gap: 12px; margin-bottom: 16px;
+            padding-bottom: 16px; border-bottom: 1px solid var(--border);
+        }
+        .result-item:last-child { border-bottom: none; }
+
+        /* 動画サムネ */
+        .video-thumb { position: relative; flex-shrink: 0; }
+        .video-thumb img {
+            width: 240px; height: 135px; object-fit: cover;
+            border-radius: 8px; display: block;
+        }
+        .thumb-length {
+            position: absolute; bottom: 6px; right: 6px;
+            background: rgba(0,0,0,0.8); color: #fff;
+            padding: 2px 6px; border-radius: 3px; font-size: 12px;
+        }
+        @media (max-width: 600px) {
+            .video-thumb img { width: 160px; height: 90px; }
+        }
+
+        .video-info { flex: 1; min-width: 0; }
+        .video-info a { text-decoration: none; color: var(--text); }
+        .video-info h3 {
+            font-size: 16px; line-height: 1.4; margin-bottom: 6px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .video-info h3:hover { color: var(--link); }
+        @media (max-width: 600px) { .video-info h3 { font-size: 13px; } }
+        .video-info .meta { font-size: 13px; color: var(--text-sub); margin-bottom: 4px; }
+        .video-info .channel-link {
+            font-size: 13px; color: var(--text-sub);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+        }
+        .video-info .channel-link:hover { color: var(--link); }
+
+        /* チャンネル */
+        .channel-item {
+            display: flex; gap: 16px; align-items: center;
+            margin-bottom: 16px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .channel-item img { width: 80px; height: 80px; border-radius: 50%; flex-shrink: 0; }
+        .channel-item a { text-decoration: none; color: var(--text); }
+        .channel-item h3 { font-size: 16px; margin-bottom: 4px; }
+        .channel-item h3:hover { color: var(--link); }
+        .channel-item p { font-size: 13px; color: var(--text-sub); }
+        @media (max-width: 600px) {
+            .channel-item img { width: 56px; height: 56px; }
+        }
+
+        /* プレイリスト */
+        .playlist-item {
+            display: flex; gap: 12px; margin-bottom: 16px;
+            padding-bottom: 16px; border-bottom: 1px solid var(--border);
+        }
+        .playlist-thumb { position: relative; flex-shrink: 0; }
+        .playlist-thumb img {
+            width: 240px; height: 135px; object-fit: cover;
+            border-radius: 8px; display: block;
+        }
+        .playlist-count {
+            position: absolute; bottom: 0; right: 0;
+            background: rgba(0,0,0,0.8); color: #fff;
+            padding: 4px 8px; border-radius: 0 0 8px 0; font-size: 13px;
+        }
+        @media (max-width: 600px) {
+            .playlist-thumb img { width: 160px; height: 90px; }
+        }
+        .playlist-info { flex: 1; }
+        .playlist-info a { text-decoration: none; color: var(--text); }
+        .playlist-info h3 { font-size: 16px; margin-bottom: 4px; }
+        .playlist-info h3:hover { color: var(--link); }
+
+        /* ページネーション */
+        .pagination {
+            display: flex; justify-content: center; gap: 12px;
+            padding: 20px 0; margin-top: 8px;
+        }
+        .page-btn {
+            padding: 8px 20px; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text);
+            text-decoration: none; font-size: 14px;
+        }
+        .page-btn:hover { background: rgba(128,128,128,0.15); }
+
+        .empty { text-align: center; padding: 60px; color: var(--text-sub); }
     </style>
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6582374172224860"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-   <header id="top-bar">
-    <div class="navbar-logo">
-      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+</head>
+<body>
+
+<header id="top-bar">
+    <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
+    <div class="search-container">
+        <form action="/search" method="get" onsubmit="return document.getElementById('sq').value.trim() !== ''">
+            <input id="sq" name="q" type="search" placeholder="検索"
+                   value="{{ word }}" autocomplete="on">
+            <button type="submit">🔍</button>
+        </form>
     </div>
-    <!-- モバイル用ハンバーガーアイコン -->
-    <div id="hamburger">&#9776;</div>
-    <!-- ナビゲーション -->
-    <nav id="top-nav">
-      <a href="/chat">Plus⁺ Chat</a>
-      <a href="/others">メニュー</a>
-      <a href="/qanda">ヘルプ</a>
-      <a href="/help">お問い合わせ</a>
-	&emsp;
-    </nav>
-  </header>
-<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
-	    
-	    <br>
-	    <div  class="no-theme">
-        <span id="dark_mode_pref" style="display: none;"></span>
-        <div class="pure-g">
-            <div class="pure-u-1 pure-u-md-2-24"></div>
-            
-            <div id="contents" class="pure-u-1 pure-u-md-20-24">
-                <div class="pure-g navbar h-box">
-                    <div class="pure-u-1 pure-u-md-12-24 searchbar">
-                        <form class="pure-form" action="/search" method="get">
-                            <fieldset>
-                                <input id="searchbox" name="q" type="search" placeholder="検索" value="{{ word }}" title="検索"  autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false">
-                            </fieldset>
-                        </form>
-                    </div>
-                </div>
-		    <button id="toButton" onclick="toggleLink()">読み込み方を変更!</button>
-		 <script>
-let isWatch = true; // 現在の状態を管理するフラグ
+</header>
 
-function toggleLink() {
-    const link = document.getElementById("dynamic-link");
-    const currentHref = link.getAttribute("href");
-    let message = ""; // メッセージ用の変数
+<div id="menu-overlay" onclick="closeMenu()"></div>
+<div id="side-menu">
+    <div class="side-menu-header">
+        <button onclick="closeMenu()" style="background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;">☰</button>
+        <a href="/"><img src="/img/logo/th.png" alt="Logo" id="side-logo-img"></a>
+    </div>
+    <a class="side-menu-item" href="/"><span class="icon">🏠</span><span>ホーム</span></a>
+    <a class="side-menu-item" href="/trending"><span class="icon">🔥</span><span>トレンド</span></a>
+    <a class="side-menu-item" href="/history"><span class="icon">🕐</span><span>視聴履歴</span></a>
+    <a class="side-menu-item" href="/subscriptions"><span class="icon">📺</span><span>登録チャンネル</span></a>
+    <a class="side-menu-item" href="/settings"><span class="icon">⚙️</span><span>設定</span></a>
+</div>
 
-    if (isWatch) {
-        // /watch を /ume に変更
-        const updatedHref = currentHref.replace("/watch", "/ume");
-        link.setAttribute("href", updatedHref);
-        message = "埋め込みモードに変更されました！";
-    } else {
-        // /ume を /watch に戻す
-        const updatedHref = currentHref.replace("/ume", "/watch");
-        link.setAttribute("href", updatedHref);
-        message = "デフォルトモードに変更されました！";
+<div class="main">
+    {% if not results %}
+    <div class="empty">検索結果がありません</div>
+    {% else %}
+
+    {% for result in results %}
+
+    {% if result["type"] == "video" %}
+    <div class="result-item">
+        <a href="/watch?v={{ result['id'] }}" class="video-thumb">
+            <img loading="lazy"
+                 src="{% if proxy == 'True' %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/mqdefault.jpg{% endif %}"
+                 alt="{{ result['title'] }}">
+            <span class="thumb-length">{{ result['length'] }}</span>
+        </a>
+        <div class="video-info">
+            <a href="/watch?v={{ result['id'] }}"><h3>{{ result['title'] }}</h3></a>
+            <p class="meta">
+                {% if result['view_count_text'] %}{{ result['view_count_text'] }}回視聴{% endif %}
+                {% if result['published'] %} · {{ result['published'] }}{% endif %}
+            </p>
+            <a class="channel-link" href="/channel/{{ result['authorId'] }}">
+                {{ result['author'] }}
+            </a>
+        </div>
+    </div>
+
+    {% elif result["type"] == "channel" %}
+    <div class="channel-item">
+        <a href="/channel/{{ result['id'] }}">
+            <img loading="lazy" src="{{ result['thumbnail'] }}" alt="{{ result['author'] }}"
+                 onerror="this.src='/img/logo/th.png'">
+        </a>
+        <div>
+            <a href="/channel/{{ result['id'] }}"><h3>{{ result['author'] }}</h3></a>
+            <p>チャンネル</p>
+        </div>
+    </div>
+
+    {% elif result["type"] == "playlist" %}
+    <div class="playlist-item">
+        <a href="/playlist?list={{ result['id'] }}" class="playlist-thumb">
+            <img loading="lazy"
+                 src="{% if proxy == 'True' %}/thumbnail?v={{ result['thumbnail'] }}{% else %}https://img.youtube.com/vi/{{ result['thumbnail'] }}/mqdefault.jpg{% endif %}"
+                 alt="{{ result['title'] }}">
+            <span class="playlist-count">📋 {{ result['count'] }}本</span>
+        </a>
+        <div class="playlist-info">
+            <a href="/playlist?list={{ result['id'] }}"><h3>{{ result['title'] }}</h3></a>
+            <p style="font-size:13px; color:var(--text-sub);">再生リスト</p>
+        </div>
+    </div>
+    {% endif %}
+
+    {% endfor %}
+
+    <div class="pagination">
+        <a class="page-btn" href="{{ next }}">次のページ →</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+let currentTheme = localStorage.getItem('theme') || 'system';
+function applyTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'system') html.removeAttribute('data-theme');
+    else html.setAttribute('data-theme', theme);
+    const logo = document.getElementById('side-logo-img');
+    if (logo) {
+        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        logo.style.mixBlendMode = isDark ? 'screen' : 'normal';
     }
+}
+applyTheme(currentTheme);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(currentTheme));
 
-    // 状態を反転
-    isWatch = !isWatch;
-
-    // メッセージをアラートで表示
-    alert(message);
+function toggleMenu() {
+    document.getElementById('side-menu').classList.toggle('open');
+    document.getElementById('menu-overlay').classList.toggle('open');
+}
+function closeMenu() {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('menu-overlay').classList.remove('open');
 }
 </script>
-                    
-                <div class="pure-g">
-                    {% for result in results %}
-                    <div class="pure-u-1 pure-u-md-1-4">
-                            
-                        <div class="h-box">
-                            {% if result["type"] == "video" %}
-                                
-                            <a id="dynamic-link" href="/watch?v={{ result['id'] }}" style="width:100%">
-                                <div class="thumbnail">
-                                    <img class="thumbnail" loading="lazy" src="{% if proxy == 'True' %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/0.jpg{% endif %}" onerror="document.cookie = 'proxy=True;max-age=2592000;';">
-                                    <p class="length">{{ result["length"] }}</p>
-                                </div>
-                                <p dir="auto">{{ result['title'] }}</p>
-                            </a>
-                                
-                            <div class="video-card-row flexible">
-                                <a href="/channel/{{ result['authorId'] }}">{{ result["author"] }}</a>
-                            </div>
-                                
-                            <div class="video-card-row flexible">
-                                <div class="flex-left">
-                                    <p class="video-data" dir="auto">{{ result["view_count_text"] }}</p>
-                                    <p class="video-data" dir="auto">{{ result["published"] }}</p>
-                                </div>
-                            </div>
-                                
-                            {% elif result["type"] == "channel" %}
-                            <a href="/channel/{{ result["id"] }}">
-                                <center>
-                                    <img loading="lazy" tabindex="-1" style="width:56.25%" src="{{ result["thumbnail"] }}">
-                                </center>
-                                <p dir="auto">{{ result["author"] }}</p>
-                            </a>
-                                
-                            {% elif result["type"] == "playlist" %}
-                            <a style="width: 100%;" href="/playlist?list={{ result["id"] }}">
-                
-                                <div class="thumbnail">
-
-                                    <img loading="lazy" tabindex="-1" class="thumbnail" src="{{ result['thumbnail'] }}">
-                                    
-                                    <p class="length">{{ result["count"] }}個の動画</p>
-                                </div>
-                                <p dir="auto">{{ result["title"] }}</p>
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        
-        <div class="pure-g h-box">
-            <div class="pure-u-1 pure-u-lg-1-5"></div>
-        </div>
-        
-        <div class="pure-u-1 pure-u-lg-3-5"></div>
-            <div class="pure-u-1 pure-u-lg-1-5" style="text-align:right">
-                <a href="{{ next }}">次のページ</a>
-            </div>
-        </div>
-        <script>
-            $('#searchbox').autocomplete({
-                source: function (request, response) {
-                    {
-                        var url = "/suggest?keyword=" + request.term
-                        var xhr = new XMLHttpRequest();
-                        xhr.open("GET", url);
-                        xhr.onload = function() {
-                            response(JSON.parse(xhr.responseText));
-                        }
-                        xhr.send();
-                    }
-                },delay:300
-            });
-        </script>
-	<script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
-    </body>
+</body>
 </html>

@@ -302,46 +302,64 @@ def getSearchData(q, page):
     datas_dict = json.loads(requestAPI(f"/search?q={urllib.parse.quote(q)}&page={page}&hl=jp", invidious_api.search))
     return [formatSearchData(data_dict) for data_dict in datas_dict]
 
-
 def getChannelData(channelid):
-    t = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}", invidious_api.channel))
+    t = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}?hl=ja&gl=JP", invidious_api.channel))
+
     if 'latestvideo' in t:
         latest_videos = t['latestvideo']
     elif 'latestVideos' in t:
         latest_videos = t['latestVideos']
     else:
-        latest_videos = {
-            "title": failed,
-            "videoId": failed,
-            "authorId": failed,
-            "author": failed,
-            "publishedText": failed,
-            "viewCountText": "0",
-            "lengthSeconds": "0"
+        latest_videos = []
+
+    videos = []
+    shorts = []
+    for i in latest_videos:
+        length = i.get("lengthSeconds", 0)
+        item = {
+            "type": "video",
+            "title": i["title"],
+            "id": i["videoId"],
+            "authorId": t["authorId"],
+            "author": t["author"],
+            "published": i.get("published", 0),
+            "published_text": i.get("publishedText", ""),
+            "view_count": i.get("viewCount", 0),
+            "view_count_text": formatViewCount(i.get("viewCount", 0)),
+            "length_str": str(datetime.timedelta(seconds=length)),
+            "is_short": length <= 60
         }
-    
-    
+        if length <= 60:
+            shorts.append(item)
+        else:
+            videos.append(item)
+
+    # プレイリスト取得
+    playlists = []
+    try:
+        pl_data = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}/playlists?hl=ja&gl=JP", invidious_api.channel))
+        for pl in pl_data.get("playlists", []):
+            playlists.append({
+                "id": pl.get("playlistId", ""),
+                "title": pl.get("title", ""),
+                "video_count": pl.get("videoCount", 0),
+                "thumbnail": pl.get("playlistThumbnail", ""),
+            })
+    except:
+        pass
+
     return [
-        [
-            {
-                # 直近の動画
-                "type":"video",
-                "title": i["title"],
-                "id": i["videoId"],
-                "authorId": t["authorId"],
-                "author": t["author"],
-                "published": i["publishedText"],
-                "view_count_text": i['viewCountText'],
-                "length_str": str(datetime.timedelta(seconds=i["lengthSeconds"]))
-            } for i in latest_videos
-        ], {
-            # チャンネル情報
+        videos,
+        shorts,
+        playlists,
+        {
             "channel_name": t["author"],
             "channel_icon": t["authorThumbnails"][-1]["url"],
-            "channel_profile": t["descriptionHtml"],
-            "author_banner": urllib.parse.quote(t["authorBanners"][0]["url"], safe="-_.~/:") if 'authorBanners' in t and len(t['authorBanners']) else '',
-            "subscribers_count": t["subCount"],
-            "tags": t["tags"]
+            "channel_profile": t.get("descriptionHtml", ""),
+            "author_banner": urllib.parse.quote(t["authorBanners"][0]["url"], safe="-_.~/:") if t.get("authorBanners") else "",
+            "subscribers_count": convertSubCount(t.get("subCountText", "")),
+            "video_count": formatViewCount(t.get("totalViews", 0)),
+            "total_videos": t.get("totalVideos", ""),
         }
     ]
 
@@ -812,12 +830,15 @@ def channel(channelid: str, response: Response, request: Request, yuki: Union[st
     return template("channel.html", {
         "request": request,
         "results": t[0],
+        "shorts": t[1],
+        "playlists": t[2],
         "channel_id": channelid,
-        "channel_name": t[1]["channel_name"],
-        "channel_icon": t[1]["channel_icon"],
-        "channel_profile": t[1]["channel_profile"],
-        "cover_img_url": t[1]["author_banner"],
-        "subscribers_count": t[1]["subscribers_count"],
+        "channel_name": t[3]["channel_name"],
+        "channel_icon": t[3]["channel_icon"],
+        "channel_profile": t[3]["channel_profile"],
+        "cover_img_url": t[3]["author_banner"],
+        "subscribers_count": t[3]["subscribers_count"],
+        "total_videos": t[3]["total_videos"],
         "proxy": proxy
     })
 

@@ -262,16 +262,16 @@ def getSearchData(q, page):
 
     def formatSearchData(data_dict):
         if data_dict["type"] == "video":
-            return {
-                "type": "video",
-                "title": data_dict["title"] if 'title' in data_dict else failed,
-                "id": data_dict["videoId"] if 'videoId' in data_dict else failed,
-                "authorId": data_dict["authorId"] if 'authorId' in data_dict else failed,
-                "author": data_dict["author"] if 'author' in data_dict else failed,
-                "published": data_dict["publishedText"] if 'publishedText' in data_dict else failed,
-                "length": str(datetime.timedelta(seconds=data_dict["lengthSeconds"])),
-                "view_count_text": data_dict["viewCountText"]
-            }
+    return {
+        "type": "video",
+        "title": data_dict["title"] if 'title' in data_dict else failed,
+        "id": data_dict["videoId"] if 'videoId' in data_dict else failed,
+        "authorId": data_dict["authorId"] if 'authorId' in data_dict else failed,
+        "author": data_dict["author"] if 'author' in data_dict else failed,
+        "published": formatPublished(data_dict.get("published", 0)),
+        "length": str(datetime.timedelta(seconds=data_dict.get("lengthSeconds", 0))),
+        "view_count_text": formatViewCount(data_dict.get("viewCount", 0)),
+    }
             
         elif data_dict["type"] == "playlist":
             return {

@@ -269,10 +269,15 @@
     {% endfor %}
 
     <div class="pagination">
+        {% if prev %}
+        <a class="page-btn" href="{{ prev }}">← 前のページ</a>
+        {% endif %}
+        {% if next and results %}
         <a class="page-btn" href="{{ next }}">次のページ →</a>
+        {% endif %}
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
 
 <script>
 let currentTheme = localStorage.getItem('theme') || 'system';

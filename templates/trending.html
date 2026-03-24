@@ -294,7 +294,7 @@ function setCategory(cat, el) {
 
 // ===== 期間切り替え =====
 function setPeriod(period, el) {
-    currentPeriod = period;
+    currentSitePeriod = period;
     document.querySelectorAll('#tab-site .filter-chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
     loadSiteTrend();

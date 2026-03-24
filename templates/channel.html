@@ -1,155 +1,432 @@
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <meta name="robots" content="noindex,nofollow">
-        
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ channel_name }} - YouTube Plus⁺</title>
+    <link rel="icon" href="/img/logo/favicon.ico">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc; --link: #065fd4;
+            --border: rgba(0,0,0,0.1);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+                --text-sub: #aaaaaa; --topbar-bg: #212121;
+                --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                --input-bg: #121212; --input-border: #444; --link: #3ea6ff;
+                --border: rgba(255,255,255,0.1);
+            }
+        }
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff; --link: #065fd4;
+            --border: rgba(0,0,0,0.1); color-scheme: light;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121; --link: #3ea6ff;
+            --border: rgba(255,255,255,0.1); color-scheme: dark;
+        }
+        body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-        <title>[チャンネル] {{ channel_name }} - YouTube Plus⁺</title>
-        <link rel="icon" href="/img/logo/favicon.ico">
-        <link rel="stylesheet" href="/css/pure-min.css">
-        <link rel="stylesheet" href="/css/grids-responsive-min.css">
-        <link rel="stylesheet" href="/css/ionicons.min.css">
-        <link rel="stylesheet" href="/css/default.css">
-        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
-<style>
-	        #topButton {
-            position: fixed;
-            left: 20px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+        /* トップバー */
+        #top-bar {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--topbar-bg); height: 56px; padding: 0 12px;
+            box-shadow: var(--topbar-shadow);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
         }
-        #topButton:hover {
-            background-color: #0056b3;
+        #hamburger-btn {
+            flex-shrink: 0; background: none; border: none;
+            cursor: pointer; padding: 6px; color: var(--text);
+            font-size: 20px; border-radius: 6px;
         }
-	    #topButton:active {
-    transform: scale(0.95);
-    background-color: #ff6347;
-}
-	</style>
-        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6582374172224860"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-     <header id="top-bar">
-    <div class="navbar-logo">
-      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
+        #hamburger-btn:hover { background: rgba(128,128,128,0.15); }
+        .search-container { flex: 1; max-width: 480px; }
+        .search-container form { display: flex; width: 100%; }
+        .search-container input {
+            flex: 1; padding: 6px 12px; min-width: 0;
+            border-radius: 20px 0 0 20px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 14px; outline: none;
+        }
+        .search-container button {
+            padding: 6px 12px; border-radius: 0 20px 20px 0;
+            border: 1px solid var(--input-border); border-left: none;
+            background: var(--bg-card); color: var(--text);
+            cursor: pointer; font-size: 14px;
+        }
+
+        /* サイドメニュー */
+        #side-menu {
+            position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+            background: var(--topbar-bg); z-index: 2000;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.3);
+            transition: left 0.25s ease;
+        }
+        #side-menu.open { left: 0; }
+        #menu-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); z-index: 1999;
+        }
+        #menu-overlay.open { display: block; }
+        .side-menu-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; height: 56px;
+            border-bottom: 1px solid var(--border);
+        }
+        .side-menu-header img { height: 28px; }
+        .side-menu-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 20px; color: var(--text);
+            text-decoration: none; font-size: 14px;
+            transition: background 0.15s;
+        }
+        .side-menu-item:hover { background: rgba(128,128,128,0.1); }
+        .side-menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
+
+        /* メイン */
+        .main { margin-top: 56px; }
+
+        /* バナー */
+        .channel-banner {
+            width: 100%; height: 180px; object-fit: cover;
+            display: block; background: var(--bg-card);
+        }
+        @media (max-width: 600px) { .channel-banner { height: 100px; } }
+
+        /* チャンネル情報 */
+        .channel-info {
+            padding: 16px; display: flex;
+            align-items: flex-start; gap: 16px;
+            flex-wrap: wrap;
+        }
+        .channel-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            object-fit: cover; flex-shrink: 0;
+        }
+        @media (max-width: 600px) { .channel-icon { width: 56px; height: 56px; } }
+        .channel-meta { flex: 1; min-width: 0; }
+        .channel-meta h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+        @media (max-width: 600px) { .channel-meta h1 { font-size: 16px; } }
+        .channel-meta .sub-count { font-size: 13px; color: var(--text-sub); margin-bottom: 8px; }
+        .subscribe-btn {
+            padding: 8px 16px; border-radius: 20px; border: none;
+            background: var(--text); color: var(--bg);
+            font-size: 13px; font-weight: bold; cursor: pointer;
+            transition: opacity 0.2s; white-space: nowrap;
+        }
+        .subscribe-btn:hover { opacity: 0.8; }
+        .subscribe-btn.subscribed {
+            background: rgba(128,128,128,0.3); color: var(--text);
+        }
+
+        /* 説明 */
+        .channel-desc {
+            padding: 0 16px 16px;
+            font-size: 13px; color: var(--text-sub); line-height: 1.6;
+            max-height: 60px; overflow: hidden; cursor: pointer;
+            transition: max-height 0.3s;
+        }
+        .channel-desc.expanded { max-height: 500px; }
+
+        /* タブ */
+        .channel-tabs {
+            display: flex; border-bottom: 1px solid var(--border);
+            overflow-x: auto; padding: 0 16px;
+        }
+        .channel-tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            padding: 12px 16px; border: none; background: none;
+            color: var(--text-sub); font-size: 14px; cursor: pointer;
+            border-bottom: 2px solid transparent; font-weight: 500;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+
+        /* フィルターバー */
+        .filter-bar {
+            display: flex; gap: 8px; padding: 12px 16px;
+            overflow-x: auto; flex-wrap: nowrap;
+        }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-chip {
+            padding: 6px 14px; border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text);
+            cursor: pointer; font-size: 13px; white-space: nowrap;
+            flex-shrink: 0; transition: all 0.15s;
+        }
+        .filter-chip.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+        /* 動画グリッド */
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px; padding: 8px 16px 16px;
+        }
+        @media (max-width: 600px) {
+            .videos-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 8px; }
+        }
+        .video-card { border-radius: 8px; overflow: hidden; cursor: pointer; }
+        .video-card a { text-decoration: none; color: var(--text); display: block; }
+        .video-card:hover { opacity: 0.85; }
+        .thumb-wrap { position: relative; }
+        .thumb-wrap img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; border-radius: 8px; }
+        .thumb-length {
+            position: absolute; bottom: 6px; right: 6px;
+            background: rgba(0,0,0,0.8); color: #fff;
+            padding: 2px 6px; border-radius: 3px; font-size: 12px;
+        }
+        .thumb-short {
+            position: absolute; top: 6px; left: 6px;
+            background: #ff0000; color: #fff;
+            padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold;
+        }
+        .card-info { padding: 8px 4px; }
+        .card-info h4 {
+            font-size: 14px; line-height: 1.4; margin-bottom: 4px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        @media (max-width: 600px) { .card-info h4 { font-size: 12px; } }
+        .card-info .meta { font-size: 12px; color: var(--text-sub); }
+
+        .empty { text-align: center; padding: 60px; color: var(--text-sub); }
+        .loading { text-align: center; padding: 40px; color: var(--text-sub); }
+    </style>
+</head>
+<body>
+
+<header id="top-bar">
+    <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
+    <div class="search-container">
+        <form action="/search" method="get" onsubmit="return document.getElementById('sq').value.trim() !== ''">
+            <input id="sq" name="q" type="search" placeholder="検索" autocomplete="on">
+            <button type="submit">🔍</button>
+        </form>
     </div>
-		 <div class="search-container">
-      <form class="pure-form" action="/search" method="get">
-        <fieldset>
-          <input id="searchbox" name="q" type="search" placeholder="検索" title="検索" autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false">
-        </fieldset>
-      </form>
+</header>
+
+<div id="menu-overlay" onclick="closeMenu()"></div>
+<div id="side-menu">
+    <div class="side-menu-header">
+        <button onclick="closeMenu()" style="background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;">☰</button>
+        <a href="/"><img src="/img/logo/th.png" alt="Logo" id="side-logo-img"></a>
     </div>
-    <!-- モバイル用ハンバーガーアイコン -->
-    <div id="hamburger">&#9776;</div>
-    <!-- ナビゲーション -->
-    <nav id="top-nav">
-      <a href="/chat">Plus⁺ Chat</a>
-      <a href="/others">メニュー</a>
-      <a href="/qanda">ヘルプ</a>
-      <a href="/help">お問い合わせ</a>
-	&emsp;
-    </nav>
-  </header>
-	    <br>
-        <div  class="no-theme">
-        <span id="dark_mode_pref" style="display:none"></span>
-        <div class="pure-g">
-            <div class="pure-u-1 pure-u-md-2-24"></div>
-            <div id="contents" class="pure-u-1 pure-u-md-20-24">
-                
-                <img id="cover_img" src="{{ cover_img_url }}" alt="カバー画像" style="margin: 1%">
-                <div class="pure-g h-box">
-                    <div class="pure-u-2-3">
-                        <div class="channel-profile">
-                            <img src="{{ channel_icon }}">
-                            <span>{{ channel_name }}</span>
-                        </div>
-                        <p id="subscribers_count">チャンネル登録者数: {{ subscribers_count }}人</p>
+    <a class="side-menu-item" href="/"><span class="icon">🏠</span><span>ホーム</span></a>
+    <a class="side-menu-item" href="/trending"><span class="icon">🔥</span><span>トレンド</span></a>
+    <a class="side-menu-item" href="/history"><span class="icon">🕐</span><span>視聴履歴</span></a>
+    <a class="side-menu-item" href="/subscriptions"><span class="icon">📺</span><span>登録チャンネル</span></a>
+    <a class="side-menu-item" href="/settings"><span class="icon">⚙️</span><span>設定</span></a>
+</div>
+
+<div class="main">
+    <!-- バナー -->
+    {% if cover_img_url %}
+    <img class="channel-banner" src="{{ cover_img_url }}" alt="バナー" onerror="this.style.display='none'">
+    {% else %}
+    <div class="channel-banner"></div>
+    {% endif %}
+
+    <!-- チャンネル情報 -->
+    <div class="channel-info">
+        <img class="channel-icon" src="{{ channel_icon }}" alt="{{ channel_name }}">
+        <div class="channel-meta">
+            <h1>{{ channel_name }}</h1>
+            <div class="sub-count">登録者 {{ subscribers_count }}人</div>
+            <button class="subscribe-btn" id="subscribe-btn"
+                onclick="toggleSubscribe('{{ channel_id }}', '{{ channel_name }}', '{{ channel_icon }}')">
+                読み込み中...
+            </button>
+        </div>
+    </div>
+
+    <!-- 説明 -->
+    {% if channel_profile %}
+    <div class="channel-desc" id="channel-desc" onclick="toggleDesc()">
+        {{ channel_profile | safe }}
+    </div>
+    {% endif %}
+
+    <!-- タブ -->
+    <div class="channel-tabs">
+        <button class="tab-btn active" onclick="switchTab('videos', this)">動画</button>
+        <button class="tab-btn" onclick="switchTab('shorts', this)">ショート</button>
+        <button class="tab-btn" onclick="switchTab('about', this)">概要</button>
+    </div>
+
+    <!-- 動画タブ -->
+    <div id="tab-videos">
+        <div class="filter-bar">
+            <span class="filter-chip active" onclick="setSort('latest', this)">🕐 最新</span>
+            <span class="filter-chip" onclick="setSort('popular', this)">🔥 人気</span>
+            <span class="filter-chip" onclick="setSort('oldest', this)">📅 古い順</span>
+        </div>
+        <div class="videos-grid" id="videos-grid">
+            {% for result in results %}
+            {% if result["type"] == "video" %}
+            <div class="video-card" id="v-{{ result['id'] }}" data-views="{{ result.get('view_count', 0) }}" data-published="{{ result.get('published', 0) }}">
+                <a href="/watch?v={{ result['id'] }}">
+                    <div class="thumb-wrap">
+                        <img loading="lazy"
+                             src="{% if proxy == 'True' %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/mqdefault.jpg{% endif %}"
+                             alt="{{ result['title'] }}">
+                        <span class="thumb-length">{{ result['length_str'] }}</span>
                     </div>
-                </div>
-                
-                <div class="h-box">
-                    <div id="descriptionWrapper">
-                        <p><span style="white-space:pre-wrap">{{ channel_profile | safe }}</span></p>
+                    <div class="card-info">
+                        <h4>{{ result['title'] }}</h4>
+                        <p class="meta">{{ result['view_count_text'] }} · {{ result['published'] }}</p>
                     </div>
-                </div>
-                
-                <div class="pure-g">
-                    
-                    {% for result in results %}
-                    <div class="pure-u-1 pure-u-md-1-4">
-                        <div class="h-box">
-                            
-                            {% if result["type"] == "video" %}
-                            <a href="/watch?v={{ result['id'] }}" style="width:100%" >
-                                <div class="thumbnail">
-                                    <img class="thumbnail" loading="lazy" src="{% if proxy == "True" %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/0.jpg{% endif %}" onerror="document.cookie = 'proxy=True;max-age=2592000;';">
-                                    <p class="length">{{ result["length_str"] }}</p>
-                                </div>
-                                <p dir="auto">{{ result['title'] }}</p>
-                            </a>
-                            <div class="video-card-row flexible">
-                                <a href="/channel/{{ result['authorId'] }}">{{ result["author"] }}</a>
-                            </div>
-                            <div class="video-card-row flexible">
-                                <div class="flex-left">
-                                    <p class="video-data" dir="auto">{{ result['view_count_text'] }}</p>
-                                    <p class="video-data" dir="auto">{{ result["published"] }}</p>
-                                </div>
-                            </div>
-                            
-                            {% elif result["type"] == "channel" %}
-                            <a href="/channel/{{ result["id"] }}">
-                                <center>
-                                    <img loading="lazy" tabindex="-1" style="width:56.25%" src="{{ result["thumbnail"] }}">
-                                </center>
-                                <p dir="auto">{{ result["author"] }}</p>
-                            </a>
-                            
-                            {% elif result["type"] == "playlist" %}
-                            <a href="/playlist?list={{ result["id"] }}" style="width:100%;">
-                            
-                                <div class="thumbnail">
-                                    <img loading="lazy" tabindex="-1" class="thumbnail" src="{% if proxy == "True" %}/thumbnail?v={{ result['thumbnail'] }}{% else %}https://img.youtube.com/vi/{{ result['thumbnail'] }}/0.jpg{% endif %}">
-                                    <p class="length">{{ result["count"] }}個の動画</p>
-                                </div>
-                                <p dir="auto">{{ result["title"] }}</p>
-                            </a>
-                            
-                            {% endif %}
-                        </div>
+                </a>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ショートタブ -->
+    <div id="tab-shorts" style="display:none;">
+        <div class="videos-grid" id="shorts-grid">
+            {% for result in results %}
+            {% if result["type"] == "video" %}
+            <div class="video-card">
+                <a href="/watch?v={{ result['id'] }}">
+                    <div class="thumb-wrap">
+                        <img loading="lazy"
+                             src="{% if proxy == 'True' %}/thumbnail?v={{ result['id'] }}{% else %}https://img.youtube.com/vi/{{ result['id'] }}/mqdefault.jpg{% endif %}"
+                             alt="{{ result['title'] }}">
+                        <span class="thumb-short">SHORT</span>
                     </div>
-                    {% endfor %}
-                </div>
+                    <div class="card-info">
+                        <h4>{{ result['title'] }}</h4>
+                    </div>
+                </a>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 概要タブ -->
+    <div id="tab-about" style="display:none; padding:16px;">
+        <div style="background:var(--bg-card); border-radius:8px; padding:16px;">
+            <h3 style="margin-bottom:12px; font-size:15px;">チャンネル概要</h3>
+            <div style="font-size:13px; color:var(--text-sub); line-height:1.6; white-space:pre-wrap;">
+                {{ channel_profile | safe }}
+            </div>
+            <div style="margin-top:16px; font-size:13px; color:var(--text-sub);">
+                <p>登録者数: {{ subscribers_count }}人</p>
             </div>
         </div>
-<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
-		
- <script>
-            $('#searchbox').autocomplete({
-                source: function (request, response) {
-                    {
-                        var url = "/suggest?keyword=" + request.term;
-                        var xhr = new XMLHttpRequest();
-                        xhr.open("GET", url);
-                        xhr.onload = function() {
-                            response(JSON.parse(xhr.responseText));
-                        }
-                        xhr.send();
-                    }
-                },delay:300
-        });
-        </script>
-	<script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
-    </body>
+    </div>
+</div>
+
+<script>
+// ===== テーマ =====
+let currentTheme = localStorage.getItem('theme') || 'system';
+function applyTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'system') html.removeAttribute('data-theme');
+    else html.setAttribute('data-theme', theme);
+    const logo = document.getElementById('side-logo-img');
+    if (logo) {
+        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        logo.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    }
+}
+applyTheme(currentTheme);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(currentTheme));
+
+// ===== サイドメニュー =====
+function toggleMenu() {
+    document.getElementById('side-menu').classList.toggle('open');
+    document.getElementById('menu-overlay').classList.toggle('open');
+}
+function closeMenu() {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('menu-overlay').classList.remove('open');
+}
+
+// ===== タブ =====
+function switchTab(name, btn) {
+    ['videos', 'shorts', 'about'].forEach(t => {
+        document.getElementById('tab-' + t).style.display = t === name ? 'block' : 'none';
+    });
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+// ===== ソート =====
+let currentSort = 'latest';
+function setSort(sort, el) {
+    currentSort = sort;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+
+    const grid = document.getElementById('videos-grid');
+    const cards = Array.from(grid.querySelectorAll('.video-card'));
+
+    cards.sort((a, b) => {
+        if (sort === 'latest') {
+            return parseInt(b.dataset.published || 0) - parseInt(a.dataset.published || 0);
+        } else if (sort === 'oldest') {
+            return parseInt(a.dataset.published || 0) - parseInt(b.dataset.published || 0);
+        } else if (sort === 'popular') {
+            return parseInt(b.dataset.views || 0) - parseInt(a.dataset.views || 0);
+        }
+        return 0;
+    });
+    cards.forEach(card => grid.appendChild(card));
+}
+
+// ===== 説明欄 =====
+function toggleDesc() {
+    document.getElementById('channel-desc')?.classList.toggle('expanded');
+}
+
+// ===== チャンネル登録 =====
+function getSubscriptions() {
+    return JSON.parse(localStorage.getItem('subscriptions') || '[]');
+}
+function saveSubscriptions(subs) {
+    localStorage.setItem('subscriptions', JSON.stringify(subs));
+}
+function isSubscribed(channelId) {
+    return getSubscriptions().some(s => s.id === channelId);
+}
+function toggleSubscribe(channelId, channelName, channelIcon) {
+    let subs = getSubscriptions();
+    if (isSubscribed(channelId)) {
+        subs = subs.filter(s => s.id !== channelId);
+        saveSubscriptions(subs);
+        updateSubscribeBtn(false);
+    } else {
+        subs.push({ id: channelId, name: channelName, icon: channelIcon, subscribedAt: Date.now() });
+        saveSubscriptions(subs);
+        updateSubscribeBtn(true);
+    }
+}
+function updateSubscribeBtn(subscribed) {
+    const btn = document.getElementById('subscribe-btn');
+    if (subscribed) {
+        btn.textContent = '✓ 登録済み';
+        btn.classList.add('subscribed');
+    } else {
+        btn.textContent = 'チャンネル登録';
+        btn.classList.remove('subscribed');
+    }
+}
+updateSubscribeBtn(isSubscribed("{{ channel_id }}"));
+</script>
+</body>
 </html>

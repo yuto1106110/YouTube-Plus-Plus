@@ -665,22 +665,15 @@ def record_trend(data: TrendData):
         return {"ok": False, "error": str(e)}
 
 @app.get("/api/site_trending")
-def get_site_trending(period: str = "7days"):
-    # cookieチェックなし（外部からも取得可能）
-    if trend_collection is None:
-        return {"videos": []}
+def get_site_trending(period: str = "7days", yuki: Union[str, None] = Cookie(None)):
+    if not checkCookie(yuki):
+        return {"error": "unauthorized"}
     try:
-        period_map = {
-            "24h": int(time.time()) - 86400,
-            "7days": int(time.time()) - (7 * 86400),
-            "30days": int(time.time()) - (30 * 86400),
-        }
-        cutoff = period_map.get(period, period_map["7days"])
-        videos = list(trend_collection.find(
-            {"last_watched": {"$gte": cutoff}},
-            {"_id": 0}
-        ).sort("count", -1).limit(50))
-        return {"videos": videos}
+        res = requests.get(
+            f"{TREND_API_URL}/trending?period={period}",
+            timeout=(1.0, 3.0)
+        )
+        return res.json()
     except Exception as e:
         return {"error": str(e), "videos": []}
 

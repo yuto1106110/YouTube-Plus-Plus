@@ -305,10 +305,10 @@ def getSearchData(q, page):
 def getChannelData(channelid, sort_by="newest"):
     t = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}?hl=ja&gl=JP", invidious_api.channel))
 
-print("channel keys:", list(t.keys()))
-print("totalVideos:", t.get("totalVideos"))
-print("videoCount:", t.get("videoCount"))
-print("videoCountText:", t.get("videoCountText"))
+    print("channel keys:", list(t.keys()))
+    print("totalVideos:", t.get("totalVideos"))
+    print("videoCount:", t.get("videoCount"))
+    print("videoCountText:", t.get("videoCountText"))
   
     # 動画一覧を別エンドポイントから取得（ソート対応）
     try:

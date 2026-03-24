@@ -300,12 +300,12 @@ function setPeriod(period, el) {
     loadSiteTrend();
 }
 
-// ===== YouTubeトレンド =====
+// ===== YouTubeトレンド（Invidious） =====
 async function loadYoutubeTrend() {
     const container = document.getElementById('youtube-list');
     container.innerHTML = '<div class="loading">読み込み中...</div>';
     try {
-        const res = await fetch(`https://plus-trend-api.vercel.app/trending?period=${currentPeriod}`);
+        const res = await fetch(`/api/trending?category=${currentCategory}`);
         const data = await res.json();
         if (!data.videos || data.videos.length === 0) {
             container.innerHTML = '<div class="empty">取得できませんでした</div>';
@@ -332,12 +332,14 @@ async function loadYoutubeTrend() {
     }
 }
 
-// ===== サイトトレンド =====
+// ===== サイトトレンド（Vercel API） =====
+let currentSitePeriod = '24h';
+
 async function loadSiteTrend() {
     const container = document.getElementById('site-list');
     container.innerHTML = '<div class="loading">読み込み中...</div>';
     try {
-        const res = await fetch(`/api/site_trending?period=${currentPeriod}`);
+        const res = await fetch(`/api/site_trending?period=${currentSitePeriod}`);
         const data = await res.json();
         if (!data.videos || data.videos.length === 0) {
             container.innerHTML = '<div class="empty">まだデータがありません。動画を見るとここに表示されます！</div>';

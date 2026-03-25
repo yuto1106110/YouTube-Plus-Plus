@@ -23,6 +23,11 @@
 # 作者情報
 ## Yuto-110 
 <br><a href="https://scratch.mit.edu/users/yuto_110/" target="_blank">Scratch</a>
+# 協力者 / Contributors
 ## sleepy-300
 <br><a href="https://scratch.mit.edu/users/sleepy-300/" target="_blank">Scratch</a>
-<br>©2025 Yuto-110
+## Toka_Kun_
+[Name 1](https://github.com/username1) | Education Parameterの提供 | | 
+[woolisbest](https://github.com/woolisbest-4520) | Education Parameterの提供 |
+<br>
+<br>©2026 Yuto-110

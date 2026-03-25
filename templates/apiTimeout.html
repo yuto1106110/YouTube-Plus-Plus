@@ -1,65 +1,247 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="robots" content="noindex,nofollow">
-        
-        <title>読み込み中... - YouTube Plus⁺</title>
-        <link rel="icon" href="/img/logo/favicon.ico">
-         <link rel="stylesheet" href="/css/empty.css">
-        <link rel="stylesheet" href="/css/pure-min.css">
-        <link rel="stylesheet" href="/css/grids-responsive-min.css">
-        <link rel="stylesheet" href="/css/ionicons.min.css">
-        <link rel="stylesheet" href="/css/default.css">
-            <script src="./scripts.js"></script>
-		<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6582374172224860"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-        <header id="top-bar">
-    <div class="navbar-logo">
-      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
-    </div>
-		 <div class="search-container">
-      <form class="pure-form" action="/search" method="get">
-        <fieldset>
-          <input id="searchbox" name="q" type="search" placeholder="検索" title="検索" autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false">
-        </fieldset>
-      </form>
-    </div>
-    <!-- モバイル用ハンバーガーアイコン -->
-    <div id="hamburger">&#9776;</div>
-    <!-- ナビゲーション -->
-    <nav id="top-nav">
-      <a href="/chat">Plus⁺ Chat</a>
-      <a href="/others">メニュー</a>
-      <a href="/qanda">ヘルプ</a>
-      <a href="/help">お問い合わせ</a>
-	&emsp;
-    </nav>
-  </header>
-	    <br>
-         <h1>読み込み中...</h1>
-	    <script>
-    // ページが読み込まれたときに実行する処理
-    window.onload = function() {
-      // 表示するメッセージの配列
-      const messages = [
-        "APIに原因がある場合はどうしようもないです...最新情報を確認しよう！",
-        "liveが見たいけど、見れない？そんな時には埋め込みを使おう‼︎",
-        "ずっと読み込んでいる場合、一度入り直してみてください！",
-        "画質を変えたい？そんな時には高画質機能を使おう‼︎",
-        "もうしばらくお待ち下さい..."
-      ];
-      // 0からmessages.length-1までのランダムな整数を生成
-      const randomIndex = Math.floor(Math.random() * messages.length);
-      // ランダムに選んだメッセージをページ内の要素に表示
-      document.getElementById("dynamicContent").innerText = messages[randomIndex];
-    };
-  </script>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>読み込み中... - YouTube Plus⁺</title>
+    <link rel="icon" href="/img/logo/favicon.ico">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc; --link: #065fd4;
+            --border: rgba(0,0,0,0.1);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+                --text-sub: #aaaaaa; --topbar-bg: #212121;
+                --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                --input-bg: #121212; --input-border: #444; --link: #3ea6ff;
+                --border: rgba(255,255,255,0.1);
+            }
+        }
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff; --link: #065fd4;
+            --input-bg: #f2f2f2; --input-border: #ccc;
+            --border: rgba(0,0,0,0.1); color-scheme: light;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121; --link: #3ea6ff;
+            --input-bg: #121212; --input-border: #444;
+            --border: rgba(255,255,255,0.1); color-scheme: dark;
+        }
+        body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+        #top-bar {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--topbar-bg); height: 56px; padding: 0 12px;
+            box-shadow: var(--topbar-shadow);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+        }
+        #hamburger-btn {
+            flex-shrink: 0; background: none; border: none;
+            cursor: pointer; padding: 6px; color: var(--text);
+            font-size: 20px; border-radius: 6px;
+        }
+        #hamburger-btn:hover { background: rgba(128,128,128,0.15); }
+        .search-container { flex: 1; max-width: 480px; }
+        .search-container form { display: flex; width: 100%; }
+        .search-container input {
+            flex: 1; padding: 6px 12px; min-width: 0;
+            border-radius: 20px 0 0 20px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 14px; outline: none;
+        }
+        .search-container button {
+            padding: 6px 12px; border-radius: 0 20px 20px 0;
+            border: 1px solid var(--input-border); border-left: none;
+            background: var(--bg-card); color: var(--text);
+            cursor: pointer; font-size: 14px;
+        }
+
+        #side-menu {
+            position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+            background: var(--topbar-bg); z-index: 2000;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.3);
+            transition: left 0.25s ease;
+        }
+        #side-menu.open { left: 0; }
+        #menu-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); z-index: 1999;
+        }
+        #menu-overlay.open { display: block; }
+        .side-menu-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; height: 56px;
+            border-bottom: 1px solid var(--border);
+        }
+        .side-menu-header img { height: 28px; }
+        .side-menu-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 20px; color: var(--text);
+            text-decoration: none; font-size: 14px;
+            transition: background 0.15s;
+        }
+        .side-menu-item:hover { background: rgba(128,128,128,0.1); }
+        .side-menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
+
+        .main {
+            margin-top: 56px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: calc(100vh - 56px);
+            padding: 20px; text-align: center;
+        }
+
+        .timeout-icon { font-size: 64px; margin-bottom: 20px; }
+        .timeout-title { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
+        .timeout-msg { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.6; }
+        .timeout-tip {
+            background: var(--bg-card); border-radius: 10px;
+            padding: 14px 20px; font-size: 13px; color: var(--text-sub);
+            margin-bottom: 24px; max-width: 400px; line-height: 1.6;
+        }
+
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            padding: 10px 20px; border-radius: 20px; border: none;
+            cursor: pointer; font-size: 14px; font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.8; }
+        .btn-primary { background: var(--text); color: var(--bg); }
+        .btn-secondary {
+            background: none; color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            width: 200px; height: 4px;
+            background: var(--border); border-radius: 2px;
+            margin: 20px auto 0; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: var(--link);
+            border-radius: 2px; width: 0%;
+            transition: width linear;
+        }
+        .countdown { font-size: 13px; color: var(--text-sub); margin-top: 8px; }
+    </style>
 </head>
 <body>
-  <h3 id="dynamicContent">読み込み中…</h3>
-  <script>setTimeout(function(){location.reload();},2000);</script>
+
+<header id="top-bar">
+    <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
+    <div class="search-container">
+        <form action="/search" method="get" onsubmit="return document.getElementById('sq').value.trim() !== ''">
+            <input id="sq" name="q" type="search" placeholder="検索" autocomplete="on">
+            <button type="submit">🔍</button>
+        </form>
+    </div>
+</header>
+
+<div id="menu-overlay" onclick="closeMenu()"></div>
+<div id="side-menu">
+    <div class="side-menu-header">
+        <button onclick="closeMenu()" style="background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;">☰</button>
+        <a href="/"><img src="/img/logo/th.png" alt="Logo" id="side-logo-img"></a>
+    </div>
+    <a class="side-menu-item" href="/"><span class="icon">🏠</span><span>ホーム</span></a>
+    <a class="side-menu-item" href="/trending"><span class="icon">🔥</span><span>トレンド</span></a>
+    <a class="side-menu-item" href="/history"><span class="icon">🕐</span><span>視聴履歴</span></a>
+    <a class="side-menu-item" href="/subscriptions"><span class="icon">📺</span><span>登録チャンネル</span></a>
+    <a class="side-menu-item" href="/settings"><span class="icon">⚙️</span><span>設定</span></a>
+</div>
+
+<div class="main">
+    <div class="timeout-icon">⏳</div>
+    <div class="timeout-title">読み込みに時間がかかっています</div>
+    <div class="timeout-msg">
+        Invidiousのサーバーが混雑しているか、<br>
+        一時的に接続できない状態です。
+    </div>
+    <div class="timeout-tip" id="tip-text">しばらくお待ちください...</div>
+
+    <div class="btn-row">
+        <button class="btn btn-primary" onclick="location.reload()">🔄 今すぐ再試行</button>
+        <button class="btn btn-secondary" onclick="history.back()">← 戻る</button>
+        <a class="btn btn-secondary" href="/">🏠 ホーム</a>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+    <div class="countdown" id="countdown">5秒後に自動で再試行します</div>
+</div>
+
+<script>
+// ===== テーマ =====
+let currentTheme = localStorage.getItem('theme') || 'system';
+function applyTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'system') html.removeAttribute('data-theme');
+    else html.setAttribute('data-theme', theme);
+    const logo = document.getElementById('side-logo-img');
+    if (logo) {
+        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        logo.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    }
+}
+applyTheme(currentTheme);
+
+// ===== サイドメニュー =====
+function toggleMenu() {
+    document.getElementById('side-menu').classList.toggle('open');
+    document.getElementById('menu-overlay').classList.toggle('open');
+}
+function closeMenu() {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('menu-overlay').classList.remove('open');
+}
+
+// ===== ヒント =====
+const tips = [
+    "💡 APIに原因がある場合は少し待ってから再試行してください",
+    "💡 ライブ配信は埋め込み再生を使うと見られることがあります",
+    "💡 画質を変えたい時は動画ページの「画質」ボタンを使おう",
+    "💡 しばらく待っても改善しない場合はホームに戻ってみてください",
+    "💡 別の動画を検索してみると見つかることがあります",
+];
+document.getElementById('tip-text').textContent = tips[Math.floor(Math.random() * tips.length)];
+
+// ===== カウントダウン（1回だけリロード） =====
+const alreadyRetried = sessionStorage.getItem('timeout_retried');
+if (!alreadyRetried) {
+    let count = 5;
+    const progress = document.getElementById('progress');
+    const countdown = document.getElementById('countdown');
+    progress.style.transition = 'width 5s linear';
+    setTimeout(() => { progress.style.width = '100%'; }, 100);
+
+    const timer = setInterval(() => {
+        count--;
+        countdown.textContent = `${count}秒後に自動で再試行します`;
+        if (count <= 0) {
+            clearInterval(timer);
+            sessionStorage.setItem('timeout_retried', '1');
+            location.reload();
+        }
+    }, 1000);
+} else {
+    // 2回目以降は自動リロードしない
+    document.getElementById('countdown').textContent = '自動再試行済み。手動で再試行してください。';
+    document.getElementById('progress').style.width = '100%';
+    document.getElementById('progress').style.background = 'var(--border)';
+}
+</script>
 </body>
 </html>

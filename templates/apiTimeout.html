@@ -104,18 +104,34 @@
 
         .timeout-icon { font-size: 64px; margin-bottom: 20px; }
         .timeout-title { font-size: 22px; font-weight: bold; margin-bottom: 8px; }
-        .timeout-msg { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.6; }
+        .timeout-msg { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; line-height: 1.6; }
         .timeout-tip {
             background: var(--bg-card); border-radius: 10px;
             padding: 14px 20px; font-size: 13px; color: var(--text-sub);
-            margin-bottom: 24px; max-width: 400px; line-height: 1.6;
+            margin-bottom: 20px; max-width: 400px; line-height: 1.6;
         }
 
-        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .status-box {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 8px; margin-bottom: 20px;
+        }
+        .retry-info {
+            font-size: 13px; color: var(--text-sub);
+            background: var(--bg-card); padding: 8px 16px;
+            border-radius: 20px;
+        }
+        .health-status {
+            font-size: 13px; padding: 10px 16px;
+            border-radius: 8px; background: var(--bg-card);
+            max-width: 360px; line-height: 1.6; text-align: center;
+        }
+
+        .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
         .btn {
             padding: 10px 20px; border-radius: 20px; border: none;
             cursor: pointer; font-size: 14px; font-weight: bold;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s; text-decoration: none;
+            display: inline-flex; align-items: center;
         }
         .btn:hover { opacity: 0.8; }
         .btn-primary { background: var(--text); color: var(--bg); }
@@ -125,16 +141,15 @@
         }
 
         .progress-bar {
-            width: 200px; height: 4px;
+            width: 240px; height: 4px;
             background: var(--border); border-radius: 2px;
-            margin: 20px auto 0; overflow: hidden;
+            margin: 0 auto 8px; overflow: hidden;
         }
         .progress-fill {
             height: 100%; background: var(--link);
             border-radius: 2px; width: 0%;
-            transition: width linear;
         }
-        .countdown { font-size: 13px; color: var(--text-sub); margin-top: 8px; }
+        .countdown { font-size: 13px; color: var(--text-sub); }
     </style>
 </head>
 <body>
@@ -171,8 +186,13 @@
     </div>
     <div class="timeout-tip" id="tip-text">しばらくお待ちください...</div>
 
+    <div class="status-box">
+        <div class="retry-info" id="retry-info"></div>
+        <div class="health-status" id="health-status">🔍 Invidiousの状態を確認中...</div>
+    </div>
+
     <div class="btn-row">
-        <button class="btn btn-primary" onclick="location.reload()">🔄 今すぐ再試行</button>
+        <button class="btn btn-primary" onclick="manualRetry()">🔄 今すぐ再試行</button>
         <button class="btn btn-secondary" onclick="history.back()">← 戻る</button>
         <a class="btn btn-secondary" href="/">🏠 ホーム</a>
     </div>
@@ -180,14 +200,9 @@
     <div class="progress-bar">
         <div class="progress-fill" id="progress"></div>
     </div>
-    <div class="countdown" id="countdown">5秒後に自動で再試行します</div>
+    <div class="countdown" id="countdown">確認中...</div>
 </div>
 
-<div style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:16px;">
-    <div id="retry-info" style="font-size:13px; color:var(--text-sub); background:var(--bg-card); padding:8px 16px; border-radius:20px;"></div>
-    <div id="health-status" style="font-size:13px; padding:8px 16px; border-radius:8px; background:var(--bg-card); max-width:360px; line-height:1.6; text-align:center;"></div>
-</div>    
-    
 <script>
 // ===== テーマ =====
 let currentTheme = localStorage.getItem('theme') || 'system';
@@ -202,6 +217,7 @@ function applyTheme(theme) {
     }
 }
 applyTheme(currentTheme);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(currentTheme));
 
 // ===== サイドメニュー =====
 function toggleMenu() {
@@ -223,10 +239,22 @@ const tips = [
 ];
 document.getElementById('tip-text').textContent = tips[Math.floor(Math.random() * tips.length)];
 
-// ===== カウントダウン（最大3回リロード） =====
+// ===== リトライ管理 =====
 const MAX_RETRY = 3;
 const RETRY_INTERVAL = 5;
-let retryCount = parseInt(sessionStorage.getItem('timeout_retry_count') || '0');
+
+// タイムアウトページに新しく入ったかどうかを判定
+// referrerがタイムアウトページでなければ新規 → リセット
+const prevPage = document.referrer;
+const isFromTimeout = prevPage.includes('/apiTimeout') ||
+    sessionStorage.getItem('timeout_url') === location.href;
+
+if (!isFromTimeout) {
+    sessionStorage.setItem('timeout_count', '0');
+    sessionStorage.setItem('timeout_url', location.href);
+}
+
+let retryCount = parseInt(sessionStorage.getItem('timeout_count') || '0');
 
 const progress = document.getElementById('progress');
 const countdown = document.getElementById('countdown');
@@ -238,20 +266,30 @@ function updateRetryInfo() {
     if (retryCount === 0) {
         retryInfo.textContent = `自動再試行: 残り${MAX_RETRY}回`;
     } else if (retryCount < MAX_RETRY) {
-        retryInfo.textContent = `自動再試行: ${retryCount}回目完了 / 残り${MAX_RETRY - retryCount}回`;
+        retryInfo.textContent = `自動再試行: ${retryCount}回完了 / 残り${MAX_RETRY - retryCount}回`;
     } else {
         retryInfo.textContent = `自動再試行: ${MAX_RETRY}回完了`;
+        retryInfo.style.color = '#ff9800';
     }
 }
 updateRetryInfo();
 
+// 手動リトライ（カウントリセット）
+function manualRetry() {
+    sessionStorage.setItem('timeout_count', '0');
+    sessionStorage.setItem('timeout_url', location.href);
+    location.reload();
+}
+
 // Invidiousのヘルスチェック
 async function checkInvidiousHealth() {
-    healthStatus.textContent = '🔍 Invidiousの状態を確認中...';
     try {
-        const res = await fetch('/api/all', { signal: AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined });
-        const data = await res.text();
-        if (data && data !== 'undefined') {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch('/api/video', { signal: controller.signal });
+        clearTimeout(timer);
+        const text = await res.text();
+        if (res.ok && text && text.length > 10) {
             healthStatus.innerHTML = '✅ Invidiousに接続できています<br><span style="font-size:11px; color:var(--text-sub);">再試行すれば表示される可能性があります</span>';
             healthStatus.style.color = '#4caf50';
         } else {
@@ -268,6 +306,9 @@ checkInvidiousHealth();
 // カウントダウンとリロード
 if (retryCount < MAX_RETRY) {
     let count = RETRY_INTERVAL;
+    countdown.textContent = `${count}秒後に自動で再試行します（${retryCount + 1}回目 / ${MAX_RETRY}回）`;
+
+    // プログレスバー
     progress.style.transition = `width ${RETRY_INTERVAL}s linear`;
     setTimeout(() => { progress.style.width = '100%'; }, 100);
 
@@ -276,7 +317,7 @@ if (retryCount < MAX_RETRY) {
         countdown.textContent = `${count}秒後に自動で再試行します（${retryCount + 1}回目 / ${MAX_RETRY}回）`;
         if (count <= 0) {
             clearInterval(timer);
-            sessionStorage.setItem('timeout_retry_count', String(retryCount + 1));
+            sessionStorage.setItem('timeout_count', String(retryCount + 1));
             location.reload();
         }
     }, 1000);

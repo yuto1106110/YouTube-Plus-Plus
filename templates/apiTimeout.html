@@ -183,6 +183,11 @@
     <div class="countdown" id="countdown">5秒後に自動で再試行します</div>
 </div>
 
+<div style="display:flex; flex-direction:column; align-items:center; gap:8px; margin-bottom:16px;">
+    <div id="retry-info" style="font-size:13px; color:var(--text-sub); background:var(--bg-card); padding:8px 16px; border-radius:20px;"></div>
+    <div id="health-status" style="font-size:13px; padding:8px 16px; border-radius:8px; background:var(--bg-card); max-width:360px; line-height:1.6; text-align:center;"></div>
+</div>    
+    
 <script>
 // ===== テーマ =====
 let currentTheme = localStorage.getItem('theme') || 'system';
@@ -218,29 +223,67 @@ const tips = [
 ];
 document.getElementById('tip-text').textContent = tips[Math.floor(Math.random() * tips.length)];
 
-// ===== カウントダウン（1回だけリロード） =====
-const alreadyRetried = sessionStorage.getItem('timeout_retried');
-if (!alreadyRetried) {
-    let count = 5;
-    const progress = document.getElementById('progress');
-    const countdown = document.getElementById('countdown');
-    progress.style.transition = 'width 5s linear';
+// ===== カウントダウン（最大3回リロード） =====
+const MAX_RETRY = 3;
+const RETRY_INTERVAL = 5;
+let retryCount = parseInt(sessionStorage.getItem('timeout_retry_count') || '0');
+
+const progress = document.getElementById('progress');
+const countdown = document.getElementById('countdown');
+const retryInfo = document.getElementById('retry-info');
+const healthStatus = document.getElementById('health-status');
+
+// リトライ情報表示
+function updateRetryInfo() {
+    if (retryCount === 0) {
+        retryInfo.textContent = `自動再試行: 残り${MAX_RETRY}回`;
+    } else if (retryCount < MAX_RETRY) {
+        retryInfo.textContent = `自動再試行: ${retryCount}回目完了 / 残り${MAX_RETRY - retryCount}回`;
+    } else {
+        retryInfo.textContent = `自動再試行: ${MAX_RETRY}回完了`;
+    }
+}
+updateRetryInfo();
+
+// Invidiousのヘルスチェック
+async function checkInvidiousHealth() {
+    healthStatus.textContent = '🔍 Invidiousの状態を確認中...';
+    try {
+        const res = await fetch('/api/all', { signal: AbortSignal.timeout ? AbortSignal.timeout(5000) : undefined });
+        const data = await res.text();
+        if (data && data !== 'undefined') {
+            healthStatus.innerHTML = '✅ Invidiousに接続できています<br><span style="font-size:11px; color:var(--text-sub);">再試行すれば表示される可能性があります</span>';
+            healthStatus.style.color = '#4caf50';
+        } else {
+            healthStatus.innerHTML = '⚠️ Invidiousのレスポンスが不安定です<br><span style="font-size:11px; color:var(--text-sub);">しばらく待ってから再試行してください</span>';
+            healthStatus.style.color = '#ff9800';
+        }
+    } catch {
+        healthStatus.innerHTML = '❌ Invidiousに接続できません<br><span style="font-size:11px; color:var(--text-sub);">サーバーが混雑しているか、メンテナンス中の可能性があります</span>';
+        healthStatus.style.color = '#f44336';
+    }
+}
+checkInvidiousHealth();
+
+// カウントダウンとリロード
+if (retryCount < MAX_RETRY) {
+    let count = RETRY_INTERVAL;
+    progress.style.transition = `width ${RETRY_INTERVAL}s linear`;
     setTimeout(() => { progress.style.width = '100%'; }, 100);
 
     const timer = setInterval(() => {
         count--;
-        countdown.textContent = `${count}秒後に自動で再試行します`;
+        countdown.textContent = `${count}秒後に自動で再試行します（${retryCount + 1}回目 / ${MAX_RETRY}回）`;
         if (count <= 0) {
             clearInterval(timer);
-            sessionStorage.setItem('timeout_retried', '1');
+            sessionStorage.setItem('timeout_retry_count', String(retryCount + 1));
             location.reload();
         }
     }, 1000);
 } else {
-    // 2回目以降は自動リロードしない
-    document.getElementById('countdown').textContent = '自動再試行済み。手動で再試行してください。';
-    document.getElementById('progress').style.width = '100%';
-    document.getElementById('progress').style.background = 'var(--border)';
+    countdown.textContent = '自動再試行が完了しました。手動で再試行してください。';
+    progress.style.width = '100%';
+    progress.style.background = 'var(--border)';
 }
 </script>
 </body>

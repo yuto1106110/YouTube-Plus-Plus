@@ -111,10 +111,14 @@
         html[data-theme="dark"] #top-bar .logo-area img { mix-blend-mode: screen; }
         .search-container { flex: 1; min-width: 0; max-width: 480px; }
         .search-container form { display: flex; width: 100%; }
-        .search-container input[type="search"] {
+        .search-container input {
+            flex: 1; padding: 6px 12px; min-width: 0;
+            border-radius: 20px 0 0 20px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg) !important; color: var(--text) !important;
+            font-size: 14px; outline: none;
             -webkit-appearance: none;
             appearance: none;
-            border-radius: 20px 0 0 20px !important;
         }
         .search-container button {
             padding: 6px 12px; border-radius: 0 20px 20px 0;

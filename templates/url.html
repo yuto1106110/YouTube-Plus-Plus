@@ -1,243 +1,393 @@
-<html>
-  <head>
-	  
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex,nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL検索 - YouTube Plus⁺</title>
-        <link rel="icon" href="/img/logo/favicon.ico">
-           <link rel="stylesheet" href="/css/pure-min.css">
-        <link rel="stylesheet" href="/css/grids-responsive-min.css">
-        <link rel="stylesheet" href="/css/ionicons.min.css">
-        <link rel="stylesheet" href="/css/default.css">
-        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=thumb_up" />
-        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-	  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6582374172224860"
-     crossorigin="anonymous"></script>
-  </head>
-	  <script>
-    $(document).ready(function() {
-      // モバイル時：ハンバーガーメニューのトグル
-      $("#hamburger").click(function() {
-        $("#top-nav").toggleClass("show");
-      });
-      
-      // スクロールによるトップバーの縮小効果
-      $(window).on("scroll", function() {
-        if($(window).scrollTop() > 50) {
-          $("#top-bar").addClass("scrolled");
-        } else {
-          $("#top-bar").removeClass("scrolled");
-        }
-      });
-    });
-  </script>
-	<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6582374172224860"
-     crossorigin="anonymous"></script>
-    </head>
-    <body>
-       <header id="top-bar">
-    <div class="navbar-logo">
-      <a href="/"><img src="/img/logo/th.png" alt="Logo"></a>
-    </div>
-    <!-- モバイル用ハンバーガーアイコン -->
-    <div id="hamburger">&#9776;</div>
-    <!-- ナビゲーション -->
-    <nav id="top-nav">
-      <a href="/bbs">掲示板</a>
-      <a href="/proxypage">Proxy</a>
-      <a href="/others">その他</a>
-      <a href="/sitsumon">回答よろ</a>
-	&emsp;
-    </nav>
-  </header>
-  <body style="background: white; margin: 0; font-family: Arial, sans-serif;">
+    <link rel="icon" href="/img/logo/favicon.ico">
     <style>
-      /* ======================
-         モーダルウィンドウのスタイル
-         ====================== */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: fadeIn 0.5s ease;
-        z-index: 1000;
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      .modal-content {
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 500px;
-        width: 80%;
-        animation: slideDown 0.5s ease;
-        position: relative;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      }
-      @keyframes slideDown {
-        from { transform: translateY(-50px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
-      .modal-close {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #ff5c5c;
-        border: none;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-        transition: background 0.3s ease;
-      }
-      .modal-close:hover {
-        background: #ff1c1c;
-      }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff;
+            --topbar-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            --input-bg: #f2f2f2; --input-border: #ccc; --link: #065fd4;
+            --border: rgba(0,0,0,0.1);
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+                --text-sub: #aaaaaa; --topbar-bg: #212121;
+                --topbar-shadow: 0 1px 3px rgba(0,0,0,0.5);
+                --input-bg: #121212; --input-border: #444; --link: #3ea6ff;
+                --border: rgba(255,255,255,0.1);
+            }
+        }
+        html[data-theme="light"] {
+            --bg: #f9f9f9; --bg-card: #f2f2f2; --text: #0f0f0f;
+            --text-sub: #606060; --topbar-bg: #ffffff; --link: #065fd4;
+            --input-bg: #f2f2f2; --input-border: #ccc;
+            --border: rgba(0,0,0,0.1); color-scheme: light;
+        }
+        html[data-theme="dark"] {
+            --bg: #0f0f0f; --bg-card: #272727; --text: #ffffff;
+            --text-sub: #aaaaaa; --topbar-bg: #212121; --link: #3ea6ff;
+            --input-bg: #121212; --input-border: #444;
+            --border: rgba(255,255,255,0.1); color-scheme: dark;
+        }
+        body { font-family: Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-      /* ======================
-         YouTube URL入力フォームのアニメーション付きスタイル
-         ====================== */
-      .form-container {
-        background: white;
-        padding: 40px;
-        border-radius: 8px;
-        margin: 100px auto;
-        max-width: 600px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeInUp 1s ease forwards;
-      }
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
+        #top-bar {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--topbar-bg); height: 56px; padding: 0 12px;
+            box-shadow: var(--topbar-shadow);
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+        #hamburger-btn {
+            flex-shrink: 0; background: none; border: none;
+            cursor: pointer; padding: 6px; color: var(--text);
+            font-size: 20px; border-radius: 6px;
         }
-      }
-      h1 {
-        text-align: center;
-        font-size: 2.2em;
-        margin-bottom: 20px;
-        animation: slideIn 1s ease forwards;
-      }
-      @keyframes slideIn {
-        from {
-          transform: translateX(-100%);
-          opacity: 0;
-        }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
-      input, button {
-        font-size: 16px;
-        padding: 10px;
-        margin: 5px;
-        transition: transform 0.3s ease;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      input:focus, button:hover {
-        transform: scale(1.05);
-        outline: none;
-      }
+        #hamburger-btn:hover { background: rgba(128,128,128,0.15); }
+        #top-bar img { height: 28px; }
 
-	        #topButton {
-            position: fixed;
-            left: 20px;
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+        #side-menu {
+            position: fixed; top: 0; left: -260px; width: 260px; height: 100vh;
+            background: var(--topbar-bg); z-index: 2000;
+            box-shadow: 2px 0 16px rgba(0,0,0,0.3);
+            transition: left 0.25s ease;
         }
-        #topButton:hover {
-            background-color: #0056b3;
+        #side-menu.open { left: 0; }
+        #menu-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); z-index: 1999;
         }
-	    #topButton:active {
-    transform: scale(0.95);
-    background-color: #ff6347;
-}
+        #menu-overlay.open { display: block; }
+        .side-menu-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 16px; height: 56px;
+            border-bottom: 1px solid var(--border);
+        }
+        .side-menu-header img { height: 28px; }
+        .side-menu-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 20px; color: var(--text);
+            text-decoration: none; font-size: 14px;
+            transition: background 0.15s;
+        }
+        .side-menu-item:hover { background: rgba(128,128,128,0.1); }
+        .side-menu-item .icon { font-size: 20px; width: 24px; text-align: center; }
+
+        .main {
+            margin-top: 56px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            min-height: calc(100vh - 56px);
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--bg-card); border-radius: 16px;
+            padding: 32px; width: 100%; max-width: 560px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .card h1 {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 8px; text-align: center;
+        }
+        .card p {
+            font-size: 13px; color: var(--text-sub);
+            text-align: center; margin-bottom: 24px; line-height: 1.6;
+        }
+
+        .input-row {
+            display: flex; gap: 8px; margin-bottom: 12px;
+        }
+        .input-row input {
+            flex: 1; padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 14px; outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-row input:focus { border-color: var(--link); }
+
+        .btn-row {
+            display: flex; gap: 8px; flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1; padding: 11px 16px; border-radius: 10px;
+            border: none; cursor: pointer; font-size: 14px;
+            font-weight: bold; transition: opacity 0.2s;
+            min-width: 120px;
+        }
+        .btn:hover { opacity: 0.8; }
+        .btn-primary { background: var(--text); color: var(--bg); }
+        .btn-secondary {
+            background: none; color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        /* 結果プレビュー */
+        #preview {
+            display: none; margin-top: 16px;
+            padding: 12px; border-radius: 10px;
+            background: var(--bg); border: 1px solid var(--border);
+            font-size: 13px; color: var(--text-sub);
+        }
+        #preview.show { display: block; }
+        #preview .preview-id {
+            font-family: monospace; color: var(--link);
+            font-size: 14px; font-weight: bold;
+        }
+        #preview .preview-type {
+            display: inline-block; margin-top: 4px;
+            padding: 2px 8px; border-radius: 10px;
+            background: var(--bg-card); font-size: 12px;
+        }
+
+        /* エラー */
+        #error-msg {
+            display: none; margin-top: 12px;
+            color: #f44336; font-size: 13px; text-align: center;
+        }
+        #error-msg.show { display: block; }
+
+        /* 対応フォーマット */
+        .formats {
+            margin-top: 20px; font-size: 12px; color: var(--text-sub);
+            line-height: 1.8;
+        }
+        .formats details summary {
+            cursor: pointer; color: var(--link);
+        }
     </style>
+</head>
+<body>
 
-    <!-- モーダルウィンドウ（使い方説明） -->
-    <div id="modalOverlay" class="modal-overlay">
-      <div class="modal-content">
-        <button id="modalClose" class="modal-close">&times;</button>
-        <h2>操作方法</h2>
-        <p>
-          このページでは、YouTubeのURLを入力して動画を再生します。<br>
-          「再生！(デフォルト)」をクリックすると通常の再生ページに移動し、<br>
-          「再生！(埋め込み)」をクリックすると埋め込み用の再生ページに移動します。<br>
-		楽しんでください！
-        </p>
-      </div>
+<header id="top-bar">
+    <button id="hamburger-btn" onclick="toggleMenu()">☰</button>
+    <a href="/"><img src="/img/logo/th.png" alt="Logo" id="top-logo"></a>
+</header>
+
+<div id="menu-overlay" onclick="closeMenu()"></div>
+<div id="side-menu">
+    <div class="side-menu-header">
+        <button onclick="closeMenu()" style="background:none;border:none;cursor:pointer;color:var(--text);font-size:20px;">☰</button>
+        <a href="/"><img src="/img/logo/th.png" alt="Logo" id="side-logo-img"></a>
     </div>
+    <a class="side-menu-item" href="/"><span class="icon">🏠</span><span>ホーム</span></a>
+    <a class="side-menu-item" href="/trending"><span class="icon">🔥</span><span>トレンド</span></a>
+    <a class="side-menu-item" href="/history"><span class="icon">🕐</span><span>視聴履歴</span></a>
+    <a class="side-menu-item" href="/subscriptions"><span class="icon">📺</span><span>登録チャンネル</span></a>
+    <a class="side-menu-item" href="/settings"><span class="icon">⚙️</span><span>設定</span></a>
+</div>
 
-    <!-- アニメーション付きのURL入力フォーム -->
-    <div class="form-container">
-      <h1>YouTubeのURLを入力</h1>
-      <form id="urlForm2">
-        <input type="text" id="youtubeUrl" placeholder="YouTubeのURLを入力..." required>
-        <button type="submit" name="action" value="watch">再生！(デフォルト)</button>
-        <button type="submit" name="action" value="watch1">再生！(埋め込み)</button>
-        <br><br>
-      </form>
+<div class="main">
+    <div class="card">
+        <h1>🔗 URL・ID検索</h1>
+        <p>YouTubeのURL・動画ID・チャンネルIDを入力してください</p>
+
+        <div class="input-row">
+            <input type="text" id="input-field"
+                   placeholder="URL または ID を入力..."
+                   oninput="onInput(this.value)"
+                   onkeydown="if(event.key==='Enter') goWatch()">
+        </div>
+
+        <div id="preview">
+            <div>検出: <span class="preview-type" id="preview-type"></span></div>
+            <div style="margin-top:4px;">ID: <span class="preview-id" id="preview-id"></span></div>
+        </div>
+        <div id="error-msg">❌ URLまたはIDを認識できませんでした</div>
+
+        <div class="btn-row" style="margin-top:12px;">
+            <button class="btn btn-primary" onclick="goWatch()">▶ 再生</button>
+            <button class="btn btn-secondary" onclick="goEmbed()">📺 埋め込み</button>
+            <button class="btn btn-secondary" onclick="goChannel()">👤 チャンネル</button>
+        </div>
+
+        <div class="formats">
+            <details>
+                <summary>対応フォーマット一覧</summary>
+                <div style="margin-top:8px;">
+                    • youtube.com/watch?v=XXXXX<br>
+                    • youtu.be/XXXXX<br>
+                    • youtube.com/shorts/XXXXX<br>
+                    • youtube.com/live/XXXXX<br>
+                    • music.youtube.com/watch?v=XXXXX<br>
+                    • youtube.com/channel/XXXXX<br>
+                    • youtube.com/@ハンドル名<br>
+                    • 動画ID（11文字）<br>
+                    • チャンネルID（UC...）
+                </div>
+            </details>
+        </div>
     </div>
-<button id="topButton" onclick="history.back(-1)" style="top:80px">< 戻る</button>
-	
-    <script>
-      // モーダルを閉じる処理
-      document.getElementById("modalClose").addEventListener("click", function() {
-        document.getElementById("modalOverlay").style.display = "none";
-      });
-      window.addEventListener("click", function(event) {
-        if (event.target === document.getElementById("modalOverlay")) {
-          document.getElementById("modalOverlay").style.display = "none";
-        }
-      });
+</div>
 
-      // YouTube URL入力フォームの処理
-      document.getElementById('urlForm2').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const url = document.getElementById('youtubeUrl').value;
-        const videoId = extractVideoId(url);
-        if (videoId) {
-          const action = event.submitter.value;
-          if (action === 'watch') {
-            window.location.href = `/watch?v=${videoId}`;
-          } else if (action === 'watch1') {
-            window.location.href = `/ume?v=${videoId}`;
-          } else {
-            alert('Invalid action type');
-          }
-        } else {
-          alert('error urlの形式をもう一度見直してください');
-        }
-      });
+<script>
+// ===== テーマ =====
+let currentTheme = localStorage.getItem('theme') || 'system';
+function applyTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'system') html.removeAttribute('data-theme');
+    else html.setAttribute('data-theme', theme);
+    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    ['top-logo', 'side-logo-img'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.mixBlendMode = isDark ? 'screen' : 'normal';
+    });
+}
+applyTheme(currentTheme);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyTheme(currentTheme));
 
-      function extractVideoId(url) {
-        const regExp = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-        const match = url.match(regExp);
-        return (match && match[1].length === 11) ? match[1] : null;
-      }
-    </script>
-<script src="//accaii.com/yuto110/script.js" async></script><noscript><img src="//accaii.com/yuto110/script?guid=on"></noscript>
-  </body>
+// ===== サイドメニュー =====
+function toggleMenu() {
+    document.getElementById('side-menu').classList.toggle('open');
+    document.getElementById('menu-overlay').classList.toggle('open');
+}
+function closeMenu() {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('menu-overlay').classList.remove('open');
+}
+
+// ===== URL/ID解析 =====
+function parse(input) {
+    input = input.trim();
+    if (!input) return null;
+
+    // 動画ID（11文字の英数字）
+    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
+        return { type: '動画ID', videoId: input };
+    }
+
+    // チャンネルID（UCで始まる）
+    if (/^UC[a-zA-Z0-9_-]{22}$/.test(input)) {
+        return { type: 'チャンネルID', channelId: input };
+    }
+
+    try {
+        // URLとして解析
+        const url = new URL(input.startsWith('http') ? input : 'https://' + input);
+        const host = url.hostname.replace('www.', '');
+        const path = url.pathname;
+
+        // youtube.com/watch?v=
+        if (url.searchParams.get('v')) {
+            return { type: '動画URL', videoId: url.searchParams.get('v') };
+        }
+
+        // youtu.be/XXXXX
+        if (host === 'youtu.be') {
+            const id = path.slice(1).split('?')[0];
+            if (id.length === 11) return { type: '短縮URL', videoId: id };
+        }
+
+        // shorts/XXXXX
+        const shortsMatch = path.match(/\/shorts\/([a-zA-Z0-9_-]{11})/);
+        if (shortsMatch) return { type: 'ショート', videoId: shortsMatch[1] };
+
+        // live/XXXXX
+        const liveMatch = path.match(/\/live\/([a-zA-Z0-9_-]{11})/);
+        if (liveMatch) return { type: 'ライブ配信', videoId: liveMatch[1] };
+
+        // embed/XXXXX
+        const embedMatch = path.match(/\/embed\/([a-zA-Z0-9_-]{11})/);
+        if (embedMatch) return { type: '埋め込みURL', videoId: embedMatch[1] };
+
+        // channel/UCXXXXX
+        const channelMatch = path.match(/\/channel\/(UC[a-zA-Z0-9_-]{22})/);
+        if (channelMatch) return { type: 'チャンネルURL', channelId: channelMatch[1] };
+
+        // @ハンドル名
+        const handleMatch = path.match(/\/@([a-zA-Z0-9_.-]+)/);
+        if (handleMatch) return { type: 'チャンネルハンドル', handle: handleMatch[1] };
+
+        // c/チャンネル名
+        const cMatch = path.match(/\/c\/([a-zA-Z0-9_.-]+)/);
+        if (cMatch) return { type: 'チャンネル名', handle: cMatch[1] };
+
+        // music.youtube.com
+        if (host === 'music.youtube.com' && url.searchParams.get('v')) {
+            return { type: 'YouTube Music', videoId: url.searchParams.get('v') };
+        }
+
+    } catch {}
+
+    return null;
+}
+
+let currentResult = null;
+
+function onInput(value) {
+    const preview = document.getElementById('preview');
+    const errorMsg = document.getElementById('error-msg');
+    const previewId = document.getElementById('preview-id');
+    const previewType = document.getElementById('preview-type');
+
+    if (!value.trim()) {
+        preview.classList.remove('show');
+        errorMsg.classList.remove('show');
+        currentResult = null;
+        return;
+    }
+
+    const result = parse(value);
+    currentResult = result;
+
+    if (result) {
+        preview.classList.add('show');
+        errorMsg.classList.remove('show');
+        previewType.textContent = result.type;
+        previewId.textContent = result.videoId || result.channelId || result.handle || '';
+    } else {
+        preview.classList.remove('show');
+        errorMsg.classList.add('show');
+    }
+}
+
+function goWatch() {
+    const result = currentResult || parse(document.getElementById('input-field').value);
+    if (!result) { showError(); return; }
+    if (result.videoId) {
+        location.href = `/watch?v=${result.videoId}`;
+    } else if (result.channelId) {
+        location.href = `/channel/${result.channelId}`;
+    } else if (result.handle) {
+        location.href = `/search?q=${encodeURIComponent('@' + result.handle)}`;
+    } else {
+        showError();
+    }
+}
+
+function goEmbed() {
+    const result = currentResult || parse(document.getElementById('input-field').value);
+    if (!result || !result.videoId) { showError(); return; }
+    location.href = `/ume?v=${result.videoId}`;
+}
+
+function goChannel() {
+    const result = currentResult || parse(document.getElementById('input-field').value);
+    if (!result) { showError(); return; }
+    if (result.channelId) {
+        location.href = `/channel/${result.channelId}`;
+    } else if (result.handle) {
+        location.href = `/search?q=${encodeURIComponent('@' + result.handle)}`;
+    } else if (result.videoId) {
+        // 動画IDの場合は動画ページへ
+        location.href = `/watch?v=${result.videoId}`;
+    } else {
+        showError();
+    }
+}
+
+function showError() {
+    document.getElementById('error-msg').classList.add('show');
+}
+</script>
+</body>
 </html>

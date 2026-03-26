@@ -306,28 +306,39 @@ def getSearchData(q, page):
 def getChannelData(channelid, sort_by="newest"):
     t = json.loads(requestAPI(f"/channels/{urllib.parse.quote(channelid)}?hl=ja&gl=JP", invidious_api.channel))
 
-    # 動画一覧を別エンドポイントから取得（ソート対応）
+    # 動画一覧
     try:
         videos_data = json.loads(requestAPI(
             f"/channels/{urllib.parse.quote(channelid)}/videos?sort_by={sort_by}&hl=ja&gl=JP",
             invidious_api.channel
         ))
-        latest_videos = videos_data.get("videos", [])
+        video_list = videos_data.get("videos", [])
     except:
-        # フォールバック
-        if 'latestvideo' in t:
-            latest_videos = t['latestvideo']
-        elif 'latestVideos' in t:
-            latest_videos = t['latestVideos']
-        else:
-            latest_videos = []
+        video_list = t.get('latestVideos', t.get('latestvideo', []))
 
-    videos = []
-    shorts = []
-    for i in latest_videos:
+    # ショート一覧
+    try:
+        shorts_data = json.loads(requestAPI(
+            f"/channels/{urllib.parse.quote(channelid)}/shorts?hl=ja&gl=JP",
+            invidious_api.channel
+        ))
+        shorts_list = shorts_data.get("videos", [])
+    except:
+        shorts_list = []
+
+    # ライブ配信一覧
+    try:
+        streams_data = json.loads(requestAPI(
+            f"/channels/{urllib.parse.quote(channelid)}/streams?hl=ja&gl=JP",
+            invidious_api.channel
+        ))
+        streams_list = streams_data.get("videos", [])
+    except:
+        streams_list = []
+
+    def make_item(i, force_short=False, is_live=False):
         length = i.get("lengthSeconds", 0)
-        is_short = i.get("isShort", False) or (length > 0 and length <= 60)
-        item = {
+        return {
             "type": "video",
             "title": i["title"],
             "id": i["videoId"],
@@ -338,12 +349,13 @@ def getChannelData(channelid, sort_by="newest"):
             "view_count": i.get("viewCount", 0),
             "view_count_text": formatViewCount(i.get("viewCount", 0)),
             "length_str": str(datetime.timedelta(seconds=length)),
-            "is_short": is_short
+            "is_short": force_short,
+            "is_live": is_live,
         }
-        if is_short:
-            shorts.append(item)
-        else:
-            videos.append(item)
+
+    videos = [make_item(i) for i in video_list]
+    shorts = [make_item(i, force_short=True) for i in shorts_list]
+    streams = [make_item(i, is_live=True) for i in streams_list]
 
     # プレイリスト取得
     playlists = []
@@ -365,16 +377,16 @@ def getChannelData(channelid, sort_by="newest"):
     except:
         pass
 
-    # コミュニティ投稿取得
+    # コミュニティ投稿
     community = []
     try:
         comm_data = json.loads(requestAPI(
-          f"/channels/{urllib.parse.quote(channelid)}/community?hl=ja&gl=JP",
-          invidious_api.channel
+            f"/channels/{urllib.parse.quote(channelid)}/community?hl=ja&gl=JP",
+            invidious_api.channel
         ))
         for post in comm_data.get("comments", []):
             community.append({
-               "id": post.get("commentId", ""),
+                "id": post.get("commentId", ""),
                 "content": post.get("contentHtml", "").replace("\n", "<br>"),
                 "published_text": post.get("publishedText", ""),
                 "likes": formatViewCount(post.get("likeCount", 0)),
@@ -383,26 +395,23 @@ def getChannelData(channelid, sort_by="newest"):
             })
     except:
         pass
-  
-    # 登録者数
+
     sub_count = t.get("subCount", 0)
-    if sub_count:
-        subscribers = formatViewCount(sub_count) + "人"
-    else:
-        subscribers = convertSubCount(t.get("subCountText", ""))
+    subscribers = formatViewCount(sub_count) + "人" if sub_count else convertSubCount(t.get("subCountText", ""))
 
     return [
         videos,
         shorts,
         playlists,
         community,
+        streams,
         {
             "channel_name": t["author"],
             "channel_icon": t["authorThumbnails"][-1]["url"],
             "channel_profile": t.get("descriptionHtml", ""),
             "author_banner": urllib.parse.quote(t["authorBanners"][0]["url"], safe="-_.~/:") if t.get("authorBanners") else "",
             "subscribers_count": subscribers,
-            "total_videos": str(len(videos) + len(shorts)) if (videos or shorts) else "",
+            "total_videos": str(t.get("totalVideos", "")),
         }
     ]
 
@@ -904,13 +913,14 @@ def channel(channelid: str, response: Response, request: Request,
         "shorts": t[1],
         "playlists": t[2],
         "community": t[3],
+        "streams": t[4],
         "channel_id": channelid,
-        "channel_name": t[4]["channel_name"],
-        "channel_icon": t[4]["channel_icon"],
-        "channel_profile": t[4]["channel_profile"],
-        "cover_img_url": t[4]["author_banner"],
-        "subscribers_count": t[4]["subscribers_count"],
-        "total_videos": t[4]["total_videos"],
+        "channel_name": t[5]["channel_name"],
+        "channel_icon": t[5]["channel_icon"],
+        "channel_profile": t[5]["channel_profile"],
+        "cover_img_url": t[5]["author_banner"],
+        "subscribers_count": t[5]["subscribers_count"],
+        "total_videos": t[5]["total_videos"],
         "sort_by": sort_by,
         "proxy": proxy
     })

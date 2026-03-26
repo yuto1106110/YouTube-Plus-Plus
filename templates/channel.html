@@ -304,6 +304,7 @@ html[data-theme="dark"] {
     <div class="channel-tabs">
         <button class="tab-btn active" onclick="switchTab('videos', this)">動画</button>
         <button class="tab-btn" onclick="switchTab('shorts', this)">ショート</button>
+        <button class="tab-btn" onclick="switchTab('streams', this)">ライブ</button>
         <button class="tab-btn" onclick="switchTab('playlists', this)">再生リスト</button>
         <button class="tab-btn" onclick="switchTab('community', this)">投稿</button>
         <button class="tab-btn" onclick="switchTab('about', this)">概要</button>
@@ -378,6 +379,31 @@ html[data-theme="dark"] {
             {% endif %}
         </div>
     </div>
+
+    <!-- ライブタブ -->
+<div id="tab-streams" style="display:none;">
+    <div class="videos-grid">
+        {% for v in streams %}
+        <div class="video-card">
+            <a href="/watch?v={{ v['id'] }}">
+                <div class="thumb-wrap">
+                    <img loading="lazy"
+                         src="{% if proxy == 'True' %}/thumbnail?v={{ v['id'] }}{% else %}https://img.youtube.com/vi/{{ v['id'] }}/mqdefault.jpg{% endif %}"
+                         alt="{{ v['title'] }}">
+                    <span class="thumb-length" style="background:#ff0000;">🔴 LIVE</span>
+                </div>
+                <div class="card-info">
+                    <h4>{{ v['title'] }}</h4>
+                    <p class="meta">{{ v['view_count_text'] }}回視聴 · {{ v['published_text'] }}</p>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+        {% if not streams %}
+        <div class="empty" style="grid-column:1/-1;">ライブ配信がありません</div>
+        {% endif %}
+    </div>
+</div>
 
     <!-- 再生リストタブ -->
     <div id="tab-playlists" style="display:none;">

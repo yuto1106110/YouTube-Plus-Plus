@@ -93,24 +93,33 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def requestAPI(path, api_urls):
     starttime = time.time()
-    
+
     def fetch(api):
         try:
             full_url = api + 'api/v1' + path
-            res = requests.get(full_url, headers=getRandomUserAgent(), timeout=max_api_wait_time)
-            
+            res = requests.get(
+                full_url,
+                headers=getRandomUserAgent(),
+                timeout=max_api_wait_time
+            )
+
             if res.status_code == requests.codes.ok and isJSON(res.text):
                 res_json = json.loads(res.text)
-                
-                # 動画チェック (path判定を修正)
-              if invidious_api.check_video and (
-                  path.startswith('/video/')
-                  or path.startswith('/videos/')
-              ):
-                    # ストリームURLがあるか確認
+
+                # 動画チェック
+                if invidious_api.check_video and (
+                    path.startswith('/video/')
+                    or path.startswith('/videos/')
+                ):
                     streams = res_json.get('formatStreams')
+
                     if streams:
-                        video_res = requests.get(streams[0]['url'], headers=getRandomUserAgent(), timeout=(1.0, 0.5))
+                        video_res = requests.get(
+                            streams[0]['url'],
+                            headers=getRandomUserAgent(),
+                            timeout=(1.0, 0.5)
+                        )
+
                         if 'video' not in video_res.headers.get('Content-Type', ''):
                             return None, api
                     else:
@@ -121,10 +130,12 @@ def requestAPI(path, api_urls):
                     return None, api
 
                 return res.text, api
+
             return None, api
+
         except Exception as e:
-    print(f"API Error: {api} {e}")
-    return None, api
+            print(f"API Error: {api} {e}")
+            return None, api
 
     # 並列実行開始
     with ThreadPoolExecutor(max_workers=len(api_urls)) as executor:

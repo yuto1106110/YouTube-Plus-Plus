@@ -119,8 +119,9 @@ def requestAPI(path, api_urls):
 
                 return res.text, api
             return None, api
-        except:
-            return None, api
+        except Exception as e:
+    print(f"API Error: {api} {e}")
+    return None, api
 
     # 並列実行開始
     with ThreadPoolExecutor(max_workers=len(api_urls)) as executor:

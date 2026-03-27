@@ -443,15 +443,37 @@ def getPlaylistData(listid, page):
         return [], False
 
 def getCommentsData(videoid):
-    t = json.loads(requestAPI(f"/comments/{urllib.parse.quote(videoid)}?hl=jp", invidious_api.comments))["comments"]
-    return [{"author": i["author"], "authoricon": i["authorThumbnails"][-1]["url"], "authorid": i["authorId"], "body": i["contentHtml"].replace("\n", "<br>")} for i in t]
+    data = json.loads(
+        requestAPI(
+            f"/comments/{urllib.parse.quote(videoid)}?hl=jp",
+            invidious_api.comments
+        )
+    )
 
-'''
-使われていないし戻り値も設定されていないためコメントアウト
-def get_replies(videoid, key):
-    t = json.loads(requestAPI(f"/comments/{videoid}?hmac_key={key}&hl=jp&format=html", invidious_api.comments))["contentHtml"]
-'''
+    comments = []
 
+    for i in data.get("comments", []):
+        thumbnails = i.get("authorThumbnails", [])
+
+        if thumbnails:
+            icon = thumbnails[-1].get("url", "")
+        else:
+            icon = ""
+
+        body = (
+            i.get("contentHtml")
+            or i.get("content")
+            or ""
+        ).replace("\n", "<br>")
+
+        comments.append({
+            "author": i.get("author", ""),
+            "authoricon": icon,
+            "authorid": i.get("authorId", ""),
+            "body": body
+        })
+
+    return comments
 
 def checkCookie(cookie):
     isTrue = True if cookie == "True" else False

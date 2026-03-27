@@ -424,22 +424,36 @@ def getChannelData(channelid, sort_by="newest"):
 
 def getPlaylistData(listid, page):
     try:
-        t = json.loads(requestAPI(f"/playlists/{urllib.parse.quote(listid)}?page={urllib.parse.quote(str(page))}", invidious_api.playlist))
+        t = json.loads(
+            requestAPI(
+                f"/playlists/{urllib.parse.quote(listid)}?page={urllib.parse.quote(str(page))}",
+                invidious_api.playlist
+            )
+        )
+
         videos = t.get("videos", [])
+
         return [
             {
-                "title": i["title"],
-                "id": i["videoId"],
-                "authorId": i["authorId"],
-                "author": i["author"],
+                "title": i.get("title", ""),
+                "id": i.get("videoId", ""),
+                "authorId": i.get("authorId", ""),
+                "author": i.get("author", ""),
                 "type": "video",
+                "thumbnail": i.get("videoThumbnails", [{}])[-1].get("url", ""),
                 "length": str(datetime.timedelta(seconds=i.get("lengthSeconds", 0))),
                 "view_count_text": formatViewCount(i.get("viewCount", 0)),
-                "published": formatPublished(i.get("published", 0)),
+                "published": (
+                    formatPublished(i["published"])
+                    if i.get("published")
+                    else ""
+                ),
             }
             for i in videos
         ], len(videos) > 0
-    except:
+
+    except Exception as e:
+        print(e)
         return [], False
 
 def getCommentsData(videoid):

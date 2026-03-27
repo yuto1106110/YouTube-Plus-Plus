@@ -89,49 +89,56 @@ def updateList(list, str):
     list.remove(str)
     return list
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 def requestAPI(path, api_urls):
     starttime = time.time()
     
-    for api in api_urls:
-        if  time.time() - starttime >= max_time - 1:
-            break
-            
+    def fetch(api):
         try:
-            print(api + 'api/v1' + path)
-            res = requests.get(api + 'api/v1' + path, headers=getRandomUserAgent(), timeout=max_api_wait_time)
+            full_url = api + 'api/v1' + path
+            res = requests.get(full_url, headers=getRandomUserAgent(), timeout=max_api_wait_time)
+            
             if res.status_code == requests.codes.ok and isJSON(res.text):
+                res_json = json.loads(res.text)
                 
-                if invidious_api.check_video and path.startswith('/video/'):
-                    # 動画の有無をチェックする場合
-                    video_res = requests.get(json.loads(res.text)['formatStreams'][0]['url'], headers=getRandomUserAgent(), timeout=(3.0, 0.5))
-                    if not 'video' in video_res.headers['Content-Type']:
-                        print(f"No Video(True)({video_res.headers['Content-Type']}): {api}")
-                        updateList(api_urls, api)
-                        continue
+                # 動画チェック (path判定を修正)
+                if invidious_api.check_video and path.startswith('/video'):
+                    # ストリームURLがあるか確認
+                    streams = res_json.get('formatStreams')
+                    if streams:
+                        video_res = requests.get(streams[0]['url'], headers=getRandomUserAgent(), timeout=(1.0, 0.5))
+                        if 'video' not in video_res.headers.get('Content-Type', ''):
+                            return None, api
+                    else:
+                        return None, api
 
-                if path.startswith('/channel/') and json.loads(res.text)["latestvideo"] == []:
-                    print(f"No Channel: {api}")
-                    updateList(api_urls, api)
-                    continue
+                # チャンネルチェック
+                if path.startswith('/channel/') and res_json.get("latestvideo") == []:
+                    return None, api
 
-                print(f"Success({invidious_api.check_video})({path.split('/')[1].split('?')[0]}): {api}")
-                return res.text
-
-            elif isJSON(res.text):
-                # ステータスコードが200ではないかつ内容がJSON形式の場合
-                print(f"Returned Err0r(JSON): {api} ('{json.loads(res.text)['error'].replace('error', 'err0r')}')")
-                updateList(api_urls, api)
-            else:
-                # ステータスコードが200ではないかつ内容がJSON形式ではない場合
-                print(f"Returned Err0r: {api} ('{res.text[:100]}')")
-                updateList(api_urls, api)
+                return res.text, api
+            return None, api
         except:
-            # 例外等が発生した場合
-            print(f"Err0r: {api}")
-            updateList(api_urls, api)
-    
-    raise APITimeoutError("APIがタイムアウトしました")
+            return None, api
 
+    # 並列実行開始
+    with ThreadPoolExecutor(max_workers=len(api_urls)) as executor:
+        futures = {executor.submit(fetch, api): api for api in api_urls}
+        
+        # 完了したものから順にチェック
+        for future in as_completed(futures, timeout=max_time):
+            if time.time() - starttime >= max_time - 1:
+                break
+                
+            result_text, api = future.result()
+            if result_text:
+                return result_text
+            else:
+                # 失敗したAPIはリストの後ろへ
+                updateList(api_urls, api)
+
+    raise APITimeoutError("APIがタイムアウトしました")
 
 def getInfo(request):
     return json.dumps([version, os.environ.get('RENDER_EXTERNAL_URL'), str(request.scope["headers"]), str(request.scope['router'])[39:-2]])

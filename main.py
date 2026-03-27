@@ -135,7 +135,11 @@ def requestAPI(path, api_urls):
             if time.time() - starttime >= max_time - 1:
                 break
                 
-            result_text, api = future.result()
+            try:
+                result_text, api = future.result()
+            except Exception as e:
+                print(f"Future Error: {e}")
+                continue
             if result_text:
                 return result_text
             else:

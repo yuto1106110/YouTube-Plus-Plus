@@ -103,7 +103,10 @@ def requestAPI(path, api_urls):
                 res_json = json.loads(res.text)
                 
                 # 動画チェック (path判定を修正)
-                if invidious_api.check_video and path.startswith('/video'):
+              if invidious_api.check_video and (
+                  path.startswith('/video/')
+                  or path.startswith('/videos/')
+              ):
                     # ストリームURLがあるか確認
                     streams = res_json.get('formatStreams')
                     if streams:

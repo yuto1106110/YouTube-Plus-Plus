@@ -441,38 +441,39 @@ def getChannelData(channelid, sort_by="newest"):
         }
     ]
 
-def getPlaylistData(listid, page):
+async def getPlaylistData(listid: str, page: int = 1):
     try:
-        t = json.loads(
-            requestAPI(
-                f"/playlists/{urllib.parse.quote(listid)}?page={urllib.parse.quote(str(page))}",
-                invidious_api.playlist
-            )
+        response = requestAPI(
+            f"/playlists/{urllib.parse.quote(listid)}?page={page}&hl=ja&gl=JP",
+            invidious_api.video
         )
 
-        videos = t.get("videos", [])
+        if not response:
+            return [], False
 
-        return [
-            {
-                "title": i.get("title", ""),
-                "id": i.get("videoId", ""),
-                "authorId": i.get("authorId", ""),
-                "author": i.get("author", ""),
-                "type": "video",
-                "thumbnail": i.get("videoThumbnails", [{}])[-1].get("url", ""),
-                "length": str(datetime.timedelta(seconds=i.get("lengthSeconds", 0))),
-                "view_count_text": formatViewCount(i.get("viewCount", 0)),
-                "published": (
-                    formatPublished(i["published"])
-                    if i.get("published")
-                    else ""
-                ),
-            }
-            for i in videos
-        ], len(videos) > 0
+        t = json.loads(response)
+
+        videos = []
+        for item in t.get("videos", []):
+            if not item.get("videoId"):
+                continue
+
+            videos.append({
+                "title": item.get("title", "Unknown"),
+                "videoId": item.get("videoId"),
+                "author": item.get("author", "Unknown"),
+                "lengthSeconds": item.get("lengthSeconds", 0),
+                "viewCount": item.get("viewCount", 0),
+                "published": item.get("published", 0),
+                "thumbnails": item.get("videoThumbnails", [])
+            })
+
+        return videos, bool(t.get("videos"))
 
     except Exception as e:
-        print(e)
+        import traceback
+        print(f"Playlist Error: {e}")
+        traceback.print_exc()
         return [], False
 
 def getCommentsData(videoid):

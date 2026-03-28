@@ -707,75 +707,94 @@ def video(v: str, response: Response, request: Request, yuki: Union[str, None] =
         "proxy": proxy
     })
 
-@app.get('/api/ytdlp/{video_id}')
-def get_ytdlp(video_id: str, response: Response, yuki: Union[str, None] = Cookie(None)):
+@app.get("/api/ytdlp/{video_id}")
+def get_ytdlp(video_id: str, yuki: Union[str, None] = Cookie(None)):
     if not checkCookie(yuki):
         return {"error": "unauthorized"}
+
     try:
         import yt_dlp
+
         ydl_opts = {
             "quiet": True,
-            "format": "bestvideo[ext=webm]+bestaudio[ext=m4a]/best",
-            "extractor_args": {
-                "youtube": {
-                    "player_client": ["android", "web"],
-                    "player_skip": ["js", "configs"],
-                }
-            },
-            "http_headers": {
-                "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36",
-                "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "Accept-Encoding": "gzip, deflate",
-                "DNT": "1",
-            },
-            "sleep_interval": 2,
-            "max_sleep_interval": 5,
-            "socket_timeout": 30,
-            "retries": {"max_retries": 3, "backoff_factor": 0.5},
+            "no_warnings": True,
+            "noplaylist": True,
+            "extract_flat": False,
+            "skip_download": True,
+            "socket_timeout": 20,
             "nocheckcertificate": True,
+            "http_headers": {
+                "User-Agent": random_user_agent()
+            }
         }
-      
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
 
-      # 画質ストリーム
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(
+                f"https://www.youtube.com/watch?v={video_id}",
+                download=False
+            )
+
+        formats = info.get("formats", [])
+
         quality_streams = []
         audio_url = None
-        for f in info.get("formats", []):
-            if f.get("vcodec") != "none" and f.get("acodec") == "none":
-                quality_streams.append({
-                    "url": f["url"],
-                    "resolution": f"{f.get('height', '?')}p",
-                })
-            elif f.get("acodec") != "none" and f.get("vcodec") == "none":
-                if not audio_url:
-                    audio_url = f["url"]
+        hls_url = None
+
+        for f in formats:
+            url = f.get("url")
+            if not url:
+                continue
+
+            # HLS (ライブ配信や一部動画)
+            if not hls_url and (
+                f.get("protocol") == "m3u8_native"
+                or "m3u8" in str(f.get("protocol", ""))
+                or ".m3u8" in url
+            ):
+                hls_url = url
+
+            # 音声のみ
+            if (
+                f.get("vcodec") == "none"
+                and f.get("acodec") != "none"
+                and not audio_url
+            ):
+                audio_url = url
+
+            # 映像のみ or 映像+音声
+            if f.get("vcodec") != "none":
+                height = f.get("height")
+                if height:
+                    quality_streams.append({
+                        "url": url,
+                        "resolution": f"{height}p"
+                    })
+
+        # 解像度順に並べて重複除去
         quality_streams.sort(
-            key=lambda x: int(x["resolution"].replace("p","")) if x["resolution"].replace("p","").isdigit() else 0,
+            key=lambda x: int(x["resolution"].replace("p", "")),
             reverse=True
         )
-        # 重複解像度を除去
+
         seen = set()
         unique_streams = []
+
         for s in quality_streams:
             if s["resolution"] not in seen:
                 seen.add(s["resolution"])
                 unique_streams.append(s)
-        # HLS（ライブ）
-        hls_url = None
-        if info.get("is_live"):
-            for f in info.get("formats", []):
-                if f.get("protocol", "").startswith("m3u8"):
-                    hls_url = f["url"]
-                    break
+
         return {
             "quality_streams": unique_streams,
             "audio_url": audio_url,
             "hlsUrl": hls_url,
+            "is_live": info.get("is_live", False),
             "provider": "ytdlp"
         }
+
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {"error": str(e)}
 
 @app.get("/api/channel_videos/{channel_id}")

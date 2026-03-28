@@ -989,7 +989,7 @@ def playlist(list: str, response: Response, request: Request, page: Union[int, N
     if not checkCookie(yuki):
         return redirect("/")
     response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
-    results, has_next = getPlaylistData(list, str(page))
+    results, has_next = await getPlaylistData(list, int(page))
     return template("search.html", {
         "request": request,
         "results": results,

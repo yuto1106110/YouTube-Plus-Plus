@@ -447,7 +447,7 @@ async def getPlaylistData(listid: str, page: int = 1):
 
         response = requestAPI(
             f"/playlists/{urllib.parse.quote(listid)}?page={page}&hl=ja&gl=JP",
-            invidious_api.video
+            invidious_api.playlist
         )
 
         print("Playlist Raw Type:", type(response))
@@ -464,7 +464,34 @@ async def getPlaylistData(listid: str, page: int = 1):
         print("Playlist Parsed Keys:", list(t.keys()))
 
         videos = t.get("videos", [])
-        return videos, len(videos) > 0
+
+        formatted = []
+        for i in videos:
+            published = i.get("published")
+
+            if published and published > 1000000000:
+                published_text = formatPublished(published)
+            else:
+                published_text = i.get("publishedText", "")
+
+            formatted.append({
+                "type": "video",
+                "title": i.get("title", ""),
+                "id": i.get("videoId", ""),
+                "authorId": i.get("authorId", ""),
+                "author": i.get("author", ""),
+                "length": str(datetime.timedelta(seconds=i.get("lengthSeconds", 0))),
+                "view_count_text": (
+                    formatViewCount(i.get("viewCount", 0))
+                    if i.get("viewCount")
+                    else i.get("viewCountText", "")
+                ),
+                "published": published_text
+            })
+
+        print("Formatted videos:", formatted[:1])
+
+        return formatted, len(videos) > 0
 
     except Exception as e:
         import traceback

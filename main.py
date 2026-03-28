@@ -985,11 +985,21 @@ def channel(channelid: str, response: Response, request: Request,
     })
 
 @app.get("/playlist", response_class=HTMLResponse)
-def playlist(list: str, response: Response, request: Request, page: Union[int, None] = 1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+async def playlist(
+    list: str,
+    response: Response,
+    request: Request,
+    page: Union[int, None] = 1,
+    yuki: Union[str] = Cookie(None),
+    proxy: Union[str] = Cookie(None)
+):
     if not checkCookie(yuki):
         return redirect("/")
+
     response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+
     results, has_next = await getPlaylistData(list, int(page))
+
     return template("search.html", {
         "request": request,
         "results": results,

@@ -443,36 +443,32 @@ def getChannelData(channelid, sort_by="newest"):
 
 async def getPlaylistData(listid: str, page: int = 1):
     try:
+        print(f"Playlist Request: {listid} page={page}")
+
         response = requestAPI(
             f"/playlists/{urllib.parse.quote(listid)}?page={page}&hl=ja&gl=JP",
             invidious_api.video
         )
 
+        print("Playlist Raw Type:", type(response))
+        print("Playlist Raw:", str(response)[:500])
+
         if not response:
             return [], False
 
-        t = json.loads(response)
+        if isinstance(response, str):
+            t = json.loads(response)
+        else:
+            t = response
 
-        videos = []
-        for item in t.get("videos", []):
-            if not item.get("videoId"):
-                continue
+        print("Playlist Parsed Keys:", list(t.keys()))
 
-            videos.append({
-                "title": item.get("title", "Unknown"),
-                "videoId": item.get("videoId"),
-                "author": item.get("author", "Unknown"),
-                "lengthSeconds": item.get("lengthSeconds", 0),
-                "viewCount": item.get("viewCount", 0),
-                "published": item.get("published", 0),
-                "thumbnails": item.get("videoThumbnails", [])
-            })
-
-        return videos, bool(t.get("videos"))
+        videos = t.get("videos", [])
+        return videos, len(videos) > 0
 
     except Exception as e:
         import traceback
-        print(f"Playlist Error: {e}")
+        print("=== PLAYLIST ERROR ===")
         traceback.print_exc()
         return [], False
 

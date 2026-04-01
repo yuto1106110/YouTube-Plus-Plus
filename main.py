@@ -724,7 +724,8 @@ def get_ytdlp(video_id: str, yuki: Union[str, None] = Cookie(None)):
             "socket_timeout": 20,
             "nocheckcertificate": True,
             "http_headers": {
-                "User-Agent": random_user_agent()
+                "User-Agent": getRandomUserAgent()
+            ["User-Agent"]
             }
         }
 
